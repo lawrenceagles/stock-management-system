@@ -50,7 +50,7 @@ router.get('/admin/:id', (req, res) => {
 
     // checks if the object is valid
     if(!ObjectId.isValid(id)) {
-        return res.status(404).send();
+        res.status(404).send();
     }
 
     // find the admin by id.
@@ -81,17 +81,17 @@ router.patch('/admin/:id', (req, res) => {
     let body = _.pick(req.body, ["firstname", "lastname", "username", "password", "email", "phone", "role"]);
     // validate the id
     if(!ObjectId.isValid(id)){
-        return res.status(400).send();
+        res.status(400).send();
     }
     // find and update the admin by id if it is found, throw error 404 if not
     Admin.findByIdAndUpdate(id, {$set:body}).then((doc)=>{
         // check if doc was foun and updated
         if(!doc){
-            return res.status(404).send();
+            res.status(404).send();
         }
 
         Admin.findById(id).then(doc=>{
-            return res.send(doc);
+            res.send(doc);
         })
         
     }).catch((e)=>{
@@ -106,13 +106,13 @@ router.delete('/admin/:id', (req, res) => {
     let id = req.params.id;
     // validate the company id
     if(!ObjectId.isValid(id)){
-        return res.status(400).send();
+        res.status(400).send();
     }
     // query to find admin and delete
     Admin.findByIdAndRemove(id).then((doc)=>{
 
         if(!doc){ // if doc is not found return error 404.
-            return res.status(404).send();
+            res.status(404).send();
         }
 
         console.log(id, doc);

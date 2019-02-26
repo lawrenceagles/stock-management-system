@@ -38,8 +38,7 @@ const AdminSchema = new Schema({
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: 6,
-      default: "lawrenceagles1235"
+      minlength: 6
     },
     phone: {
         type: String,
@@ -70,27 +69,21 @@ const AdminSchema = new Schema({
 
 // encrypt password using bcrypt conditionally. Only if the user is newly created or he updated his password directly.
 AdminSchema.pre('save', function(next){
-  let admin = this;
-  if(admin.$isDefault('password') && !admin.isModified('password')){
-    bcrypt.genSalt(10, (err, salt)=> {
+  let admin = this; // bind this
+
+  if (!admin.isModified('password')){
+    // call next and move to execute the next action if password is not modified.
+    return next();
+  }
+
+  // !admin.isModified('password') ? return next();
+
+  bcrypt.genSalt(10, (err, salt)=> {
       bcrypt.hash(admin.password, salt, (err, hash)=> {
         admin.password = hash; // overwrite the password with the harsh value before saving to the DB.
-        console.log(admin.isModified('password'));
-        next();
+        return next();
       })
     })
-  }else if(admin.isDirectModified('password') && !admin.$isDefault('password')) {
-    bcrypt.genSalt(10, (err, salt)=> {
-      bcrypt.hash(admin.password, salt, (err, hash)=> {
-        admin.password = hash; // overwrite the password with the harsh value before saving to the DB.
-        next();
-      })
-    })
-  }
-  else{
-    // call next and move to execute the next action if password is already harshed.
-    next();
-  }
 });
 
 module.exports = mongoose.model('Admin', AdminSchema);
