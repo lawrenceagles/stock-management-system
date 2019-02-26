@@ -25,20 +25,15 @@ router.get('/admin', (req, res) => {
 // POST Route onboard admin
 router.post('/admin', (req, res) => {
 
-    let admin = new Admin({
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        username: req.body.username,
-        email: req.body.email,
-        phone: req.body.phone,
-        role: [req.body.role]
-    });
+    let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
+    let admin = new Admin(body);
 
-    admin.save().then((doc)=>{
-        res.send(admin);
-    },
-    (e)=>{
-        res.status(400).send();
+    admin.save().then(() => { // save the admin instance 
+        return admin.generateToken(); // save the admin instance
+    }).then((token) => { // pass pass the token as the value of the custom header 'x-auth' and send header with the newly signed up admin.
+        res.header('x-auth', token).send(admin);
+    }).catch((e) => {
+        res.status(400).send(e);
     });
 });
 
