@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
+
+const {Admin} = require ('../models/admin');
+
 const {ObjectId} = require('mongodb');
-const Admin = require ('../models/admin');
+const {authenticate} = require('../../middleware/authenticate');
 
 // Home route 
 // Ask what should the home route point to? 
@@ -36,6 +39,12 @@ router.post('/admins', (req, res) => {
     }).catch((e) => {
         res.status(400).send(e);
     });
+});
+
+
+// Route that returns a single user and its token
+router.get('/admins/me',authenticate, (req, res) => {
+    res.send(req.admin);
 });
 
 

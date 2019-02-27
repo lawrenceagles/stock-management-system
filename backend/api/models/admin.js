@@ -115,5 +115,24 @@ AdminSchema.methods.generateToken = function() {
     });
 }
 
+// create a custom model method to find user by token
+AdminSchema.statics.findByToken = function(token) {
+    console.log(".Statics here")
+    let Admin = this;
+    let decoded;
 
-module.exports = mongoose.model('Admin', AdminSchema);
+    try {
+        decoded = jwt.verify(token, '12345abc');
+    } catch(e) {
+        return Promise.reject();
+    }
+    return Admin.findOne({
+        '_id': decoded._id,
+        'tokens.token': token,
+        'tokens.access': 'auth'
+    });
+}
+
+
+const Admin = mongoose.model('Admin', AdminSchema);
+module.exports = {Admin};
