@@ -12,8 +12,8 @@ router.get('/', (req, res) => {
 });
 
 // GET route read all admins
-router.get('/admin', (req, res) => {
-    Admin.find({}).then(doc => {
+router.get('/admins', (req, res) => {
+    Admin.find().then(doc => { 
       res.send(doc);
     });
 },
@@ -23,7 +23,7 @@ router.get('/admin', (req, res) => {
 );
 
 // POST Route onboard admin
-router.post('/admin', (req, res) => {
+router.post('/admins', (req, res) => {
 
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
     let admin = new Admin(body);
@@ -31,6 +31,7 @@ router.post('/admin', (req, res) => {
     admin.save().then(() => { // save the admin instance 
         return admin.generateToken(); // save the admin instance
     }).then((token) => { // pass pass the token as the value of the custom header 'x-auth' and send header with the newly signed up admin.
+        let admin =  _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
         res.header('x-auth', token).send(admin);
     }).catch((e) => {
         res.status(400).send(e);
@@ -39,7 +40,7 @@ router.post('/admin', (req, res) => {
 
 
 // GET :id Route to get single admin
-router.get('/admin/:id', (req, res) => {
+router.get('/admins/:id', (req, res) => {
     // destructure the req.params object to get the object id.
     let id = req.params.id;
 
@@ -59,7 +60,7 @@ router.get('/admin/:id', (req, res) => {
 });
 
 // GET :id Route to get single admin by role
-router.get('/admin/role', (req, res) => {
+router.get('/admins/role', (req, res) => {
     // get the role from the logged in user 
     // this should be completed after authentication is complete
     let role = req.params.role;
@@ -69,7 +70,7 @@ router.get('/admin/role', (req, res) => {
 });
 
 // PATCH Route Update admin
-router.patch('/admin/:id', (req, res) => {
+router.patch('/admins/:id', (req, res) => {
     // get the admin id
     let id = req.params.id;
     // pickout only what you want to grant the user permission to update
@@ -79,15 +80,17 @@ router.patch('/admin/:id', (req, res) => {
         res.status(400).send();
     }
     // find and update the admin by id if it is found, throw error 404 if not
-    Admin.findByIdAndUpdate(id, {$set:body}).then((doc)=>{
+    Admin.findOneAndUpdate(id, {$set:body}, {new: true}).then((doc)=>{
         // check if doc was foun and updated
         if(!doc){
             res.status(404).send();
         }
 
-        Admin.findById(id).then(doc=>{
-            res.send(doc);
-        })
+        res.send(doc);
+
+        // Admin.findById(id).then(doc=>{
+        //     res.send(doc);
+        // })
         
     }).catch((e)=>{
         res.status(400).send();
@@ -96,7 +99,7 @@ router.patch('/admin/:id', (req, res) => {
 });
 
 // DELETE Route delete admin
-router.delete('/admin/:id', (req, res) => {
+router.delete('/admins/:id', (req, res) => {
     // get the admin id
     let id = req.params.id;
     // validate the company id
@@ -104,7 +107,7 @@ router.delete('/admin/:id', (req, res) => {
         res.status(400).send();
     }
     // query to find admin and delete
-    Admin.findByIdAndRemove(id).then((doc)=>{
+    Admin.findByIdAndDelete(id).then((doc)=>{
 
         if(!doc){ // if doc is not found return error 404.
             res.status(404).send();

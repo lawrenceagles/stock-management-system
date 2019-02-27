@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const _ = require('lodash');
 
 const Schema = mongoose.Schema;
 const role = ["super_admin", "manager", "observer"];
@@ -69,6 +70,37 @@ const AdminSchema = new Schema({
     }]
 });
 
+// convert mongoose Model to Object and pick needed properties
+// this function overwrites the toJSON function. It is called implicitly
+AdminSchema.methods.toJOSN = function() {
+    let admin = this;
+    let adminObject = admin.toObject();
+
+    return _.pick(adminObject, ['_id', 'email']);
+}
+
+// encrypt password using bcrypt conditionally. Only if the user is newly created or he updated his password directly.
+AdminSchema.pre('save', function(next) {
+  const admin = this // bind this
+
+  if (admin.isModified('password')) {
+    bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
+      if (err) {
+        return next(err);
+      }
+      bcrypt.hash(admin.password, salt, (err, hash) => {
+        if (err) {
+          return next(err);
+        }
+        admin.password = hash
+        return next()
+      })
+    }) 
+  } else {
+    return next();
+  }
+})
+
 AdminSchema.methods.generateToken = function() {
 
     let admin = this;
@@ -77,7 +109,6 @@ AdminSchema.methods.generateToken = function() {
 
     // set the admin.tokens empty array of object, object properties with the token and the access generated.
     admin.tokens = admin.tokens.concat([{access, token}]);
-    // admin.tokens.push({access, token});
     
     // save the admin and return the token to be used in the server.js where with the POST route for assiging tokens to newly signed up users.
     return admin.save().then(() => {
@@ -85,23 +116,13 @@ AdminSchema.methods.generateToken = function() {
     });
 }
 
-// encrypt password using bcrypt conditionally. Only if the user is newly created or he updated his password directly.
-AdminSchema.pre('save', function(next){
-  let admin = this; // bind this
+// AdminSchema.methods.toJOSN = function() {
+//     let admin = this;
+//     let adminObject = admin.toObject();
+//     alert('Im here')
 
-  if(admin.isModified('password')) {
-        bcrypt.genSalt(15, (err, salt)=> { // generate salt and harsh password
-            bcrypt.harsh(admin.password, salt, (err, harsh)=> {
-                admin.password = harsh;
-                next();
-            });
-        });
-    }else{
-        next();
-    }
-});
-
-// Genrate user token method
+//     return _.pick(adminObject, ["_id","firstname", "lastname", "username", "email", "phone", "role"]);
+// }
 
 
 module.exports = mongoose.model('Admin', AdminSchema);

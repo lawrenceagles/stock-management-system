@@ -12,8 +12,9 @@ const Port = process.env.PORT || 3004;
 // connect to a promise library for usage
 mongoose.Promise = global.Promise;
 
-// connect mongoose with DB 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://lawrenceagles:lawrence1@ds153637.mlab.com:53637/vetiva');
+// connect mongoose with DB  process.env.MONGODB_URI || 'mongodb://localhost/Todoapp'
+// mongoose.connect(process.env.MONGODB_URI || 'mongodb://lawrenceagles:lawrence1@ds153637.mlab.com:53637/vetiva');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/vetiva');
 mongoose.connection.once('open', () => console.log('Mongodb now connected'));
 
 const app = express(); // create express app and store it in the app variable
