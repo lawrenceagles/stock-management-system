@@ -156,7 +156,7 @@ AdminSchema.statics.findByCredentials = function(email, password) {
 
 AdminSchema.methods.removeToken = function(token) {
   let admin = this;
-    return admin.update({
+    return admin.updateOne({
     $pull: {
       tokens: {
         token
