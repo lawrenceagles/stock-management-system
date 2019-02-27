@@ -115,7 +115,7 @@ AdminSchema.methods.generateToken = function() {
     });
 }
 
-// create a custom model method to find user by token
+// create a custom model method to find admin by token for authentication
 AdminSchema.statics.findByToken = function(token) {
     console.log(".Statics here")
     let Admin = this;
@@ -130,6 +130,26 @@ AdminSchema.statics.findByToken = function(token) {
         '_id': decoded._id,
         'tokens.token': token,
         'tokens.access': 'auth'
+    });
+}
+
+// create a new mongoose method for user login authentication
+AdminSchema.statics.findByCredentials = function(email, password) {
+    let Admin = this;
+    return Admin.findOne({email}).then((admin)=> { // find admin by email
+        if(!admin){  // handle admin not found
+            return Promise.reject();
+        }
+
+        return new Promise((resolve, reject)=> {
+            bcrypt.compare(password, admin.password, (err, res)=> {
+                if(res) {
+                    return resolve(admin);
+                }else{
+                    return reject();
+                }
+            })
+        });
     });
 }
 

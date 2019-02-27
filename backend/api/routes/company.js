@@ -42,9 +42,21 @@ router.post('/admins', (req, res) => {
 });
 
 
-// Route that returns a single user and its token
+// Route that returns a single admin and its token
 router.get('/admins/me',authenticate, (req, res) => {
     res.send(req.admin);
+});
+
+// signin/login route
+router.post('/admins/login', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password']);
+    Admin.findByCredentials(body.email, body.password).then((admin)=> { 
+        return admin.generateToken().then((token)=> {
+            return res.header('x-auth', token).send(admin);
+        });
+    }).catch((e)=> {
+        res.status(400).send();
+    })
 });
 
 
@@ -70,7 +82,7 @@ router.get('/admins/:id', (req, res) => {
 
 // GET :id Route to get single admin by role
 router.get('/admins/role', (req, res) => {
-    // get the role from the logged in user 
+    // get the role from the logged in admin 
     // this should be completed after authentication is complete
     let role = req.params.role;
     Admin.find({role:[role]}).then((docs)=>{
@@ -82,7 +94,7 @@ router.get('/admins/role', (req, res) => {
 router.patch('/admins/:id', (req, res) => {
     // get the admin id
     let id = req.params.id;
-    // pickout only what you want to grant the user permission to update
+    // pickout only what you want to grant the admin permission to update
     let body = _.pick(req.body, ["firstname", "lastname", "username", "password", "email", "phone", "role"]);
     // validate the id
     if(!ObjectId.isValid(id)){
