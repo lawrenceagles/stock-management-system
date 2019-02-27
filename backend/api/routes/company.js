@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
 });
 
 // GET route read all admins
-router.get('/admins', (req, res) => {
+router.get('/admins',authenticate,(req, res) => {
     Admin.find().then(doc => { 
       res.send(doc);
     });
@@ -59,9 +59,18 @@ router.post('/admins/login', (req, res) => {
     })
 });
 
+// signout/logout route
+router.delete('/admins/logout', authenticate, (req, res)=>{
+  req.admin.removeToken(req.token).then(()=>{
+    res.status(200).send();
+  }, ()=>{
+    res.status(400).send();
+  })
+});
+
 
 // GET :id Route to get single admin
-router.get('/admins/:id', (req, res) => {
+router.get('/admins/:id',authenticate, (req, res) => {
     // destructure the req.params object to get the object id.
     let id = req.params.id;
 
@@ -91,7 +100,7 @@ router.get('/admins/role', (req, res) => {
 });
 
 // PATCH Route Update admin
-router.patch('/admins/:id', (req, res) => {
+router.patch('/admins/:id',authenticate, (req, res) => {
     // get the admin id
     let id = req.params.id;
     // pickout only what you want to grant the admin permission to update
@@ -118,7 +127,7 @@ router.patch('/admins/:id', (req, res) => {
 });
 
 // DELETE Route delete admin
-router.delete('/admins/:id', (req, res) => {
+router.delete('/admins/:id',authenticate, (req, res) => {
     // get the admin id
     let id = req.params.id;
     // validate the company id

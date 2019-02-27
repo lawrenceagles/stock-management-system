@@ -58,6 +58,7 @@ const AdminSchema = new Schema({
       trim: true,
       enum: role
     },
+    image: String,
     tokens: [{
         access: {
           type: String,
@@ -117,7 +118,6 @@ AdminSchema.methods.generateToken = function() {
 
 // create a custom model method to find admin by token for authentication
 AdminSchema.statics.findByToken = function(token) {
-    console.log(".Statics here")
     let Admin = this;
     let decoded;
 
@@ -153,6 +153,17 @@ AdminSchema.statics.findByCredentials = function(email, password) {
     });
 }
 
+
+AdminSchema.methods.removeToken = function(token) {
+  let admin = this;
+    return admin.update({
+    $pull: {
+      tokens: {
+        token
+      }
+    }
+  })
+}
 
 const Admin = mongoose.model('Admin', AdminSchema);
 module.exports = {Admin};
