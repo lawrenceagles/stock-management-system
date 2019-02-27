@@ -25,6 +25,11 @@ router.get('/admins',authenticate,(req, res) => {
 }
 );
 
+// Registration form Route
+router.get('/admins', (req, res)=> {
+    res.render('/admins');
+});
+
 // POST Route onboard admin
 router.post('/admins', (req, res) => {
 
@@ -45,6 +50,11 @@ router.post('/admins', (req, res) => {
 // Route that returns a single admin and its token
 router.get('/admins/me',authenticate, (req, res) => {
     res.send(req.admin);
+});
+
+// Login form Route
+router.get('/admins', (req, res)=> {
+    res.render('/admins');
 });
 
 // signin/login route
@@ -90,14 +100,14 @@ router.get('/admins/:id',authenticate, (req, res) => {
 });
 
 // GET :id Route to get single admin by role
-router.get('/admins/role', (req, res) => {
-    // get the role from the logged in admin 
-    // this should be completed after authentication is complete
-    let role = req.params.role;
-    Admin.find({role:[role]}).then((docs)=>{
-        res.send(docs)
-    });
-});
+// router.get('/admins/role', (req, res) => {
+//     // get the role from the logged in admin 
+//     // this should be completed after authentication is complete
+//     let role = req.params.role;
+//     Admin.find({role:[role]}).then((docs)=>{
+//         res.send(docs)
+//     });
+// });
 
 // PATCH Route Update admin
 router.patch('/admins/:id',authenticate, (req, res) => {
