@@ -31,7 +31,7 @@ router.post('/admins', (req, res) => {
     admin.save().then(() => { // save the admin instance 
         return admin.generateToken(); // save the admin instance
     }).then((token) => { // pass pass the token as the value of the custom header 'x-auth' and send header with the newly signed up admin.
-        let admin =  _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
+        // let admin =  _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
         res.header('x-auth', token).send(admin);
     }).catch((e) => {
         res.status(400).send(e);
@@ -86,16 +86,14 @@ router.patch('/admins/:id', (req, res) => {
             res.status(404).send();
         }
 
-        res.send(doc);
-
-        // Admin.findById(id).then(doc=>{
-        //     res.send(doc);
-        // })
+        Admin.findById(id).then(doc=>{
+            res.send(doc);
+        })
         
     }).catch((e)=>{
         res.status(400).send();
     });
-    // return the updated doc
+    
 });
 
 // DELETE Route delete admin

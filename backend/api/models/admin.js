@@ -83,7 +83,7 @@ AdminSchema.methods.toJOSN = function() {
 AdminSchema.pre('save', function(next) {
   const admin = this // bind this
 
-  if (admin.isModified('password')) {
+  if (admin.$isDefault('password') || admin.isModified('password')) {
     bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
       if (err) {
         return next(err);
@@ -115,14 +115,6 @@ AdminSchema.methods.generateToken = function() {
         return token;
     });
 }
-
-// AdminSchema.methods.toJOSN = function() {
-//     let admin = this;
-//     let adminObject = admin.toObject();
-//     alert('Im here')
-
-//     return _.pick(adminObject, ["_id","firstname", "lastname", "username", "email", "phone", "role"]);
-// }
 
 
 module.exports = mongoose.model('Admin', AdminSchema);
