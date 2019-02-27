@@ -72,11 +72,10 @@ const AdminSchema = new Schema({
 
 // convert mongoose Model to Object and pick needed properties
 // this function overwrites the toJSON function. It is called implicitly
-AdminSchema.methods.toJOSN = function() {
-    let admin = this;
-    let adminObject = admin.toObject();
-
-    return _.pick(adminObject, ['_id', 'email']);
+AdminSchema.methods.toJSON = function() {
+ let obj = this.toObject();
+ let newAdmin = _.pick(obj, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
+ return newAdmin;
 }
 
 // encrypt password using bcrypt conditionally. Only if the user is newly created or he updated his password directly.
