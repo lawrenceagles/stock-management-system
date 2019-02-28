@@ -26,12 +26,12 @@ router.get('/admins',authenticate,(req, res) => {
 );
 
 // Registration form Route
-router.get('/admins', (req, res)=> {
+router.get('/register', (req, res)=> {
     res.render('/admins');
 });
 
 // POST Route onboard admin
-router.post('/admins', (req, res) => {
+router.post('/admins',authenticate, (req, res) => {
 
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
     let admin = new Admin(body);
@@ -52,13 +52,8 @@ router.get('/admins/me',authenticate, (req, res) => {
     res.send(req.admin);
 });
 
-// Login form Route
-router.get('/admins', (req, res)=> {
-    res.render('/admins');
-});
-
 // signin/login route
-router.post('/admins/login', (req, res) => {
+router.post('/admins/login',authenticate, (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
     Admin.findByCredentials(body.email, body.password).then((admin)=> { 
         return admin.generateToken().then((token)=> {
@@ -70,7 +65,7 @@ router.post('/admins/login', (req, res) => {
 });
 
 // signout/logout route
-router.delete('/admins/logout', authenticate, (req, res)=>{
+router.delete('/admins/logout',authenticate, (req, res)=>{
   req.admin.removeToken(req.token).then(()=>{
     res.status(200).send();
   }, ()=>{
@@ -98,16 +93,6 @@ router.get('/admins/:id',authenticate, (req, res) => {
     })
 
 });
-
-// GET :id Route to get single admin by role
-// router.get('/admins/role', (req, res) => {
-//     // get the role from the logged in admin 
-//     // this should be completed after authentication is complete
-//     let role = req.params.role;
-//     Admin.find({role:[role]}).then((docs)=>{
-//         res.send(docs)
-//     });
-// });
 
 // PATCH Route Update admin
 router.patch('/admins/:id',authenticate, (req, res) => {

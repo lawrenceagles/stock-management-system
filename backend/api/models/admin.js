@@ -133,6 +133,12 @@ AdminSchema.statics.findByToken = function(token) {
     });
 }
 
+// create a custom model method to find admin by their roles for authentication
+// AdminSchema.statics.findByRole = function(role) {
+//   let Admin = this;
+//   return Admin.findOne({role});
+// }
+
 // create a new mongoose method for user login authentication
 AdminSchema.statics.findByCredentials = function(email, password) {
     let Admin = this;
