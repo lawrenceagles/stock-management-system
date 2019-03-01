@@ -16,12 +16,8 @@ router.post('/profile', upload.single('image'), function (req, res, next) {
   // req.file is the `avatar` file
   // req.body will hold the text fields, if there were any
   if(!req.file){
-    console.log("req.file:", req.file);
     return res.status(204).send({Error: "Upload was not successful!"});
   }
-
-  console.log("req.file:", req.file);
-  console.log("req.files:", req.files);
   res.status(200).send(req.file);
 
 });
@@ -73,7 +69,7 @@ router.get('/admins/me',authenticate, (req, res) => {
 });
 
 // signin/login route
-router.post('/admins/login',authenticate, (req, res) => {
+router.post('/admins/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
     Admin.findByCredentials(body.email, body.password).then((admin)=> { 
         return admin.generateToken().then((token)=> {
@@ -130,17 +126,12 @@ router.patch('/admins/:id',authenticate, (req, res) => {
         if(!doc){
             res.status(404).send();
         }
-        console.log("The doc:", doc);
-        console.log("The doc password", doc.password);
-        console.log("The doc username:", doc.username);
 
         let saltRounds = 10;
         let Password = doc.password;
         let hash = bcrypt.hashSync(Password, saltRounds);
         doc.password = hash;
         doc.save();
-        console.log("The doc password", doc.password);
-        console.log("The hash is:", hash);
 
         Admin.findById(id).then(doc=>{
             res.send(doc);
