@@ -101,28 +101,6 @@ AdminSchema.pre('save', function(next) {
   }
 })
 
-// encrypt password using bcrypt conditionally. Only if the user is updating his data.
-AdminSchema.pre('update', function(next) {
-  const admin = this // bind this
-
-  if (admin.isModified('password')) {
-    bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
-      if (err) {
-        return next(err);
-      }
-      bcrypt.hash(admin.password, salt, (err, hash) => {
-        if (err) {
-          return next(err);
-        }
-        admin.password = hash
-        return next()
-      })
-    }) 
-  } else {
-    return next();
-  }
-})
-
 AdminSchema.methods.generateToken = function() {
 
     let admin = this;

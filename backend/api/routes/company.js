@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
 const multer = require('multer');
+const bcrypt = require('bcrypt');
 
 const {Admin} = require ('../models/admin');
 const {ObjectId} = require('mongodb');
@@ -129,6 +130,17 @@ router.patch('/admins/:id',authenticate, (req, res) => {
         if(!doc){
             res.status(404).send();
         }
+        console.log("The doc:", doc);
+        console.log("The doc password", doc.password);
+        console.log("The doc username:", doc.username);
+
+        let saltRounds = 10;
+        let Password = doc.password;
+        let hash = bcrypt.hashSync(Password, saltRounds);
+        doc.password = hash;
+        doc.save();
+        console.log("The doc password", doc.password);
+        console.log("The hash is:", hash);
 
         Admin.findById(id).then(doc=>{
             res.send(doc);
