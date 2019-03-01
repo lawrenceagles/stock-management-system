@@ -18,7 +18,7 @@ mongoose.connection.once('open', () => console.log('Mongodb now connected'));
 
 const app = express(); // create express app and store it in the app variable
 app.use(bodyParser.json()); // enable data to be availbe on req.body and allows us send data as json
-app.use('/', router); // configure multer to use express router
+// app.use('/', router); // configure multer to use express router
 app.use(route); // use the express.Router middleware to handle all routes
 
 

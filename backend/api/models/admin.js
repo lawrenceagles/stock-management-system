@@ -79,11 +79,33 @@ AdminSchema.methods.toJSON = function() {
  return newAdmin;
 }
 
-// encrypt password using bcrypt conditionally. Only if the user is newly created or he updated his password directly.
+// encrypt password using bcrypt conditionally. Only if the user is newly created.
 AdminSchema.pre('save', function(next) {
   const admin = this // bind this
 
-  if (admin.$isDefault('password') || admin.isModified('password')) {
+  if (admin.$isDefault('password')) {
+    bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
+      if (err) {
+        return next(err);
+      }
+      bcrypt.hash(admin.password, salt, (err, hash) => {
+        if (err) {
+          return next(err);
+        }
+        admin.password = hash
+        return next()
+      })
+    }) 
+  } else {
+    return next();
+  }
+})
+
+// encrypt password using bcrypt conditionally. Only if the user is updating his data.
+AdminSchema.pre('update', function(next) {
+  const admin = this // bind this
+
+  if (admin.isModified('password')) {
     bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
       if (err) {
         return next(err);

@@ -124,7 +124,7 @@ router.patch('/admins/:id',authenticate, (req, res) => {
         res.status(400).send();
     }
     // find and update the admin by id if it is found, throw error 404 if not
-    Admin.findOneAndUpdate(id, {$set:body}, {new: true}).then((doc)=>{
+    Admin.findOneAndUpdate({_id:id}, {$set:body}, {new: true}).then((doc)=>{
         // check if doc was foun and updated
         if(!doc){
             res.status(404).send();
