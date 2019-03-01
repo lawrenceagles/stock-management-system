@@ -1,11 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
+const multer = require('multer');
 
 const {Admin} = require ('../models/admin');
-
 const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
+
+const upload = multer({ dest: 'uploads/' }); // configure multer
+
+
+
+router.post('/profile', upload.single('image'), function (req, res, next) {
+  // req.file is the `avatar` file
+  // req.body will hold the text fields, if there were any
+  if(!req.file){
+    console.log("req.file:", req.file);
+    return res.status(204).send({Error: "Upload was not successful!"});
+  }
+
+  console.log("req.file:", req.file);
+  console.log("req.files:", req.files);
+  res.status(200).send(req.file);
+
+});
 
 // Home route 
 // Ask what should the home route point to? 
@@ -24,6 +42,7 @@ router.get('/admins',authenticate,(req, res) => {
   res.status(404).send();
 }
 );
+
 
 // Registration form Route
 router.get('/register', (req, res)=> {
