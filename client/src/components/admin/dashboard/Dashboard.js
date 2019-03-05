@@ -149,7 +149,7 @@ class Dashboard extends Component {
             <ul className="navbar nav ">
               <p>THIS IS THE NAV BAR PLACE HOLDER</p>
               <p>THIS IS THE NAV BAR PLACE HOLDER</p>
-              <p>THIS IS THE NAV BAR PLACE HOLDER</p>
+              <p><a href="/">Logout</a></p>
             </ul>
           </div>
 
