@@ -72,11 +72,15 @@ router.post('/admin',authenticate, (req, res) => {
 router.post('/admin/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
     Admin.findByCredentials(body.email, body.password).then((admin)=> { 
+        if(admin.tokens.length > 0){
+            return res.send("You are already Logged in");
+        }
+
         return admin.generateToken().then((token)=> {
             return res.header('x-auth', token).send(admin);
         });
     }).catch((e)=> {
-        res.status(400).send();
+        res.status(400).send("Error Incorrect email or password");
     })
 });
 
