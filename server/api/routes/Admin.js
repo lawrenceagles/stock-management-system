@@ -29,25 +29,26 @@ router.get('/', (req, res) => {
     res.send({type: "WELCOME TO HOME LOGIN"});
 });
 
-// GET route read all admins
-router.get('/readall',authenticate,(req, res) => {
+// GET route get all admins
+router.get('/admin',authenticate,(req, res) => {
     Admin.find().then(doc => { 
-      res.send(doc);
+        res.send(doc);
     });
-},
-(e) => {
-  res.status(404).send();
-}
+    },
+
+    (e) => {
+      res.status(404).send();
+    }
 );
 
 
 // Registration form Route
-router.get('/register', (req, res)=> {
-    res.render('/admins');
+router.get('/admin/register', (req, res)=> {
+    res.send({"Register": "This is the registration page"})
 });
 
 // POST Route onboard admin
-router.post('/admins',authenticate, (req, res) => {
+router.post('/admin',authenticate, (req, res) => {
 
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
     let admin = new Admin(body);
@@ -55,7 +56,6 @@ router.post('/admins',authenticate, (req, res) => {
     admin.save().then(() => { // save the admin instance 
         return admin.generateToken(); // save the admin instance
     }).then((token) => { // pass pass the token as the value of the custom header 'x-auth' and send header with the newly signed up admin.
-        // let admin =  _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
         res.header('x-auth', token).send(admin);
     }).catch((e) => {
         res.status(400).send(e);
@@ -64,12 +64,12 @@ router.post('/admins',authenticate, (req, res) => {
 
 
 // Route that returns a single admin and its token
-router.get('/me',authenticate, (req, res) => {
-    res.send(req.admin);
-});
+// router.get('/me',authenticate, (req, res) => {
+//     res.send(req.admin);
+// });
 
 // signin/login route
-router.post('/login', (req, res) => {
+router.post('/admin/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
     Admin.findByCredentials(body.email, body.password).then((admin)=> { 
         return admin.generateToken().then((token)=> {
@@ -81,7 +81,7 @@ router.post('/login', (req, res) => {
 });
 
 // signout/logout route
-router.delete('/logout',authenticate, (req, res)=>{
+router.delete('/admin/logout',authenticate, (req, res)=>{
   req.admin.removeToken(req.token).then(()=>{
     res.status(200).send();
   }, ()=>{
@@ -91,7 +91,7 @@ router.delete('/logout',authenticate, (req, res)=>{
 
 
 // GET :id Route to get single admin
-router.get('/:id',authenticate, (req, res) => {
+router.get('/admin/:id',authenticate, (req, res) => {
     // destructure the req.params object to get the object id.
     let id = req.params.id;
 
@@ -111,7 +111,7 @@ router.get('/:id',authenticate, (req, res) => {
 });
 
 // PATCH Route Update admin
-router.patch('/:id',authenticate, (req, res) => {
+router.patch('/admin/:id',authenticate, (req, res) => {
     // get the admin id
     let id = req.params.id;
     // pickout only what you want to grant the admin permission to update
@@ -144,7 +144,7 @@ router.patch('/:id',authenticate, (req, res) => {
 });
 
 // DELETE Route delete admin
-router.delete('/:id',authenticate, (req, res) => {
+router.delete('/admin/:id',authenticate, (req, res) => {
     // get the admin id
     let id = req.params.id;
     // validate the company id
@@ -157,8 +157,6 @@ router.delete('/:id',authenticate, (req, res) => {
         if(!doc){ // if doc is not found return error 404.
             res.status(404).send();
         }
-
-        console.log(id, doc);
         res.send(doc); // return the deleted doc (admin) if found and deleted
     }).catch((e)=>{
         res.status(400).send();

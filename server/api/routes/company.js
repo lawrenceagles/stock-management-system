@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 
-const {Company} = require('../Models/company')
+const {Company} = require('../models/company')
 
 router.post('/registration',(req,res,next)=>{                //create
     Company.find({name:req.body.name},(err,doc)=>{
