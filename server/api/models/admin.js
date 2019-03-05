@@ -75,7 +75,7 @@ const AdminSchema = new Schema({
 // this function overwrites the toJSON function. It is called implicitly
 AdminSchema.methods.toJSON = function() {
  let obj = this.toObject();
- let newAdmin = _.pick(obj, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
+ let newAdmin = _.pick(obj, ['firstname', 'lastname', 'username', 'email', 'phone', 'role', 'tokens']);
  return newAdmin;
 }
 
