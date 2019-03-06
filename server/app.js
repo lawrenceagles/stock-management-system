@@ -30,6 +30,7 @@ app.use('/',companyRoute);//company route
 app.use('/',userRoute);//user route
 
 
+
 //Routes that are not defined throws errow
 app.use((req, res, next)=>{
   var err = new Error('Not Found');
