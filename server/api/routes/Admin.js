@@ -93,8 +93,11 @@ router.post('/admin/login', (req, res) => {
         }
 
         return admin.generateToken().then((token)=> {
-            let adminData = _.pick(admin, ['username', 'role', 'tokens']);
-            return res.header('x-auth', token).send(adminData);
+            return res.header('x-auth', token).send({
+                username: admin.username,
+                role:admin.role,
+                token
+            });
         });
     }).catch((e)=> {
         res.status(400).send("Error Incorrect email or password");
