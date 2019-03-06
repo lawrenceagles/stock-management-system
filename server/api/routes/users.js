@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const {authenticate} = require('../../middleware/authenticate');
 const multer =  require('multer');
 const _ = require('lodash');
-const nodeMailer = require("nodemailer"); //nodemailer
+// const nodeMailer = require("nodemailer"); //nodemailer
 const path = require("path");
 
 

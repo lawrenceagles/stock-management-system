@@ -81,7 +81,6 @@ router.post('/admin/login', (req, res) => {
 });
 
 // signout/logout route
-
 router.delete('/admin/logout',authenticate, (req, res)=>{
   req.admin.removeToken(req.token).then(()=>{
     res.status(200).send();
