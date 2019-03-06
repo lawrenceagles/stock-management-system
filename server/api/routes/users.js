@@ -4,25 +4,63 @@ const {User} = require("../Models/user");
 const jwt = require('jsonwebtoken')
 const {authenticate} = require('../../middleware/authenticate');
 const multer =  require('multer');
-const upload = multer({ dest: 'uploads/' }); //  for image/file upload
+const _ = require('lodash');
+const nodeMailer = require("nodemailer"); //nodemailer
+const path = require("path");
 
 
 
+// Set Multer
+// Set Storage Engine
+const storage = multer.diskStorage({
+  destination: "./public/uploads/",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname.toLowerCase());
+  }
+});
 
+// Initialize single Upload Method
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1000000
+  },
+  fileFilter: (req, file, callback) => {
+    checkFileType(file, callback);
+  }
+}).single("upload");
+// Check File Type Function
+checkFileType = (file, callback) => {
+    // Allowed Extentions
+    const filetypes = /jpeg|jpg|png/;
+    // Check Extentions
+    const extname = filetypes.test(
+      path.extname(file.originalname).toLocaleLowerCase()
+    );
+ // Check MIME Types
+ const mimetype = filetypes.test(file.mimetype);
 
-router.post('/profile', upload.single('image'), function (req, res, next) {
-    // req.file is the `avatar` file
-    // req.body will hold the text fields, if there were any
-    if(!req.file){
-      return res.status(204).send({Error: "Upload was not successful!"});
-    }
-    res.status(200).send(req.file);
-    console.log(req.file)
-  
-  });
-  
+ if (mimetype && extname) {
+   return callback(null, true);
+ } else {
+   callback("Error: Images Only!");
+ }
+};
+router.post("/upload", (req, res, next) => {
+    upload(req, res, err => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(req.file);
+      }
+    });
+  });  
 //create new user
-router.post("/registration",authenticate, (req, res, next) => {
+router.post("/users", (req, res, next) => {
+    User.findOne({'employee_number':req.body.employee_number},(err,newuser)=>{
+        if(newuser) return res.status(404).json({
+             message:` User already exist`
+         })
         let user = new User
             user.employee_number=req.body.employee_number;
             user.firstName=req.body.firstName;
@@ -35,6 +73,7 @@ router.post("/registration",authenticate, (req, res, next) => {
             user.date_of_joining_company=req.body.date_of_joining_company;
             user.grade_level=req.body.grade_level;
             user.Company_Name=req.body.Company_Name;
+            user.Company_Schemerules = req.body.Company_Schemerules;
             user.bankDetails.bankName = req.body.bankName;
             user.bankDetails.bankBranch  = req.body.bankBranch;
             user.bankDetails.accountName = req.body.accountName;
@@ -53,6 +92,8 @@ router.post("/registration",authenticate, (req, res, next) => {
             user.number_of_vested_shares = req.body.number_of_vested_shares;
             user.number_of_shares_sold = req.body.number_of_shares_sold;
             user.allocation_date = req.body.allocation_date;
+            user.make_buy_request = req.body.make_buy_request;
+            user.make_sell_request = req.body.make_sell_request;
             user.corresponding_vesting_date = req.body.corresponding_vesting_date;
             user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
             
@@ -68,27 +109,28 @@ router.post("/registration",authenticate, (req, res, next) => {
                 })
             })
         })
+    })
  //login
- router.post('/login',(req,res)=>{
+ router.post('/user/login',(req,res)=>{
     User.findOne({'email':req.body.email},(err,user)=>{
         if(!user) return res.status(404).json({
              message:`auth failed email not found`
          })
-       user.comparePassword(req.body.password,(isMatch,err)=>{
-           if(err) throw err;
-           if(!isMatch) return res.status(400).json({
-               message:"Wrong Password"
-           })   
-            if(isMatch) { 
-                //if user log in success, generate a JWT token for the user with a secret key
-    
-                jwt.sign({user}, 'privatekey', { expiresIn: '1h' },(err, token) => {
-                    if(err) { console.log(err) }    
-                    res.status(200).json({
-                        message: `user login status ${isMatch}`
+        user.comparePassword(req.body.password,(isMatch,err)=>{
+        if(err) throw err;
+            if(!isMatch) return res.status(400).json({
+                message:"Wrong Password"
+                })   
+                if(isMatch) { 
+                //if user log in success, generate a JWT token for the user with a secret key        
+                    jwt.sign({user}, 'privatekey', { expiresIn: '1h' },(err, token) => {
+                        if(err) { console.log(err) }    
+                        res.status(200).json({
+                            message: `LoggedIn, Welcome`,
+                            user
+                        });
                     });
-                });
-            }
+                }
             else {
                 console.log('ERROR: Could not log in');
             }
@@ -97,32 +139,46 @@ router.post("/registration",authenticate, (req, res, next) => {
 })
 //upload
 
-router.delete('/users/logout',authenticate, (req, res)=>{
-    req.admin.removeToken(req.token).then(()=>{
+router.delete('/user/logout',authenticate, (req, res)=>{
+    req.user.removeToken(req.token).then(()=>{
       res.status(200).send();
-    }, ()=>{
-      res.status(400).send();
-    })
-  });
+        },()=>{
+        res.status(400).send();
+        })
+    });
 
 //read user info
-router.get("/read",authenticate,(req,res,next)=>{
-    User.find().limit(3)
+ router.get('/users',(req,res,next)=>{ 
+    let pageOptions = {
+        page: req.query.page || 0,
+        limit: req.query.limit || 10
+    }
+    
+    User.find()
+        .skip(pageOptions.page*pageOptions.limit)
+        .limit(pageOptions.limit)
+        .exec( (err, doc)=>{
+            if(err) { res.status(500).json(err); return; };
+            res.status(200).json(doc);
+        })  
+})
+//find one user
+router.get("/user/:id",authenticate,(req,res,next)=>{
+    let id = req.params.id;
+    User.find({_id:id})
     .then(response=>{
        res.status(200).json({
-         response,
-        total:response.length
+         response
         })
     })
     .catch(err=>{
         res.status(500).json({
-         message:`an error has occured`,
-        error:`${err}`
+         message:`an error has occured`
      })
     })
  })
-//find one user
-router.get("/read/:id",authenticate,(req,res,next)=>{
+ //
+ router.post("/user/:id",authenticate,(req,res,next)=>{
     let id = req.params.id;
     User.find({_id:id})
     .then(response=>{
@@ -138,7 +194,8 @@ router.get("/read/:id",authenticate,(req,res,next)=>{
  })
 
 
- router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
+
+ router.delete('/user/delete/:id',authenticate,(req,res,next)=>{   //delete
     const id = req.params.id
       User.findOneAndDelete({_id:id})
        .then(response=>{
@@ -167,8 +224,9 @@ router.get("/read/:id",authenticate,(req,res,next)=>{
        })
    })
    
+   //send email
       
-   router.put('/update/:id',authenticate,(req,res)=>{               //update
+   router.put('/user/update/:id',authenticate,(req,res)=>{               //update
     const id = req.params.id;
         User.findOne({_id:id},(err, user)=>{
             if (err) {

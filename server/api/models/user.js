@@ -9,25 +9,28 @@ const Schema = mongoose.Schema;
 
 
 
-const userSchema = new Schema({
-    
+    const userSchema = new Schema({
     employee_number: {
         type: Number,
         unique: true,
+        maxlength:150,
         required: [true, 'Employee Number is required']
     },
     firstName: {
         type: String,
+        maxlength:120,
         required: [true, 'User First Name is required']
     },
     lastName: {
         type: String,
+        maxlength:120,
         required: [true, 'User Last Name is required']
     },
     email: {
         type: String,
         required: [true, 'User email required'],
         trim: true,
+        maxlength:120,
         validate: {
             validator: validator.isEmail,
             message: '{VALUE }is not a valid Email!'
@@ -40,20 +43,28 @@ const userSchema = new Schema({
     },
     phone: {
         type: String,
-        required: [true, 'User phone number is required']
+        required: [true, 'User phone number is required'],
+        maxlength:100,
       },
-      password: {
+    password: {
         type: String,
+        trim:true,
         required: [true, 'User password is required'],
+        minlength:5,
     },
     token:{
         type:String
     },
     Company_Name:{
         type:String,
+        maxlength:200
     },
     Company_Schemerules:{   //cannot be updated by users
         type:String,
+    },
+    User_Loan_Request:{
+       type:String,
+       maxlength:120
     },
     date_of_joining_company: {
         type: Date,
@@ -66,25 +77,30 @@ const userSchema = new Schema({
     bankDetails:{
             bankName: {
                 type: String,
-                required: [true, 'Bank name is required']
+                required: [true, 'Bank name is required'],
+                maxlength:300,
             },
             bankBranch: {
                 type: String,
+                maxlength:200,
                 required: [true, 'Bank branch is required']
             },
             accountName: {
                 type: String,
+                maxlength:300,
                 required: [true, 'Account name is required']
             },
             accountNumber: {
                 type: Number,
+                maxlength:300,
                 required: [true, 'Account number is required']
             }
         },
     next_of_kin_information: {
         fullName:{
             type:String,
-            required:[true, 'FirstName is required']
+            required:[true, 'FirstName is required'],
+            maxlength:300,
             
         },
         
@@ -92,54 +108,76 @@ const userSchema = new Schema({
             type: String,
             required: [true, 'User email required'],
             trim: true,
-            unique:false
+            unique:false,
+            maxlength:200
         },
         NextOfKinStreet:{
             type:String,
-            required:true
+            required:true,
+            maxlength:200
         },
         NextOfKinCity:{
             type: String,
-            required:true
+            required:true,
+            maxlength:120
         },
         NextOfKinState: {
             type: String,
             uppercase: true,
-            required: true
+            required: true,
+            maxlength:100
         },
         NextOfKinPhone: {
             type: Number,
-            required: [true, 'User phone number required']
+            required: [true, 'User phone number required'],
+            maxlength:120,
           },
         NextOfKinRelationship: {
                type: String,
-              required: [true, 'This field cannot be empty']
+              required: [true, 'This field cannot be empty'],
+              maxlength:120,
         }
         
     },
     current_value_of_shares: {
         type: Number,
+        maxlength:120,
         required: [true, 'This field is required']
     },
     dividend_received: {
         type: String,
+        maxlength:120,
         required: [true, 'This field is required']
     },
     number_of_shares_collaterised: {
         type: Number,
+        maxlength:120,
         required: [true, 'This field is required']
     },
     number_of_allocated_shares: {
         type: Number,
+        maxlength:120,
         required: [true, 'This field is required']
+    },
+    make_buy_request:{
+        type:Boolean,
+        maxlength:500,
+        required:[true,'This field is required']
+    },
+    make_sell_request:{
+        type:Boolean,
+        maxlength:120,
+        required:[true,'This field is required']
     },
     number_of_vested_shares: {
         type: Number,
         default: 0,
+        maxlength:120,
         required: [true, 'This field is required']
     },
     number_of_shares_sold: {
         type: Number,
+        maxlength:120,
         required: [true, 'This field is required']
     },
     allocation_date: {
