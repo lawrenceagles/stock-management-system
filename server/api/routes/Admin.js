@@ -81,7 +81,7 @@ router.post('/admin/login', (req, res) => {
 });
 
     // signout/logout route
-router.delete('/logout',authenticate, (req, res)=>{
+router.delete('/admin/logout',authenticate, (req, res)=>{
   req.admin.removeToken(req.token).then(()=>{
     res.status(200).send();
   }, ()=>{
@@ -91,7 +91,7 @@ router.delete('/logout',authenticate, (req, res)=>{
 
 
     // GET :id Route to get single admin
-router.get('/:id',authenticate, (req, res) => {
+router.get('/admin/:id',authenticate, (req, res) => {
     // destructure the req.params object to get the object id.
     let id = req.params.id;
 
