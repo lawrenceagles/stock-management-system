@@ -2,16 +2,12 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 const Audit_Trail_Schema = new Schema({
-	id: {
-		type: Number,
-		required: true
-	},
 	action: {
 		type: String,
 		required: true
 	},
 	createdBy: {
-		type: mongoose.Schema.Types.ObjectId,
+		type: String,
 		required: true
 	},
 	createdAT: {
@@ -20,6 +16,12 @@ const Audit_Trail_Schema = new Schema({
 	}
 });
 
+Audit_Trail_Schema.methods.auditTrail = function (admin, doc){
+	const log = this;
+	// let obj = this.toObject();
+	// let newAdmin = _.pick(obj, ['SN', 'createdAt']);
+	console.log ("Message: The audit Trail method is working");
+}
 
-const Audit_Trail = mongoose.model('Audit_Trail', Audit_Trail_Schema);
-module.exports = {Audit_Trail};
+const Log = mongoose.model('Audit_Trail', Audit_Trail_Schema);
+module.exports = {Log};
