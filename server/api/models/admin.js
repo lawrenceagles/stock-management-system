@@ -140,7 +140,9 @@ AdminSchema.statics.findByCredentials = function(email, password) {
     let Admin = this;
     return Admin.findOne({email}).then((admin)=> { // find admin by email
         if(!admin){  // handle admin not found
-            return Promise.reject("");
+            return Promise.reject({
+              message:'Invalid Email'
+            });
         }
 
         return new Promise((resolve, reject)=> {
@@ -148,7 +150,9 @@ AdminSchema.statics.findByCredentials = function(email, password) {
                 if(res) {
                     return resolve(admin);
                 }else{
-                    return reject();
+                    return reject({
+                      message:err
+                    });
                 }
             })
         });

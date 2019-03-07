@@ -255,8 +255,25 @@ userSchema.methods.generateToken = function() {
 }
 
 // create a custom model method to find user by token for authentication
+// userSchema.statics.findByToken = function(token) {
+//     let User = this;
+//     let decoded;
+
+//     try {
+//         decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     } catch(e) {
+//         return Promise.reject();
+//     }
+//     return User.findOne({
+//         '_id': decoded._id,
+//         'tokens.token': token,
+//         'tokens.access': 'auth'
+//     });
+// }
+
+
 userSchema.statics.findByToken = function(token) {
-    let user = this;
+    let User = this;
     let decoded;
 
     try {

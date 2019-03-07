@@ -103,7 +103,7 @@ router.post('/admin/login', (req, res) => {
             });
         });
     }).catch((e)=> {
-        res.status(400).send(`Error ${e}`);
+        res.status(400).send(e);
     })
 });
 

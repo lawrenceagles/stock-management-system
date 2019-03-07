@@ -121,13 +121,15 @@ router.post("/users", (req, res, next) => {
                 })   
                 if(isMatch) { 
                 //if user log in success, generate a JWT token for the user with a secret key        
-                    jwt.sign({user}, 'privatekey', { expiresIn: '1h' },(err, token) => {
-                        if(err) { console.log(err) }    
-                        res.status(200).json({
-                            message: `LoggedIn, Welcome`,
-                            user
-                        });
-                    });
+                    return user.generateToken()
+                    .then((token)=> {
+                      return res.header('x-auth', token).send({
+                          user
+                      });
+                  })
+                    .catch(err=>{
+                      res.status(400).send(err)
+                    })
                 }
             else {
                 console.log('ERROR: Could not log in');
@@ -138,11 +140,20 @@ router.post("/users", (req, res, next) => {
 
 //upload
 router.delete('/user/logout',authenticate, (req, res)=>{
+    // req.user.removeToken(req.token).then(()=>{
+    //   res.status(200).send("You have logged out");
+    //     },()=>{
+    //     res.status(400).send("Logout failed");
+    //     })
+
     req.user.removeToken(req.token).then(()=>{
+
       res.status(200).send();
-        },()=>{
-        res.status(400).send();
-        })
+    }, ()=>{
+      console.log()
+      res.status(400).send();
+    })
+
     });
 
 //read user info
