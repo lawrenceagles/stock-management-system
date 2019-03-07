@@ -1,26 +1,17 @@
+require('./config/config');
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
 const route = require('./api/routes/Admin');
 const userRoute = require('./api/routes/users');
 const companyRoute = require('./api/routes/company');
-const db = require('./config/db')
+const db = require('./config/db/db')
 const router = express.Router();
 const Host = 'localhost';
-const Port = process.env.PORT || 3004;
+const Port = process.env.PORT;
+
+const {mongoose} = require('./config/db/mongoose');
 
 
-
-// connect to a promise library for usage
-mongoose.Promise = global.Promise; 
-
-// connect mongoose with DB  process.env.MONGODB_URI || 'mongodb://localhost/Todoapp'
-// mongoose.connect(process.env.MONGODB_URI || 'mongodb://lawrenceagles:lawrence1@ds153637.mlab.com:53637/vetiva');
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://lawrenceagles:lawrence1@ds153637.mlab.com:53637/vetiva', {
-  useCreateIndex: true,
-  useNewUrlParser: true
-});
-mongoose.connection.once('open', () => console.log('Mongodb now connected'));
 
 const app = express(); // create express app and store it in the app variable
 app.use(bodyParser.json()); // enable data to be availbe on req.body and allows us send data as json

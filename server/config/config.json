@@ -1,0 +1,12 @@
+{
+  "test": {
+    "PORT": 3004,
+    "MONGODB_URI": "mongodb://lawrenceagles:lawrence1@ds153637.mlab.com:53637/vetiva",
+    "JWT_SECRET": "poijasdf98435jpgfdpoij3"
+  },
+  "development": {
+    "PORT": 3004,
+    "MONGODB_URI": "mongodb://lawrenceagles:lawrence1@ds153637.mlab.com:53637/vetiva",
+    "JWT_SECRET": "pojiaj234oi234oij234oij4"
+  }
+}

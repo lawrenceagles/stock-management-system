@@ -105,7 +105,7 @@ AdminSchema.methods.generateToken = function() {
 
     let admin = this;
     let access = 'auth';
-    let token = jwt.sign({_id: admin._id.toHexString(), access}, '12345abc').toString(); // the second
+    let token = jwt.sign({_id: admin._id.toHexString(), access}, process.env.JWT_SECRET).toString(); // the second
 
     // set the admin.tokens empty array of object, object properties with the token and the access generated.
     admin.tokens = admin.tokens.concat([{access, token}]);
@@ -122,7 +122,7 @@ AdminSchema.statics.findByToken = function(token) {
     let decoded;
 
     try {
-        decoded = jwt.verify(token, '12345abc');
+        decoded = jwt.verify(token, 'process.env.JWT_SECRET');
     } catch(e) {
         return Promise.reject();
     }

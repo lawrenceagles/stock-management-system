@@ -137,8 +137,8 @@ router.post("/users", (req, res, next) => {
          })
     }) 
 })
-//upload
 
+//upload
 router.delete('/user/logout',authenticate, (req, res)=>{
     req.user.removeToken(req.token).then(()=>{
       res.status(200).send();
@@ -192,8 +192,6 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
      })
     })
  })
-
-
 
  router.delete('/user/delete/:id',authenticate,(req,res,next)=>{   //delete
     const id = req.params.id
@@ -344,6 +342,5 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
             };
        });
 })
-
 
 module.exports = router;

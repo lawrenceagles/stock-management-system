@@ -6,6 +6,8 @@ const bcrypt = require('bcrypt');
 
 const {Admin} = require ('../models/admin');
 const {Log} = require ('../models/audit_Trail');
+const {User} = require("../models/user");
+const {Company} = require('../models/company');
 const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
 
@@ -216,7 +218,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
     });
 });
 
-
+// Audit Trail Route
 router.get('/audit',authenticate, (req, res)=>{
     let auditLog = Log.find({}).then((doc)=>{
         res.send(doc);
