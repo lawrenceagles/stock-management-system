@@ -1,4 +1,5 @@
 const {Admin} = require('../api/models/admin');
+const {User} = require('../api/models/user');
 // create a middleware function
 let authenticate = (req, res, next) => {
     let token = req.header('x-auth'); // grap the token from the server
@@ -24,6 +25,21 @@ let authenticate = (req, res, next) => {
 
         next();
     }).catch((e) => {
+        res.status(401).send("You do not have the permission you perform this operation");
+    });
+    }
+
+    if(User){
+         User.findByToken(token).then((user)=>{
+            if(!user) { // reject the promise if no user is found
+                return Promise.reject();
+                // you can redirect the user to the login page!
+            }
+            req.user = user;
+            req.token = token;
+
+            next();
+         }).catch((e) => {
         res.status(401).send("You do not have the permission you perform this operation");
     });
     }

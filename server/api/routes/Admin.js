@@ -6,8 +6,6 @@ const bcrypt = require('bcrypt');
 
 const {Admin} = require ('../models/admin');
 const {Log} = require ('../models/audit_Trail');
-const {User} = require("../models/user");
-const {Company} = require('../models/company');
 const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
 
@@ -59,16 +57,19 @@ router.get('/admin/register', (req, res)=> {
 
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
+    // let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    // let randomPassword = _.sample(possible, 10).join('');
+    // req.body.password = randomPassword;
 
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
     let admin = new Admin(body);
 
-    let log = new Log({
-        action: `${req.admin.lastname} ${req.admin.firstname} created ${admin.firstname} ${admin.lastname} profile`,
-        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
-    });
+    // let log = new Log({
+    //     action: `${req.admin.lastname} ${req.admin.firstname} created ${admin.firstname} ${admin.lastname} profile`,
+    //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+    // });
 
-    log.save();
+    // log.save();
 
     admin.save().then(() => { // save the admin instance 
         return admin.generateToken(); // save the admin instance

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 const SALT_i = 10;
@@ -191,7 +192,17 @@ const Schema = mongoose.Schema;
     corresponding_date_of_sale: {
         type: Date,
         required: [true, 'This field is required']
-    }
+    },
+    tokens: [{
+        access: {
+          type: String,
+          required: true
+        },
+        token: {
+          type: String,
+          required: true
+        }
+    }]
 });
 
 userSchema.pre('save',function(next){
@@ -227,11 +238,12 @@ userSchema.pre('save',function(next){
 //          cb(err,user);
 //      })
 //  }
+
 userSchema.methods.generateToken = function() {
 
     let user = this;
     let access = 'auth';
-    let token = jwt.sign({_id: user._id.toHexString(), access}, 'process.env.JWT_SECRET').toString(); // the second
+    let token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString(); // the second
 
     // set the user.tokens empty array of object, object properties with the token and the access generated.
     user.tokens = user.tokens.concat([{access, token}]);
@@ -248,7 +260,7 @@ userSchema.statics.findByToken = function(token) {
     let decoded;
 
     try {
-        decoded = jwt.verify(token, 'process.env.JWT_SECRET');
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch(e) {
         return Promise.reject();
     }

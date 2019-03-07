@@ -97,19 +97,17 @@ router.post("/users", (req, res, next) => {
             user.corresponding_vesting_date = req.body.corresponding_vesting_date;
             user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
             
-            user.save()
-            .then(response=>{
-              res.status(200).json({
-                  message:"User registration successful"
+            user.save().then(() => { // save the user instance 
+                return user.generateToken(); // save the user instance
+            }).then((token) => { // pass pass the token as the value of the custom header 'x-auth' and send header with the newly signed up user.
+                res.header('x-auth', token).send(user);
+            }).catch(err=>{
+                        res.json({
+                            message:`Server error ${err}`
+                        })
+                    })
                 })
             })
-            .catch(err=>{
-                res.json({
-                    message:`Server error ${err}`
-                })
-            })
-        })
-    })
  //login
  router.post('/user/login',(req,res)=>{
     User.findOne({'email':req.body.email},(err,user)=>{
@@ -148,7 +146,7 @@ router.delete('/user/logout',authenticate, (req, res)=>{
     });
 
 //read user info
- router.get('/users',(req,res,next)=>{ 
+ router.get('/users',authenticate,(req,res,next)=>{ 
     let pageOptions = {
         page: req.query.page || 0,
         limit: req.query.limit || 10
