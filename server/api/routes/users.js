@@ -56,7 +56,7 @@ router.post("/upload", (req, res, next) => {
     });
   });  
 //create new user
-router.post("/users", (req, res, next) => {
+router.post("/users",authenticate, (req, res, next) => {
     User.findOne({'employee_number':req.body.employee_number},(err,newuser)=>{
         if(newuser) return res.status(404).json({
              message:` User already exist`
@@ -120,7 +120,10 @@ router.post("/users", (req, res, next) => {
                 message:"Wrong Password"
                 })   
                 if(isMatch) { 
-                //if user log in success, generate a JWT token for the user with a secret key        
+                //if user log in success, generate a JWT token for the user with a secret key    
+                if(user.tokens.length > 0){
+                    return res.send("You are already Logged in");
+                }    
                     return user.generateToken()
                     .then((token)=> {
                       return res.header('x-auth', token).send({
