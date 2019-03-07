@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 const SALT_i = 10;
@@ -9,7 +10,7 @@ const Schema = mongoose.Schema;
 
 
 
-    const userSchema = new Schema({
+const userSchema = new Schema({
     employee_number: {
         type: Number,
         unique: true,
@@ -191,7 +192,17 @@ const Schema = mongoose.Schema;
     corresponding_date_of_sale: {
         type: Date,
         required: [true, 'This field is required']
-    }
+    },
+    tokens: [{
+        access: {
+          type: String,
+          required: true
+        },
+        token: {
+          type: String,
+          required: true
+        }
+    }]
 });
 
 userSchema.pre('save',function(next){
@@ -227,11 +238,12 @@ userSchema.pre('save',function(next){
 //          cb(err,user);
 //      })
 //  }
+
 userSchema.methods.generateToken = function() {
 
     let user = this;
     let access = 'auth';
-    let token = jwt.sign({_id: user._id.toHexString(), access}, '12345abc').toString(); // the second
+    let token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString(); // the second
 
     // set the user.tokens empty array of object, object properties with the token and the access generated.
     user.tokens = user.tokens.concat([{access, token}]);
@@ -242,13 +254,12 @@ userSchema.methods.generateToken = function() {
     });
 }
 
-// create a custom model method to find user by token for authentication
 userSchema.statics.findByToken = function(token) {
-    let user = this;
+    let User = this;
     let decoded;
 
     try {
-        decoded = jwt.verify(token, '12345abc');
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch(e) {
         return Promise.reject();
     }

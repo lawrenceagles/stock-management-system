@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const {authenticate} = require('../../middleware/authenticate');
 const multer =  require('multer');
 const _ = require('lodash');
-const nodeMailer = require("nodemailer"); //nodemailer
+// const nodeMailer = require("nodemailer"); //nodemailer
 const path = require("path");
 
 
@@ -56,7 +56,7 @@ router.post("/upload", (req, res, next) => {
     });
   });  
 //create new user
-router.post("/users", (req, res, next) => {
+router.post("/users",authenticate, (req, res, next) => {
     User.findOne({'employee_number':req.body.employee_number},(err,newuser)=>{
         if(newuser) return res.status(404).json({
              message:` User already exist`
@@ -97,19 +97,17 @@ router.post("/users", (req, res, next) => {
             user.corresponding_vesting_date = req.body.corresponding_vesting_date;
             user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
             
-            user.save()
-            .then(response=>{
-              res.status(200).json({
-                  message:"User registration successful"
+            user.save().then(() => { // save the user instance 
+                return user.generateToken(); // save the user instance
+            }).then((token) => { // pass pass the token as the value of the custom header 'x-auth' and send header with the newly signed up user.
+                res.header('x-auth', token).send(user);
+            }).catch(err=>{
+                        res.json({
+                            message:`Server error ${err}`
+                        })
+                    })
                 })
             })
-            .catch(err=>{
-                res.json({
-                    message:`Server error ${err}`
-                })
-            })
-        })
-    })
  //login
  router.post('/user/login',(req,res)=>{
     User.findOne({'email':req.body.email},(err,user)=>{
@@ -122,14 +120,19 @@ router.post("/users", (req, res, next) => {
                 message:"Wrong Password"
                 })   
                 if(isMatch) { 
-                //if user log in success, generate a JWT token for the user with a secret key        
-                    jwt.sign({user}, 'privatekey', { expiresIn: '1h' },(err, token) => {
-                        if(err) { console.log(err) }    
-                        res.status(200).json({
-                            message: `LoggedIn, Welcome`,
-                            user
-                        });
-                    });
+                //if user log in success, generate a JWT token for the user with a secret key    
+                if(user.tokens.length > 0){
+                    return res.send("You are already Logged in");
+                }    
+                    return user.generateToken()
+                    .then((token)=> {
+                      return res.header('x-auth', token).send({
+                          user
+                      });
+                  })
+                    .catch(err=>{
+                      res.status(400).send(err)
+                    })
                 }
             else {
                 console.log('ERROR: Could not log in');
@@ -137,18 +140,27 @@ router.post("/users", (req, res, next) => {
          })
     }) 
 })
-//upload
 
+//upload
 router.delete('/user/logout',authenticate, (req, res)=>{
+    // req.user.removeToken(req.token).then(()=>{
+    //   res.status(200).send("You have logged out");
+    //     },()=>{
+    //     res.status(400).send("Logout failed");
+    //     })
+
     req.user.removeToken(req.token).then(()=>{
+
       res.status(200).send();
-        },()=>{
-        res.status(400).send();
-        })
+    }, ()=>{
+      console.log()
+      res.status(400).send();
+    })
+
     });
 
 //read user info
- router.get('/users',(req,res,next)=>{ 
+ router.get('/users',authenticate,(req,res,next)=>{ 
     let pageOptions = {
         page: req.query.page || 0,
         limit: req.query.limit || 10
@@ -192,8 +204,6 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
      })
     })
  })
-
-
 
  router.delete('/user/delete/:id',authenticate,(req,res,next)=>{   //delete
     const id = req.params.id
@@ -344,6 +354,5 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
             };
        });
 })
-
 
 module.exports = router;

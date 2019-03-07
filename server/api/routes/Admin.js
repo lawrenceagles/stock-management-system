@@ -5,6 +5,7 @@ const multer = require('multer');
 const bcrypt = require('bcrypt');
 
 const {Admin} = require ('../models/admin');
+const {Log} = require ('../models/audit_Trail');
 const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
 
@@ -32,6 +33,13 @@ router.get('/', (req, res) => {
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
     Admin.find().then(doc => { 
+        let log = new Log({
+            action: `${req.admin.lastname} ${req.admin.firstname} viewed all admin profile`,
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+        });
+
+        log.save();
+
         res.send(doc);
     });
     },
@@ -49,9 +57,19 @@ router.get('/admin/register', (req, res)=> {
 
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
+    // let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    // let randomPassword = _.sample(possible, 10).join('');
+    // req.body.password = randomPassword;
 
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
     let admin = new Admin(body);
+
+    // let log = new Log({
+    //     action: `${req.admin.lastname} ${req.admin.firstname} created ${admin.firstname} ${admin.lastname} profile`,
+    //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+    // });
+
+    // log.save();
 
     admin.save().then(() => { // save the admin instance 
         return admin.generateToken(); // save the admin instance
@@ -72,18 +90,32 @@ router.post('/admin',authenticate, (req, res) => {
 router.post('/admin/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
     Admin.findByCredentials(body.email, body.password).then((admin)=> { 
+
+        if(admin.tokens.length > 0){
+            return res.send("You are already Logged in");
+        }
+
         return admin.generateToken().then((token)=> {
-            return res.header('x-auth', token).send(admin);
+            return res.header('x-auth', token).send({
+                username: admin.username,
+                role:admin.role,
+                token
+            });
         });
     }).catch((e)=> {
-        res.status(400).send();
+        res.status(400).send(e);
     })
 });
 
 // signout/logout route
-
 router.delete('/admin/logout',authenticate, (req, res)=>{
   req.admin.removeToken(req.token).then(()=>{
+    let log = new Log({
+        action: `${req.admin.lastname} ${req.admin.firstname} logged out`
+    });
+
+    log.save();
+
     res.status(200).send();
   }, ()=>{
     res.status(400).send();
@@ -91,9 +123,10 @@ router.delete('/admin/logout',authenticate, (req, res)=>{
 });
 
 
-    // GET :id Route to get single admin
-
+// GET :id Route to get single admin
 router.get('/admin/:id',authenticate, (req, res) => {
+    // Log.auditTrail(req.admin, {name:"Lawrence Eagles"});
+
     // destructure the req.params object to get the object id.
     let id = req.params.id;
 
@@ -104,6 +137,13 @@ router.get('/admin/:id',authenticate, (req, res) => {
 
     // find the admin by id.
     Admin.findById(id).then((doc)=> {
+        let log = new Log({
+            action: `${req.admin.lastname} ${req.admin.firstname} viewed ${doc.firstname} ${doc.lastname} profile`,
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+        });
+
+        log.save();
+
         // if admin is not found return error 404 otherwise send the admin.
         doc ? res.send(doc) : res.status(404).send();
     }).catch((e)=>{
@@ -136,6 +176,12 @@ router.patch('/admin/:id',authenticate, (req, res) => {
         doc.save();
 
         Admin.findById(id).then(doc=>{
+            let log = new Log({
+                action: `${req.admin.lastname} ${req.admin.firstname} edited ${doc.firstname} ${doc.lastname} profile`,
+                createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            });
+
+            log.save();
             res.send(doc);
         })
         
@@ -159,9 +205,24 @@ router.delete('/admin/:id',authenticate, (req, res) => {
         if(!doc){ // if doc is not found return error 404.
             res.status(404).send();
         }
+
+        let log = new Log({
+            action: `${req.admin.lastname} ${req.admin.firstname} deleted ${doc.firstname} ${doc.lastname} profile`,
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+        });
+
+        log.save();
+
         res.send(doc); // return the deleted doc (admin) if found and deleted
     }).catch((e)=>{
         res.status(400).send();
+    });
+});
+
+// Audit Trail Route
+router.get('/audit',authenticate, (req, res)=>{
+    let auditLog = Log.find({}).then((doc)=>{
+        res.send(doc);
     });
 });
 

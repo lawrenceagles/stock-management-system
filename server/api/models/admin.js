@@ -105,7 +105,7 @@ AdminSchema.methods.generateToken = function() {
 
     let admin = this;
     let access = 'auth';
-    let token = jwt.sign({_id: admin._id.toHexString(), access}, '12345abc').toString(); // the second
+    let token = jwt.sign({_id: admin._id.toHexString(), access}, process.env.JWT_SECRET).toString(); // the second
 
     // set the admin.tokens empty array of object, object properties with the token and the access generated.
     admin.tokens = admin.tokens.concat([{access, token}]);
@@ -122,7 +122,7 @@ AdminSchema.statics.findByToken = function(token) {
     let decoded;
 
     try {
-        decoded = jwt.verify(token, '12345abc');
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch(e) {
         return Promise.reject();
     }
@@ -133,18 +133,16 @@ AdminSchema.statics.findByToken = function(token) {
     });
 }
 
-// create a custom model method to find admin by their roles for authentication
-// AdminSchema.statics.findByRole = function(role) {
-//   let Admin = this;
-//   return Admin.findOne({role});
-// }
+
 
 // create a new mongoose method for user login authentication
 AdminSchema.statics.findByCredentials = function(email, password) {
     let Admin = this;
     return Admin.findOne({email}).then((admin)=> { // find admin by email
         if(!admin){  // handle admin not found
-            return Promise.reject();
+            return Promise.reject({
+              message:'Invalid Email'
+            });
         }
 
         return new Promise((resolve, reject)=> {
@@ -152,7 +150,9 @@ AdminSchema.statics.findByCredentials = function(email, password) {
                 if(res) {
                     return resolve(admin);
                 }else{
-                    return reject();
+                    return reject({
+                      message:err
+                    });
                 }
             })
         });
