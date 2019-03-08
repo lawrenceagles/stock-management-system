@@ -143,12 +143,6 @@ router.post("/users",authenticate, (req, res, next) => {
 
 //upload
 router.delete('/user/logout',authenticate, (req, res)=>{
-    // req.user.removeToken(req.token).then(()=>{
-    //   res.status(200).send("You have logged out");
-    //     },()=>{
-    //     res.status(400).send("Logout failed");
-    //     })
-
     req.user.removeToken(req.token).then(()=>{
 
       res.status(200).send();

@@ -6,7 +6,7 @@
   },
   "development": {
     "PORT": 3004,
-    "MONGODB_URI": "mongodb://lawrenceagles:lawrence1@ds153637.mlab.com:53637/vetiva",
+    "MONGODB_URI": "mongodb://localhost:3004/vetiva",
     "JWT_SECRET": "zzkjafydio4797jlkfjasdjfkl7io8dufjl"
   }
 }
