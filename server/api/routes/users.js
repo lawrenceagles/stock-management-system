@@ -7,7 +7,6 @@ const _ = require('lodash');
 const path = require("path");
 
 const {authenticateUser} = require('../../middleware/authenticateUser');
-const {authenticate} = require('../../middleware/authenticate');
 const {User} = require("../models/user");
 const {Log} = require ('../models/audit_Trail');
 const {ObjectId} = require('mongodb');
@@ -60,7 +59,7 @@ router.post("/upload", (req, res, next) => {
     });
   });  
 //create new user
-router.post("/users",authenticate,(req, res, next) => {
+router.post("/users",authenticateUser,(req, res, next) => {
     User.findOne({'employee_number':req.body.employee_number},(err,newuser)=>{
         if(newuser) return res.status(404).json({
              message:` User already exist`
@@ -102,12 +101,12 @@ router.post("/users",authenticate,(req, res, next) => {
             user.corresponding_vesting_date = req.body.corresponding_vesting_date;
             user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
 
-            // let log = new Log({
-            //     action: `${req.admin.lastname} ${req.admin.firstname} created a new user with Name: ${user.firstname} ${user.lastname}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
-            //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`
-            // });
+            let log = new Log({
+                action: `${req.admin.lastName} ${req.admin.firstName} created a new user with Name: ${user.firstName} ${user.lastName}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
+                createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+            });
 
-            // log.save();
+            log.save();
             
             user.save().then(() => { // save the user instance 
                 return user.generateToken(); // save the user instance
@@ -166,7 +165,7 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
     });
 
 //read user info
- router.get('/users',authenticate,(req,res,next)=>{ 
+ router.get('/users',authenticateUser,(req,res,next)=>{ 
     let pageOptions = {
         page: req.query.page || 0,
         limit: req.query.limit || 10
@@ -179,8 +178,8 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
             if(err) { res.status(500).json(err); return; };
 
             let log = new Log({
-                action: `${req.admin.lastname} ${req.admin.firstname} viewed all users profiles`,
-                createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                action: `${req.admin.lastName} ${req.admin.firstName} viewed all users profiles`,
+                createdBy: `${req.admin.lastName} ${req.admin.firstName}`
             });
 
             log.save();
@@ -198,12 +197,12 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
 
      User.findById(id).then((doc)=> {
-        // let log = new Log({
-        //     action: `${req.admin.lastname} ${req.admin.firstname} viewed ${doc.firstname} ${doc.lastname} profile`,
-        //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`
-        // });
+        let log = new Log({
+            action: `${req.admin.lastName} ${req.admin.firstName} viewed ${doc.firstName} ${doc.lastName} profile`,
+            createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+        });
 
-        // log.save();
+        log.save();
 
         // if admin is not found return error 404 otherwise send the admin.
         doc ? res.send(doc) : res.status(404).send();
@@ -216,8 +215,8 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
     // .then(doc=>{
 
     //     // let log = new Log({
-    //     //     action: `${req.admin.lastname} ${req.admin.firstname} Viewed a user profile, with Name: ${doc.firstname} ${doc.lastname}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
-    //     //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+    //     //     action: `${req.admin.lastName} ${req.admin.firstName} Viewed a user profile, with Name: ${doc.firstName} ${doc.lastName}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
+    //     //     createdBy: `${req.admin.lastName} ${req.admin.firstName}`
     //     // });
 
     //     // log.save();
@@ -240,8 +239,8 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
  //    .then(doc=>{
 
  //       // let log = new Log({
- //       //      action: `${req.admin.lastname} ${req.admin.firstname} updated a user profile, with Name: ${doc.firstname} ${doc.lastname}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
- //       //      createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+ //       //      action: `${req.admin.lastName} ${req.admin.firstName} updated a user profile, with Name: ${doc.firstName} ${doc.lastName}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
+ //       //      createdBy: `${req.admin.lastName} ${req.admin.firstName}`
  //       //  });
 
  //       //  log.save();
@@ -257,7 +256,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
  //    })
  // })
 
- router.delete('/user/delete/:id',authenticate,(req,res,next)=>{   //delete
+ router.delete('/user/delete/:id', (req,res,next)=>{   //delete
     const id = req.params.id
 
       // Validate the user id
@@ -269,8 +268,8 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
        .then(doc=>{
 
          let log = new Log({
-              action: `${req.admin.lastname} ${req.admin.firstname} deleted a user profile, with Name: ${doc.firstname} ${doc.lastname}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
-              createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+              action: `${req.admin.lastName} ${req.admin.firstName} deleted a user profile, with Name: ${doc.firstName} ${doc.lastName}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
+              createdBy: `${req.admin.lastName} ${req.admin.firstName}`
           });
 
           log.save();
@@ -411,8 +410,8 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                     }
 
                     let log = new Log({
-                        action: `${req.admin.lastname} ${req.admin.firstname} updated a user profile, with Name: ${user.firstname} ${user.lastname}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
-                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                        action: `${req.admin.lastName} ${req.admin.firstName} updated a user profile, with Name: ${user.firstName} ${user.lastName}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
+                        createdBy: `${req.admin.lastName} ${req.admin.firstName}`
                     });
 
                     log.save();

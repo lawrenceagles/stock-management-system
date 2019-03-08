@@ -42,6 +42,14 @@ router.post('/registration',authenticate,(req,res,next)=>{
         company.dateOfPurchase=req.body.dateOfPurchase;
         company.paymentPeriod=req.body.paymentPeriod;
         company.userList = req.body.userList;
+
+        let log = new Log({
+            action: `${req.admin.lastname} ${req.admin.firstname} created ${company.name} profile `,
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+        });
+
+        log.save();
+
         company.save()
     .then(response=>{
              res.status(200).json({
@@ -58,7 +66,7 @@ router.post('/registration',authenticate,(req,res,next)=>{
     })
 })
 
-router.get('/list',(req,res,next)=>{ 
+router.get('/list',authenticate,(req,res,next)=>{ 
     let pageOptions = {
         page: req.query.page || 0,
         limit: req.query.limit || 10
@@ -69,6 +77,14 @@ router.get('/list',(req,res,next)=>{
         .limit(pageOptions.limit)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
+
+            let log = new Log({
+                action: `${req.admin.lastname} ${req.admin.firstname} viewed companies profile `,
+                createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            });
+
+            log.save();
+
             res.status(200).json(doc);
         })   
 })
@@ -102,6 +118,13 @@ router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
                     })
                 }
                 else{
+                    let log = new Log({
+                        action: `${req.admin.lastname} ${req.admin.firstname} deleted ${company.name} profile `,
+                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                    });
+
+                    log.save();
+
                     res.satus(200).json({
                         message:`Document has been deleted`
                       })
@@ -209,6 +232,13 @@ router.put('/update/:id',authenticate,(req,res)=>{               //update
                     if(req.body.schemeRules){
                         company.schemeRules = req.body.schemeRules;
                     }
+
+                    let log = new Log({
+                        action: `${req.admin.lastname} ${req.admin.firstname} created ${company.name} profile `,
+                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                    });
+
+                    log.save();
 
                     company.save((err,UpdatedCompany)=>{
                         if(err) res.status(500).json({
