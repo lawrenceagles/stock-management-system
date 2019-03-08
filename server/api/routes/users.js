@@ -174,16 +174,38 @@ router.delete('/user/logout',authenticate, (req, res)=>{
         .limit(pageOptions.limit)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
+
+            let log = new Log({
+                action: `${req.admin.lastname} ${req.admin.firstname} viewed ${doc.firstname} ${doc.lastname} profile`,
+                createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            });
+
+            log.save();
+            
             res.status(200).json(doc);
         })  
 })
 //find one user
 router.get("/user/:id",authenticate,(req,res,next)=>{
     let id = req.params.id;
+    // checks if the object is valid
+    if(!ObjectId.isValid(id)) {
+        res.status(404).send();
+    }
+
+
     User.find({_id:id})
-    .then(response=>{
+    .then(doc=>{
+
+        let log = new Log({
+            action: `${req.admin.lastname} ${req.admin.firstname} updated ${doc.firstname} ${doc.lastname} profile`,
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+        });
+
+        log.save();
+
        res.status(200).json({
-         response
+         doc
         })
     })
     .catch(err=>{
@@ -210,7 +232,7 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
 
  router.delete('/user/delete/:id',authenticate,(req,res,next)=>{   //delete
     const id = req.params.id
-    
+
       // Validate the user id
       if(!ObjectId.isValid(id)){
           res.status(400).send();
@@ -255,6 +277,11 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
       
    router.put('/user/update/:id',authenticate,(req,res)=>{               //update
     const id = req.params.id;
+        // Validate user id
+        if(!ObjectId.isValid(id)){
+            res.status(400).send({Message:"Invalid user ID"});
+        }
+
         User.findOne({_id:id},(err, user)=>{
             if (err) {
                 res.status(500).json({
@@ -263,7 +290,7 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
               }
             else {
                 if(!user){
-                res.satus(404).json({
+                res.status(404).json({
                     message:`Document not found`
                     })
                 }
@@ -355,6 +382,14 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
                     if(req.body.corresponding_date_of_sale){
                         user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
                     }
+
+                    let log = new Log({
+                        action: `${req.admin.lastname} ${req.admin.firstname} edited ${user.firstname} ${user.lastname} profile`,
+                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                    });
+
+                    log.save();
+
                     user.save((err,UpdatedUser)=>{
                         if(err) res.status(500).json({
                             message:`Error occured while saving Company detail`,
