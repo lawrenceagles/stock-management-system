@@ -6,9 +6,11 @@ const _ = require('lodash');
 // const nodeMailer = require("nodemailer"); //nodemailer
 const path = require("path");
 
+const {authenticateUser} = require('../../middleware/authenticateUser');
 const {authenticate} = require('../../middleware/authenticate');
 const {User} = require("../models/user");
 const {Log} = require ('../models/audit_Trail');
+const {ObjectId} = require('mongodb');
 
 
 
@@ -58,11 +60,12 @@ router.post("/upload", (req, res, next) => {
     });
   });  
 //create new user
-router.post("/users",authenticate, (req, res, next) => {
+router.post("/users",authenticate,(req, res, next) => {
     User.findOne({'employee_number':req.body.employee_number},(err,newuser)=>{
         if(newuser) return res.status(404).json({
              message:` User already exist`
          })
+
         let user = new User
             user.employee_number=req.body.employee_number;
             user.firstName=req.body.firstName;
@@ -99,12 +102,12 @@ router.post("/users",authenticate, (req, res, next) => {
             user.corresponding_vesting_date = req.body.corresponding_vesting_date;
             user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
 
-            let log = new Log({
-                action: `${req.admin.lastname} ${req.admin.firstname} created ${user.firstname} ${user.lastname}, Employee Number:user.employee_number, profile`,
-                createdBy: `${req.admin.lastname} ${req.admin.firstname}`
-            });
+            // let log = new Log({
+            //     action: `${req.admin.lastname} ${req.admin.firstname} created a new user with Name: ${user.firstname} ${user.lastname}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
+            //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            // });
 
-            log.save();
+            // log.save();
             
             user.save().then(() => { // save the user instance 
                 return user.generateToken(); // save the user instance
@@ -150,8 +153,8 @@ router.post("/users",authenticate, (req, res, next) => {
     }) 
 })
 
-//upload
-router.delete('/user/logout',authenticate, (req, res)=>{
+//logout
+router.delete('/user/logout',authenticateUser, (req, res)=>{
     req.user.removeToken(req.token).then(()=>{
 
       res.status(200).send();
@@ -176,7 +179,7 @@ router.delete('/user/logout',authenticate, (req, res)=>{
             if(err) { res.status(500).json(err); return; };
 
             let log = new Log({
-                action: `${req.admin.lastname} ${req.admin.firstname} viewed ${doc.firstname} ${doc.lastname} profile`,
+                action: `${req.admin.lastname} ${req.admin.firstname} viewed all users profiles`,
                 createdBy: `${req.admin.lastname} ${req.admin.firstname}`
             });
 
@@ -194,41 +197,65 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
     }
 
 
-    User.find({_id:id})
-    .then(doc=>{
+     User.findById(id).then((doc)=> {
+        // let log = new Log({
+        //     action: `${req.admin.lastname} ${req.admin.firstname} viewed ${doc.firstname} ${doc.lastname} profile`,
+        //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+        // });
 
-        let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} updated ${doc.firstname} ${doc.lastname} profile`,
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
-        });
+        // log.save();
 
-        log.save();
-
-       res.status(200).json({
-         doc
-        })
+        // if admin is not found return error 404 otherwise send the admin.
+        doc ? res.send(doc) : res.status(404).send();
+    }).catch((e)=>{
+        res.status(400).send();
     })
-    .catch(err=>{
-        res.status(500).json({
-         message:`an error has occured`
-     })
-    })
+
+
+    // User.find({_id:id})
+    // .then(doc=>{
+
+    //     // let log = new Log({
+    //     //     action: `${req.admin.lastname} ${req.admin.firstname} Viewed a user profile, with Name: ${doc.firstname} ${doc.lastname}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
+    //     //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+    //     // });
+
+    //     // log.save();
+
+    //    res.status(200).json({
+    //      doc
+    //     })
+    // })
+    // .catch(err=>{
+    //     res.status(500).json({
+    //      message:`an error has occured`
+    //  })
+    // })
  })
- //
- router.post("/user/:id",authenticate,(req,res,next)=>{
-    let id = req.params.id;
-    User.find({_id:id})
-    .then(response=>{
-       res.status(200).json({
-         response
-        })
-    })
-    .catch(err=>{
-        res.status(500).json({
-         message:`an error has occured`
-     })
-    })
- })
+
+ // 
+ // router.post("/user/:id",authenticateUser,(req,res,next)=>{
+ //    let id = req.params.id;
+ //    User.find({_id:id})
+ //    .then(doc=>{
+
+ //       // let log = new Log({
+ //       //      action: `${req.admin.lastname} ${req.admin.firstname} updated a user profile, with Name: ${doc.firstname} ${doc.lastname}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
+ //       //      createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+ //       //  });
+
+ //       //  log.save();
+
+ //       res.status(200).json({
+ //         doc
+ //        })
+ //    })
+ //    .catch(err=>{
+ //        res.status(500).json({
+ //         message:`an error has occured`
+ //     })
+ //    })
+ // })
 
  router.delete('/user/delete/:id',authenticate,(req,res,next)=>{   //delete
     const id = req.params.id
@@ -241,8 +268,8 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
       User.findOneAndDelete({_id:id})
        .then(doc=>{
 
-          let log = new Log({
-              action: `${req.admin.lastname} ${req.admin.firstname} deleted ${doc.firstname} ${doc.lastname} profile`,
+         let log = new Log({
+              action: `${req.admin.lastname} ${req.admin.firstname} deleted a user profile, with Name: ${doc.firstname} ${doc.lastname}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
               createdBy: `${req.admin.lastname} ${req.admin.firstname}`
           });
 
@@ -275,7 +302,7 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
    
    //send email
       
-   router.put('/user/update/:id',authenticate,(req,res)=>{               //update
+   router.put('/user/update/:id',authenticateUser,(req,res)=>{               //update
     const id = req.params.id;
         // Validate user id
         if(!ObjectId.isValid(id)){
@@ -384,7 +411,7 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
                     }
 
                     let log = new Log({
-                        action: `${req.admin.lastname} ${req.admin.firstname} edited ${user.firstname} ${user.lastname} profile`,
+                        action: `${req.admin.lastname} ${req.admin.firstname} updated a user profile, with Name: ${user.firstname} ${user.lastname}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
                         createdBy: `${req.admin.lastname} ${req.admin.firstname}`
                     });
 

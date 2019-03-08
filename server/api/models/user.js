@@ -6,10 +6,6 @@ const SALT_i = 10;
 
 const Schema = mongoose.Schema;
 
-
-
-
-
 const userSchema = new Schema({
     employee_number: {
         type: Number,
@@ -229,21 +225,11 @@ userSchema.pre('save',function(next){
      })
  }
 
-//  userSchema.methods.generateToken=function(cb){
-//      var user = this;
-//      var token = jwt.sign(user._id.toHexString(),'supersecreet')
-//      user.token = token;
-//      user.save((err,user)=>{
-//          if(err) return cb(err)
-//          cb(err,user);
-//      })
-//  }
-
 userSchema.methods.generateToken = function() {
 
     let user = this;
     let access = 'auth';
-    let token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString(); // the second
+    let token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRETE_USER).toString(); // the second
 
     // set the user.tokens empty array of object, object properties with the token and the access generated.
     user.tokens = user.tokens.concat([{access, token}]);
@@ -259,7 +245,7 @@ userSchema.statics.findByToken = function(token) {
     let decoded;
 
     try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
+        decoded = jwt.verify(token, process.env.JWT_SECRETE_USER);
     } catch(e) {
         return Promise.reject();
     }
@@ -270,11 +256,6 @@ userSchema.statics.findByToken = function(token) {
     });
 }
 
-// create a custom model method to find user by their roles for authentication
-// userSchema.statics.findByRole = function(role) {
-//   let user = this;
-//   return user.findOne({role});
-// }
 
 // create a new mongoose method for user login authentication
 userSchema.statics.findByCredentials = function(email, password) {

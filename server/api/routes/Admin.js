@@ -80,12 +80,6 @@ router.post('/admin',authenticate, (req, res) => {
     });
 });
 
-
-// Route that returns a single admin and its token
-// router.get('/me',authenticate, (req, res) => {
-//     res.send(req.admin);
-// });
-
 // signin/login route
 router.post('/admin/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
