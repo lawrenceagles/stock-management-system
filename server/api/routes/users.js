@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const {User} = require("../models/user");
 const jwt = require('jsonwebtoken');
-const {authenticate} = require('../../middleware/authenticate');
 const multer =  require('multer');
 const _ = require('lodash');
 // const nodeMailer = require("nodemailer"); //nodemailer
 const path = require("path");
+
+const {authenticate} = require('../../middleware/authenticate');
+const {User} = require("../models/user");
+const {Log} = require ('../models/audit_Trail');
 
 
 
@@ -96,6 +98,13 @@ router.post("/users",authenticate, (req, res, next) => {
             user.make_sell_request = req.body.make_sell_request;
             user.corresponding_vesting_date = req.body.corresponding_vesting_date;
             user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
+
+            let log = new Log({
+                action: `${req.admin.lastname} ${req.admin.firstname} created ${user.firstname} ${user.lastname}, Employee Number:user.employee_number, profile`,
+                createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            });
+
+            log.save();
             
             user.save().then(() => { // save the user instance 
                 return user.generateToken(); // save the user instance
@@ -201,8 +210,22 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
 
  router.delete('/user/delete/:id',authenticate,(req,res,next)=>{   //delete
     const id = req.params.id
+    
+      // Validate the user id
+      if(!ObjectId.isValid(id)){
+          res.status(400).send();
+      }
+
       User.findOneAndDelete({_id:id})
-       .then(response=>{
+       .then(doc=>{
+
+          let log = new Log({
+              action: `${req.admin.lastname} ${req.admin.firstname} deleted ${doc.firstname} ${doc.lastname} profile`,
+              createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+          });
+
+          log.save();
+
           res.status(200).json({
               message:"User deleted"
             })
@@ -214,7 +237,7 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
                        })
                    }
                    else{
-                       res.satus(200).json({
+                       res.status(200).json({
                            message:`Document has been deleted`
                          })
                        }       

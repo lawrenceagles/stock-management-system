@@ -57,9 +57,9 @@ router.get('/admin/register', (req, res)=> {
 
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
-    let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let randomPassword = _.sample(possible, 10).join('');
-    req.body.password = randomPassword;
+    // let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    // let randomPassword = _.sample(possible, 10).join('');
+    // req.body.password = randomPassword;
 
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
     let admin = new Admin(body);
@@ -203,7 +203,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
     Admin.findByIdAndDelete(id).then((doc)=>{
 
         if(!doc){ // if doc is not found return error 404.
-            res.status(404).send();
+            res.status(404).send("This user is not in the database");
         }
 
         let log = new Log({
