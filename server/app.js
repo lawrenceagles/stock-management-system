@@ -21,7 +21,7 @@ app.use('/',userRoute);//user route
 
 
 
-//Routes that are not defined throws errow
+//Routes that are not defined throws error
 app.use((req, res, next)=>{
   var err = new Error('Not Found');
   err.status = 404;

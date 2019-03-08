@@ -189,7 +189,7 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
         })  
 })
 //find one user
-router.get("/user/:id",authenticate,(req,res,next)=>{
+router.get("/user/:id",authenticateUser,(req,res,next)=>{
     let id = req.params.id;
     // checks if the object is valid
     if(!ObjectId.isValid(id)) {

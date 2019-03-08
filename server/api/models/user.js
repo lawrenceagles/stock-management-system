@@ -189,6 +189,10 @@ const userSchema = new Schema({
         type: Date,
         required: [true, 'This field is required']
     },
+    role:{
+        type: String,
+        default: "user"
+    },
     tokens: [{
         access: {
           type: String,
@@ -229,7 +233,7 @@ userSchema.methods.generateToken = function() {
 
     let user = this;
     let access = 'auth';
-    let token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRETE_USER).toString(); // the second
+    let token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString(); // the second
 
     // set the user.tokens empty array of object, object properties with the token and the access generated.
     user.tokens = user.tokens.concat([{access, token}]);
@@ -245,7 +249,7 @@ userSchema.statics.findByToken = function(token) {
     let decoded;
 
     try {
-        decoded = jwt.verify(token, process.env.JWT_SECRETE_USER);
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch(e) {
         return Promise.reject();
     }

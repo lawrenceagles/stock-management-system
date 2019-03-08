@@ -1,5 +1,4 @@
 const {Admin} = require('../api/models/admin');
-const {User} = require('../api/models/user');
 // create a middleware function
 let authenticate = (req, res, next) => {
     let token = req.header('x-auth'); // grap the token from the server
