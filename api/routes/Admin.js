@@ -214,7 +214,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 });
 
 // Audit Trail Route
-router.get('/audit',authenticate, (req, res)=>{
+router.get('/audit', (req, res)=>{
     let auditLog = Log.find({}).then((doc)=>{
         res.send(doc);
     });

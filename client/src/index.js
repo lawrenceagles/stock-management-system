@@ -15,7 +15,7 @@ ReactDOM.render(
       <Route exact path="/dashboard" component={Dashboard} />
       <Route exact path="/admin/onboard" component={OnboardAdmin} />
       <Route exact path="/company/onboard" component={OnboardCompany} />
-      <Route exact path="/company/activity" component={AuditTrail} />
+      <Route exact path="/dashboard/activity" component={AuditTrail} />
     </Switch>
   </Router>,
   document.getElementById('root')

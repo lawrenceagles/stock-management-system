@@ -4,6 +4,7 @@ const router = express.Router();
 
 const {Company} = require('../models/company')
 const {authenticate} = require('../../middleware/authenticate');
+const {Log} = require ('../models/audit_Trail');
 
 // Company Onboarding Route
 router.post('/registration',authenticate,(req,res,next)=>{
@@ -66,7 +67,7 @@ router.post('/registration',authenticate,(req,res,next)=>{
     })
 })
 
-router.get('/list',authenticate,(req,res,next)=>{ 
+router.get('/list',(req,res,next)=>{ 
     let pageOptions = {
         page: req.query.page || 0,
         limit: req.query.limit || 10
@@ -77,14 +78,6 @@ router.get('/list',authenticate,(req,res,next)=>{
         .limit(pageOptions.limit)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
-
-            let log = new Log({
-                action: `${req.admin.lastname} ${req.admin.firstname} viewed companies profile `,
-                createdBy: `${req.admin.lastname} ${req.admin.firstname}`
-            });
-
-            log.save();
-
             res.status(200).json(doc);
         })   
 })
