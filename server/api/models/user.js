@@ -6,10 +6,6 @@ const SALT_i = 10;
 
 const Schema = mongoose.Schema;
 
-
-
-
-
 const userSchema = new Schema({
     employee_number: {
         type: Number,
@@ -193,6 +189,10 @@ const userSchema = new Schema({
         type: Date,
         required: [true, 'This field is required']
     },
+    role:{
+        type: String,
+        default: "user"
+    },
     tokens: [{
         access: {
           type: String,
@@ -229,16 +229,6 @@ userSchema.pre('save',function(next){
      })
  }
 
-//  userSchema.methods.generateToken=function(cb){
-//      var user = this;
-//      var token = jwt.sign(user._id.toHexString(),'supersecreet')
-//      user.token = token;
-//      user.save((err,user)=>{
-//          if(err) return cb(err)
-//          cb(err,user);
-//      })
-//  }
-
 userSchema.methods.generateToken = function() {
 
     let user = this;
@@ -270,11 +260,6 @@ userSchema.statics.findByToken = function(token) {
     });
 }
 
-// create a custom model method to find user by their roles for authentication
-// userSchema.statics.findByRole = function(role) {
-//   let user = this;
-//   return user.findOne({role});
-// }
 
 // create a new mongoose method for user login authentication
 userSchema.statics.findByCredentials = function(email, password) {

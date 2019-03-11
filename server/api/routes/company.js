@@ -5,58 +5,6 @@ const router = express.Router();
 const {Company} = require('../models/company')
 const {authenticate} = require('../../middleware/authenticate');
 
-router.post('/registration',(req,res,next)=>{                //create
-    Company.find({name:req.body.name},(err,doc)=>{
-    if(doc.length){
-        res.status(400).json({
-         message:`Bad request name conflict`
-        })
-     }
-    else{
-       const company = new Company
-        company.name=req.body.name;
-        company.type=req.body.type;
-        company.totalSchemeMembers=req.body.totalSchemeMembers;
-        company.totalSharesAllotedToScheme=req.body.totalSharesAllotedToScheme;
-        company.totalSharesAllotedToSchemeMembers=req.body.totalSharesAllotedToSchemeMembers;
-        company.totalUnallotedShares=req.body.totalUnallotedShares;
-        company.totalSharesSold=req.body.totalSharesSold;
-        company.totalSharesBought=req.body.totalSharesBought;
-        company.totalSharesForfieted=req.body.totalSharesForfieted;
-        company.totalSharesRepurchased=req.body.totalSharesRepurchased;
-        company.totalDividentDeclared=req.body.totalDividentDeclared;
-        company.vestingDate=req.body.vestingDate;
-        company.dateOfAllocation=req.body.dateOfAllocation;
-        company.dividendType=req.body.dividendType;
-        company.dividendRatePerShares=req.body.dividendRatePerShares;
-        company.canBuyShares=req.body.canBuyShares;
-        company.canSellShares=req.body.canSellShares;
-        company.canCollateriseShares=req.body.canCollateriseShares;
-        company.sharePrice=req.body.sharePrice;
-        company.currentShareValuation=req.body.currentShareValuation;
-        company.canRepurchase=req.body.canRepurchase;
-        company.initialShareSale=req.body.initialShareSale;
-        company.purchasePrice=req.body.purchasePrice;
-        company.schemeRules=req.body.schemeRules;
-        company.dateOfPurchase=req.body.dateOfPurchase;
-        company.paymentPeriod=req.body.paymentPeriod;
-        company.userList = req.body.userList;
-        company.save()
-    .then(response=>{
-             res.status(200).json({
-                response,
-                info:"save successfull"
-            })
-        })
-    .catch(err=>{
-            return res.status(404).json({
-                message:'something is wrong '+ err
-            });
-        })
-      }
-    })
-})
-
 // Company Onboarding Route
 router.post('/registration',authenticate,(req,res,next)=>{
     Company.find({name:req.body.name},(err,doc)=>{
@@ -94,6 +42,14 @@ router.post('/registration',authenticate,(req,res,next)=>{
         company.dateOfPurchase=req.body.dateOfPurchase;
         company.paymentPeriod=req.body.paymentPeriod;
         company.userList = req.body.userList;
+
+        let log = new Log({
+            action: `${req.admin.lastname} ${req.admin.firstname} created ${company.name} profile `,
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+        });
+
+        log.save();
+
         company.save()
     .then(response=>{
              res.status(200).json({
@@ -110,7 +66,7 @@ router.post('/registration',authenticate,(req,res,next)=>{
     })
 })
 
-router.get('/list',(req,res,next)=>{ 
+router.get('/list',authenticate,(req,res,next)=>{ 
     let pageOptions = {
         page: req.query.page || 0,
         limit: req.query.limit || 10
@@ -121,6 +77,14 @@ router.get('/list',(req,res,next)=>{
         .limit(pageOptions.limit)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
+
+            let log = new Log({
+                action: `${req.admin.lastname} ${req.admin.firstname} viewed companies profile `,
+                createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            });
+
+            log.save();
+
             res.status(200).json(doc);
         })   
 })
@@ -139,7 +103,7 @@ router.get('/list',(req,res,next)=>{
   });
 
   //delet
-router.delete('/delete/:id',(req,res,next)=>{   //delete
+router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
  const id = req.params.id
    Company.findOneAndDelete({_id:id})
     .then(response=>{
@@ -154,6 +118,13 @@ router.delete('/delete/:id',(req,res,next)=>{   //delete
                     })
                 }
                 else{
+                    let log = new Log({
+                        action: `${req.admin.lastname} ${req.admin.firstname} deleted ${company.name} profile `,
+                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                    });
+
+                    log.save();
+
                     res.satus(200).json({
                         message:`Document has been deleted`
                       })
@@ -168,7 +139,7 @@ router.delete('/delete/:id',(req,res,next)=>{   //delete
     })
 })
 
-router.put('/update/:id',(req,res)=>{               //update
+router.put('/update/:id',authenticate,(req,res)=>{               //update
     const id = req.params.id;
         Company.findOne({_id:id},(err, company)=>{
             if (err) {
@@ -261,6 +232,13 @@ router.put('/update/:id',(req,res)=>{               //update
                     if(req.body.schemeRules){
                         company.schemeRules = req.body.schemeRules;
                     }
+
+                    let log = new Log({
+                        action: `${req.admin.lastname} ${req.admin.firstname} created ${company.name} profile `,
+                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                    });
+
+                    log.save();
 
                     company.save((err,UpdatedCompany)=>{
                         if(err) res.status(500).json({

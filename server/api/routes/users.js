@@ -1,12 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const {User} = require("../models/user");
 const jwt = require('jsonwebtoken');
-const {authenticate} = require('../../middleware/authenticate');
 const multer =  require('multer');
 const _ = require('lodash');
 // const nodeMailer = require("nodemailer"); //nodemailer
 const path = require("path");
+
+const {authenticateUser} = require('../../middleware/authenticateUser');
+const {User} = require("../models/user");
+const {Log} = require ('../models/audit_Trail');
+const {ObjectId} = require('mongodb');
 
 
 
@@ -56,11 +59,12 @@ router.post("/upload", (req, res, next) => {
     });
   });  
 //create new user
-router.post("/users",authenticate, (req, res, next) => {
+router.post("/users",authenticateUser,(req, res, next) => {
     User.findOne({'employee_number':req.body.employee_number},(err,newuser)=>{
         if(newuser) return res.status(404).json({
              message:` User already exist`
          })
+
         let user = new User
             user.employee_number=req.body.employee_number;
             user.firstName=req.body.firstName;
@@ -96,6 +100,13 @@ router.post("/users",authenticate, (req, res, next) => {
             user.make_sell_request = req.body.make_sell_request;
             user.corresponding_vesting_date = req.body.corresponding_vesting_date;
             user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
+
+            let log = new Log({
+                action: `${req.admin.lastName} ${req.admin.firstName} created a new user with Name: ${user.firstName} ${user.lastName}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
+                createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+            });
+
+            log.save();
             
             user.save().then(() => { // save the user instance 
                 return user.generateToken(); // save the user instance
@@ -141,14 +152,8 @@ router.post("/users",authenticate, (req, res, next) => {
     }) 
 })
 
-//upload
-router.delete('/user/logout',authenticate, (req, res)=>{
-    // req.user.removeToken(req.token).then(()=>{
-    //   res.status(200).send("You have logged out");
-    //     },()=>{
-    //     res.status(400).send("Logout failed");
-    //     })
-
+//logout
+router.delete('/user/logout',authenticateUser, (req, res)=>{
     req.user.removeToken(req.token).then(()=>{
 
       res.status(200).send();
@@ -160,7 +165,7 @@ router.delete('/user/logout',authenticate, (req, res)=>{
     });
 
 //read user info
- router.get('/users',authenticate,(req,res,next)=>{ 
+ router.get('/users',authenticateUser,(req,res,next)=>{ 
     let pageOptions = {
         page: req.query.page || 0,
         limit: req.query.limit || 10
@@ -171,44 +176,104 @@ router.delete('/user/logout',authenticate, (req, res)=>{
         .limit(pageOptions.limit)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
+
+            let log = new Log({
+                action: `${req.admin.lastName} ${req.admin.firstName} viewed all users profiles`,
+                createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+            });
+
+            log.save();
+            
             res.status(200).json(doc);
         })  
 })
 //find one user
-router.get("/user/:id",authenticate,(req,res,next)=>{
+router.get("/user/:id",authenticateUser,(req,res,next)=>{
     let id = req.params.id;
-    User.find({_id:id})
-    .then(response=>{
-       res.status(200).json({
-         response
-        })
+    // checks if the object is valid
+    if(!ObjectId.isValid(id)) {
+        res.status(404).send();
+    }
+
+
+     User.findById(id).then((doc)=> {
+        let log = new Log({
+            action: `${req.admin.lastName} ${req.admin.firstName} viewed ${doc.firstName} ${doc.lastName} profile`,
+            createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+        });
+
+        log.save();
+
+        // if admin is not found return error 404 otherwise send the admin.
+        doc ? res.send(doc) : res.status(404).send();
+    }).catch((e)=>{
+        res.status(400).send();
     })
-    .catch(err=>{
-        res.status(500).json({
-         message:`an error has occured`
-     })
-    })
- })
- //
- router.post("/user/:id",authenticate,(req,res,next)=>{
-    let id = req.params.id;
-    User.find({_id:id})
-    .then(response=>{
-       res.status(200).json({
-         response
-        })
-    })
-    .catch(err=>{
-        res.status(500).json({
-         message:`an error has occured`
-     })
-    })
+
+
+    // User.find({_id:id})
+    // .then(doc=>{
+
+    //     // let log = new Log({
+    //     //     action: `${req.admin.lastName} ${req.admin.firstName} Viewed a user profile, with Name: ${doc.firstName} ${doc.lastName}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
+    //     //     createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+    //     // });
+
+    //     // log.save();
+
+    //    res.status(200).json({
+    //      doc
+    //     })
+    // })
+    // .catch(err=>{
+    //     res.status(500).json({
+    //      message:`an error has occured`
+    //  })
+    // })
  })
 
- router.delete('/user/delete/:id',authenticate,(req,res,next)=>{   //delete
+ // 
+ // router.post("/user/:id",authenticateUser,(req,res,next)=>{
+ //    let id = req.params.id;
+ //    User.find({_id:id})
+ //    .then(doc=>{
+
+ //       // let log = new Log({
+ //       //      action: `${req.admin.lastName} ${req.admin.firstName} updated a user profile, with Name: ${doc.firstName} ${doc.lastName}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
+ //       //      createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+ //       //  });
+
+ //       //  log.save();
+
+ //       res.status(200).json({
+ //         doc
+ //        })
+ //    })
+ //    .catch(err=>{
+ //        res.status(500).json({
+ //         message:`an error has occured`
+ //     })
+ //    })
+ // })
+
+ router.delete('/user/delete/:id', (req,res,next)=>{   //delete
     const id = req.params.id
+
+      // Validate the user id
+      if(!ObjectId.isValid(id)){
+          res.status(400).send();
+      }
+
       User.findOneAndDelete({_id:id})
-       .then(response=>{
+       .then(doc=>{
+
+         let log = new Log({
+              action: `${req.admin.lastName} ${req.admin.firstName} deleted a user profile, with Name: ${doc.firstName} ${doc.lastName}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
+              createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+          });
+
+          log.save();
+
           res.status(200).json({
               message:"User deleted"
             })
@@ -220,7 +285,7 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
                        })
                    }
                    else{
-                       res.satus(200).json({
+                       res.status(200).json({
                            message:`Document has been deleted`
                          })
                        }       
@@ -236,8 +301,13 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
    
    //send email
       
-   router.put('/user/update/:id',authenticate,(req,res)=>{               //update
+   router.put('/user/update/:id',authenticateUser,(req,res)=>{               //update
     const id = req.params.id;
+        // Validate user id
+        if(!ObjectId.isValid(id)){
+            res.status(400).send({Message:"Invalid user ID"});
+        }
+
         User.findOne({_id:id},(err, user)=>{
             if (err) {
                 res.status(500).json({
@@ -246,7 +316,7 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
               }
             else {
                 if(!user){
-                res.satus(404).json({
+                res.status(404).json({
                     message:`Document not found`
                     })
                 }
@@ -338,6 +408,14 @@ router.get("/user/:id",authenticate,(req,res,next)=>{
                     if(req.body.corresponding_date_of_sale){
                         user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
                     }
+
+                    let log = new Log({
+                        action: `${req.admin.lastName} ${req.admin.firstName} updated a user profile, with Name: ${user.firstName} ${user.lastName}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
+                        createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+                    });
+
+                    log.save();
+
                     user.save((err,UpdatedUser)=>{
                         if(err) res.status(500).json({
                             message:`Error occured while saving Company detail`,

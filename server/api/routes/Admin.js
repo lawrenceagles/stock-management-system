@@ -64,12 +64,12 @@ router.post('/admin',authenticate, (req, res) => {
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
     let admin = new Admin(body);
 
-    // let log = new Log({
-    //     action: `${req.admin.lastname} ${req.admin.firstname} created ${admin.firstname} ${admin.lastname} profile`,
-    //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`
-    // });
+    let log = new Log({
+        action: `${req.admin.lastname} ${req.admin.firstname} created ${admin.firstname} ${admin.lastname} profile`,
+        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+    });
 
-    // log.save();
+    log.save();
 
     admin.save().then(() => { // save the admin instance 
         return admin.generateToken(); // save the admin instance
@@ -79,12 +79,6 @@ router.post('/admin',authenticate, (req, res) => {
         res.status(400).send(e);
     });
 });
-
-
-// Route that returns a single admin and its token
-// router.get('/me',authenticate, (req, res) => {
-//     res.send(req.admin);
-// });
 
 // signin/login route
 router.post('/admin/login', (req, res) => {
@@ -203,7 +197,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
     Admin.findByIdAndDelete(id).then((doc)=>{
 
         if(!doc){ // if doc is not found return error 404.
-            res.status(404).send();
+            res.status(404).send("This user is not in the database");
         }
 
         let log = new Log({

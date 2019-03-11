@@ -7,6 +7,7 @@
   "development": {
     "PORT": 3004,
     "MONGODB_URI": "mongodb://lawrenceagles:lawrence1@ds153637.mlab.com:53637/vetiva",
-    "JWT_SECRET": "zzkjafydio4797jlkfjasdjfkl7io8dufjl"
+    "JWT_SECRET": "zzkjafydio4797jlkfjasdjfkl7io8dufjl",
+    "JWT_SECRETE_USER": "zzsdf7oiuwioejtklwje%%ue7#$dl" 
   }
 }
