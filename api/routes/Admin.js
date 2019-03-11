@@ -38,10 +38,6 @@ router.get('/admin',authenticate,(req, res) => {
 
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
-    // let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    // let randomPassword = _.sample(possible, 10).join('');
-    // req.body.password = randomPassword;
-
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
     let admin = new Admin(body);
 
