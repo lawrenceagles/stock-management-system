@@ -30,23 +30,76 @@ class onBoardCompany extends Component {
       grade: '',
       level: '',
       schemeRules: '',
+      success: false,
+      error: '',
     };
   }
 
-  componentDidMount() {
-    // const header = {
-    //   'x-auth': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YzgxMGViMzcxYjU4MjY4YzNhNTdlMWYiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTUxOTYxNzc5fQ.2xIyEsLyJaMwXrQ3e3vFNow8L1K1mDwEPvU4HDAaDUw',
-    // };
+ onChange = e => {
+    this.setState({ [e.target.id]: e.target.value });
+  };
+
+  onBoardCompany = e => {
+    e.preventDefault();
+    const {
+      companyName,
+      companyType,
+      totalShares,
+      totalAllocatedShares,
+      totalUnallocatedShares,
+      totalSchemeMembers,
+      allocationDate,
+      vestingDateSchedule,
+      cash,
+      bonus,
+      share,
+      shareBonus,
+      currentShareValue,
+      canBuy,
+      canSell,
+      totalSharesForfieted,
+      collaterizedShares,
+      purchasePrice,
+      paymentPeriod,
+      grade,
+      level,
+      schemeRules,
+    } = this.state;
+
+    const companyData = {
+      companyName,
+      companyType,
+      totalShares,
+      totalAllocatedShares,
+      totalUnallocatedShares,
+      totalSchemeMembers,
+      allocationDate,
+      vestingDateSchedule,
+      cash,
+      bonus,
+      share,
+      shareBonus,
+      currentShareValue,
+      canBuy,
+      canSell,
+      totalSharesForfieted,
+      collaterizedShares,
+      purchasePrice,
+      paymentPeriod,
+      grade,
+      level,
+      schemeRules,
+    };
 
     axios
-      .get('http://localhost:8000/list')
+      .post('http://localhost:8000/registration', companyData)
       .then(res => {
-        this.setState({ companies: res.data });
+        this.setState({ success: true });
       })
       .catch(error => {
         this.setState({ error });
       });
-  }
+  };
 
   render() {
     const {
@@ -72,6 +125,8 @@ class onBoardCompany extends Component {
       grade,
       level,
       schemeRules,
+      success,
+      error,
     } = this.state;
     return (
       <div className="wrapper">
