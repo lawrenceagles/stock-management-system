@@ -25,7 +25,7 @@
 /client/yarn-error.log*
 
 # SERVER FILES TO BE IGNORED 
-/server/node_modules
-/server/config/config.json
+/node_modules
+/config/config.json
 
 

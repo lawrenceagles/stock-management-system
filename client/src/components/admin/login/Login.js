@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import './Login.styles.css';
 
 class Login extends Component {
@@ -8,28 +9,48 @@ class Login extends Component {
     this.state = {
       email: '',
       password: '',
-      submitted: false,
       error: '',
     };
-
-    this.loginUser = this.loginUser.bind(this);
   }
 
-  loginUser(e) {
+  onChange = e => {
+    this.setState({ [e.target.id]: e.target.value });
+  };
+
+  loginUser = e => {
     e.preventDefault();
+    const { email, password } = this.state;
 
-    // .then(() => {
-    // 	this.setState({ ...INITIAL_STATE });
-    // 	history.push(/dashboard);
-    // })
-    // .catch(error => {
-    // this.setState({ error });
-    // });
-    this.props.history.push('/dashboard');
-  }
+    const userData = {
+      email,
+      password,
+    };
+
+    const header = {
+      'Content-Type': 'application/json',
+    };
+
+    axios
+      .post('http://localhost:4000/admin/login', userData, header)
+      .then(res => {
+        console.log(res.data);
+      });
+  };
+  // loginUser(e) {
+  //   e.preventDefault();
+
+  //   // .then(() => {
+  //   // 	this.setState({ ...INITIAL_STATE });
+  //   // 	history.push(/dashboard);
+  //   // })
+  //   // .catch(error => {
+  //   // this.setState({ error });
+  //   // });
+  // this.props.history.push('/dashboard');
+  // };
 
   render() {
-    const { email, password, submitted, error } = this.state;
+    const { email, password, error } = this.state;
     return (
       <section className="p-5">
         <div className="container-fluid">
@@ -43,35 +64,36 @@ class Login extends Component {
               <form onSubmit={this.loginUser}>
                 <div className="form-group">
                   <input
-                    type="email"
+                    onChange={this.onChange}
+                    type="text"
                     className="form-control p-4"
                     id="email"
+                    value={email}
+                    error={error}
                     placeholder="Enter Email"
+                    required
                   />
-                  {submitted && !email && (
-                    <div className="help-block">Email is required</div>
-                  )}
                 </div>
                 <div className="form-group">
                   <input
-                    type="password"
+                    onChange={this.onChange}
+                    type="text"
                     className="form-control p-4"
                     id="password"
+                    value={password}
+                    error={error}
                     placeholder="Enter Password"
+                    required
                   />
-                  {submitted && !password && (
-                    <div className="help-block">Password is required</div>
-                  )}
-                  <label className="mt-2">
+                  <span className="mt-2">
                     <a className="text-dark" href="/">
                       Forgot Password?
                     </a>
-                  </label>
+                  </span>
                 </div>
                 <button type="submit" className="p-2 btn-block btn c-btn-bg">
                   LOGIN
                 </button>
-                {error && <div className="alert alert-danger">{error}</div>}
               </form>
             </div>
           </div>

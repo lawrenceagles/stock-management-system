@@ -1,30 +1,65 @@
 import React, { Component } from 'react';
-import './Dashboard.styles.css';
 import axios from 'axios';
+import './onboardAdmin.css';
 
-class Dashboard extends Component {
+class OnboardAdmin extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      companies: [],
+      email: '',
       error: '',
+      phone: '',
+      username: '',
+      firstname: '',
+      lastname: '',
+      role: '',
+      success: false,
     };
   }
 
-  componentDidMount() {
+  onChange = e => {
+    this.setState({ [e.target.id]: e.target.value });
+  };
+
+  onboardAdmin = e => {
+    e.preventDefault();
+    const { firstname, lastname, username, email, phone, role } = this.state;
+
+    const userData = {
+      firstname,
+      lastname,
+      username,
+      email,
+      phone,
+      role,
+    };
+
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
     axios
-      .get('http://localhost:4000/list')
+      .post('http://localhost:4000/admin', userData, { header: headers })
       .then(res => {
-        this.setState({ companies: res.data });
+        this.setState({ success: true });
       })
       .catch(error => {
         this.setState({ error });
       });
-  }
+  };
 
   render() {
-    const { companies } = this.state;
+    const {
+      email,
+      username,
+      firstname,
+      lastname,
+      role,
+      phone,
+      success,
+      error,
+    } = this.state;
     return (
       <div className="wrapper">
         <div className="sidebar">
@@ -40,7 +75,7 @@ class Dashboard extends Component {
             </div>
             <nav className="navbar-nav flex-column mt-4 text-center ml-4">
               <li className="nav-item c-li mb-4">
-                <a href="/" className="nav-link text-white">
+                <a href="/dashboard" className="nav-link text-white">
                   <div className="text-center mx-auto d-block">
                     <svg
                       width="28"
@@ -177,134 +212,112 @@ class Dashboard extends Component {
             </ul>
           </div>
 
-          <div className="content">
-            <section>
-              <div className="container">
-                <div className="row">
-                  <div className="col-lg-9 comp-info">
-                    <div className="row pt-5 mt-3 mb-5">
-                      <div className="col-sm-3 ">
-                        <div className="card c1">
-                          <div className="card-body">
-                            <div className="text-center">
-                              <h6>Total Number of companies</h6>
-                              <h3>{companies.length}</h3>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-sm-3 ">
-                        <div className="card c2">
-                          <div className="card-body">
-                            <div className="text-center">
-                              <h6>Total Scheme Members</h6>
-                                <h3>3435</h3>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-sm-3 ">
-                        <div
-                          className="card c3"
-                          style={{ borderLeft: '4px solid green' }}
-                        >
-                          <div className="card-body">
-                            <div className="text-center">
-                              <h6>Total Number of Shares</h6>
-                              <h3>39,393</h3>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-sm-3 ">
-                        <div
-                          className="card c4"
-                          style={{ borderLeft: '4px solid red' }}
-                        >
-                          <div className="card-body">
-                            <div className="text-center">
-                              <h6>Total Number of Alloted Shares </h6>
-                              <h3>1,239</h3>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+          <div className="content admin-content  mt-4">
+            <div className="container ">
+              <div className="row">
+                <div className="col-lg-9 ml-auto">
+                  {success && (
+                    <div className="alert alert-success" role="alert">
+                      OnboardAdmin Succesful
                     </div>
-                  </div>
-                </div>
-              </div>
-            </section>
+                  )}
+                  <div className="row pt-5 mt-3">
+                    <h3 className="mb-4"> Add Information </h3>
+                    <form onSubmit={this.onboardAdmin}>
+                      <div className="form-row mb-4">
+                        <div className="form-group col-md-4">
+                          <label htmlFor="inputEmail4">First Name</label>
+                          <input
+                            type="text"
+                            id="firstname"
+                            value={firstname}
+                            error={error}
+                            onChange={this.onChange}
+                            required
+                            className="form-control"
+                          />
+                        </div>
+                        <div className="form-group col-md-4">
+                          <label htmlFor="inputEmail4">Last Name</label>
+                          <input
+                            type="text"
+                            id="lastname"
+                            value={lastname}
+                            error={error}
+                            onChange={this.onChange}
+                            required
+                            className="form-control"
+                          />
+                        </div>
+                        <div className="form-group col-md-4">
+                          <label htmlFor="inputEmail4">Username</label>
+                          <input
+                            type="text"
+                            id="username"
+                            value={username}
+                            error={error}
+                            onChange={this.onChange}
+                            required
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
 
-            <section>
-              <div className="container">
-                <div className="row mb-5">
-                  <div className="col-xl-10 col-lg-9 col-md-8 ml-auto">
-                    <div className="row">
-                      <div className="col-12">
-                        <h5 className="text-dark text-left mb-3">
-                          All Companies
-                        </h5>
-                        <table className="table table-bordered bg-white text-center">
-                          <thead>
-                            <tr className="text-muted">
-                              <th>S/N</th>
-                              <th>Company Name</th>
-                              <th>Company Type</th>
-                              <th>Total Shares</th>
-                              <th>Total Allocated Shares</th>
-                              <th>Total Scheme Members</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {companies.map((company, index) => (
-                              <tr key={index}>
-                                <th>{++index}</th>
-                                <th>{company.name}</th>
-                                <th>{company.type}</th>
-                                <th>{company.totalSharesAllotedToScheme}</th>
-                                <th>
-                                  {company.totalSharesAllotedToSchemeMembers}
-                                </th>
-                                <th>{company.totalSchemeMembers}</th>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                        <nav aria-label="Page navigation example">
-                          <ul className="pagination justify-content-end">
-                            <li className="page-item disabled">
-                              <a className="page-link" href="/" tabIndex="-1">
-                                Previous
-                              </a>
-                            </li>
-                            <li className="page-item">
-                              <a className="page-link" href="/">
-                                1
-                              </a>
-                            </li>
-                            <li className="page-item">
-                              <a className="page-link" href="/">
-                                2
-                              </a>
-                            </li>
-                            <li className="page-item">
-                              <a className="page-link" href="/">
-                                3
-                              </a>
-                            </li>
-                            <li className="page-item">
-                              <a className="page-link" href="/">
-                                Next
-                              </a>
-                            </li>
-                          </ul>
-                        </nav>
+                      <div className="form-row mb-4">
+                        <div className="form-group col-md-6">
+                          <label htmlFor="inputEmail4">Email</label>
+                          <input
+                            type="text"
+                            id="email"
+                            value={email}
+                            error={error}
+                            onChange={this.onChange}
+                            required
+                            className="form-control"
+                          />
+                        </div>
+                        <div className="form-group col-md-6">
+                          <label htmlFor="inputEmail4">Phone Number</label>
+                          <input
+                            type="text"
+                            id="phone"
+                            value={phone}
+                            error={error}
+                            onChange={this.onChange}
+                            required
+                            placeholder="+234-918-233-2551"
+                            className="form-control"
+                          />
+                        </div>
                       </div>
-                    </div>
+
+                      <div className="form-row ">
+                        <div className="form-group col-md-4">
+                          <label htmlFor="inputState">Role</label>
+                          <select
+                            value={role}
+                            onChange={this.onChange}
+                            id="role"
+                            className="form-control"
+                          >
+                            <option>Choose...</option>
+                            <option value="manager">Manager</option>
+                            <option value="editor">Editor</option>
+                            <option value="super_admin">Super Admin</option>
+                          </select>
+                        </div>
+                      </div>
+                      <button
+                        type="submit"
+                        className="float-right p-2 btn c-btn-bg2 mb-4"
+                      >
+                        Add{' '}
+                      </button>
+                    </form>
                   </div>
                 </div>
               </div>
-            </section>
+            </div>
           </div>
         </div>
       </div>
@@ -312,4 +325,4 @@ class Dashboard extends Component {
   }
 }
 
-export default Dashboard;
+export default OnboardAdmin;
