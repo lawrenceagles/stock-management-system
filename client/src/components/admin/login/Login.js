@@ -20,6 +20,7 @@ class Login extends Component {
   loginUser = e => {
     e.preventDefault();
     const { email, password } = this.state;
+    const { value } = 'users';
 
     const userData = {
       email,
@@ -33,21 +34,27 @@ class Login extends Component {
     axios
       .post('http://localhost:8000/admin/login', userData, header)
       .then(res => {
-        console.log(res.data);
+        if (res.data === 'You are already Logged in') {
+          this.props.history.push('/dashboard');
+        }
+        this.onSetResult(res.data, value);
+        this.props.history.push('/dashboard');
+      })
+      .catch(error => {
+        this.setState({ error });
       });
   };
-  // loginUser(e) {
-  //   e.preventDefault();
 
-  //   // .then(() => {
-  //   // 	this.setState({ ...INITIAL_STATE });
-  //   // 	history.push(/dashboard);
-  //   // })
-  //   // .catch(error => {
-  //   // this.setState({ error });
-  //   // });
-  // this.props.history.push('/dashboard');
-  // };
+  onSetResult = (result, key) => {
+    localStorage.setItem(key, JSON.stringify(result));
+  };
+
+  componentDidMount() {
+    const cachedHits = localStorage.getItem('users');
+    if (cachedHits) {
+      this.props.history.push('/dashboard');
+    }
+  }
 
   render() {
     const { email, password, error } = this.state;
