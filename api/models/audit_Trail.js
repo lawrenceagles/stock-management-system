@@ -17,7 +17,7 @@ const Audit_Trail_Schema = new Schema({
 	},
 	user: {
 		type: String,
-	},
+	}
 },
 {
 	timestamps: true

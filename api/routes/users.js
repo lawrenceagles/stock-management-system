@@ -3,7 +3,6 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const multer =  require('multer');
 const _ = require('lodash');
-// const nodeMailer = require("nodemailer"); //nodemailer
 const path = require("path");
 
 const {authenticateUser} = require('../../middleware/authenticateUser');
@@ -102,8 +101,10 @@ router.post("/users",authenticateUser,(req, res, next) => {
             user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
 
             let log = new Log({
-                action: `${req.admin.lastName} ${req.admin.firstName} created a new user with Name: ${user.firstName} ${user.lastName}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
-                createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+                createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
+                action: `${req.admin.lastName} ${req.admin.firstName} created a new user`,
+                user: `${user.firstName} ${user.lastName}`,
+                company: `${user.Company_Name}`             
             });
 
             log.save();
@@ -175,15 +176,7 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
         .skip(pageOptions.page*pageOptions.limit)
         .limit(pageOptions.limit)
         .exec( (err, doc)=>{
-            if(err) { res.status(500).json(err); return; };
-
-            let log = new Log({
-                action: `${req.admin.lastName} ${req.admin.firstName} viewed all users profiles`,
-                createdBy: `${req.admin.lastName} ${req.admin.firstName}`
-            });
-
-            log.save();
-            
+            if(err) { res.status(500).json(err); return; };            
             res.status(200).json(doc);
         })  
 })
@@ -197,13 +190,6 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
 
      User.findById(id).then((doc)=> {
-        let log = new Log({
-            action: `${req.admin.lastName} ${req.admin.firstName} viewed ${doc.firstName} ${doc.lastName} profile`,
-            createdBy: `${req.admin.lastName} ${req.admin.firstName}`
-        });
-
-        log.save();
-
         // if admin is not found return error 404 otherwise send the admin.
         doc ? res.send(doc) : res.status(404).send();
     }).catch((e)=>{
@@ -268,8 +254,10 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
        .then(doc=>{
 
          let log = new Log({
-              action: `${req.admin.lastName} ${req.admin.firstName} deleted a user profile, with Name: ${doc.firstName} ${doc.lastName}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
-              createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+              createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
+              action: `${req.admin.lastName} ${req.admin.firstName} deleted a user`,
+              user: `${doc.firstName} ${doc.lastName}`,
+              company: `${doc.Company_Name}`
           });
 
           log.save();
@@ -410,8 +398,10 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                     }
 
                     let log = new Log({
-                        action: `${req.admin.lastName} ${req.admin.firstName} updated a user profile, with Name: ${user.firstName} ${user.lastName}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
-                        createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+                        createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
+                        action: `${req.admin.lastName} ${req.admin.firstName} updated a user`,
+                        user: `${user.firstName} ${user.lastName}`,
+                        company: `${user.Company_Name}`
                     });
 
                     log.save();

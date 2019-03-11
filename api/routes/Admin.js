@@ -27,14 +27,6 @@ router.post('/profile', upload.single('image'), function (req, res, next) {
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
     Admin.find().then(doc => { 
-        let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} viewed all admin profile`,
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-            user: "All admin"
-        });
-
-        log.save();
-
         res.send(doc);
     });
     },

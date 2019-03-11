@@ -44,8 +44,10 @@ router.post('/registration',authenticate,(req,res,next)=>{
         company.userList = req.body.userList;
 
         let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} created ${company.name} profile `,
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+            action: `${req.admin.lastname} ${req.admin.firstname} created a company `,
+            company: `${company.name}`
+
         });
 
         log.save();
@@ -77,14 +79,6 @@ router.get('/list',authenticate,(req,res,next)=>{
         .limit(pageOptions.limit)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
-
-            let log = new Log({
-                action: `${req.admin.lastname} ${req.admin.firstname} viewed companies profile `,
-                createdBy: `${req.admin.lastname} ${req.admin.firstname}`
-            });
-
-            log.save();
-
             res.status(200).json(doc);
         })   
 })
@@ -119,8 +113,10 @@ router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
                 }
                 else{
                     let log = new Log({
-                        action: `${req.admin.lastname} ${req.admin.firstname} deleted ${company.name} profile `,
-                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+                        action: `${req.admin.lastname} ${req.admin.firstname} deleted a company`,
+                        company: `${company.name}`
+                        
                     });
 
                     log.save();
@@ -234,8 +230,9 @@ router.put('/update/:id',authenticate,(req,res)=>{               //update
                     }
 
                     let log = new Log({
-                        action: `${req.admin.lastname} ${req.admin.firstname} created ${company.name} profile `,
-                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+                        action: `${req.admin.lastname} ${req.admin.firstname} created a company`,
+                        company: `${company.name}`
                     });
 
                     log.save();
