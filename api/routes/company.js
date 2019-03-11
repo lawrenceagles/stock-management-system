@@ -7,7 +7,7 @@ const {authenticate} = require('../../middleware/authenticate');
 const {Log} = require ('../models/audit_Trail');
 
 // Company Onboarding Route
-router.post('/registration',authenticate,(req,res,next)=>{
+router.post('/registration',(req,res,next)=>{
     Company.find({name:req.body.name},(err,doc)=>{
     if(doc.length){
         res.status(400).json({
@@ -44,12 +44,12 @@ router.post('/registration',authenticate,(req,res,next)=>{
         company.paymentPeriod=req.body.paymentPeriod;
         company.userList = req.body.userList;
 
-        let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} created ${company.name} profile `,
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
-        });
+        // let log = new Log({
+        //     action: `${req.admin.lastname} ${req.admin.firstname} created ${company.name} profile `,
+        //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+        // });
 
-        log.save();
+        // log.save();
 
         company.save()
     .then(response=>{

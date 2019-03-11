@@ -47,7 +47,7 @@ class Sidebar extends Component {
               </a>
             </li>
             <li className="nav-item c-li mb-4">
-              <a href="/admin/onboard" className="nav-link text-white">
+              <a href="/dashboard/onboard" className="nav-link text-white">
                 <div className="text-center mx-auto d-block">
                   <svg
                     width="28"

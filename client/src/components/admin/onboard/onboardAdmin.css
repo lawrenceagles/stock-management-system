@@ -3,3 +3,11 @@
 	width: 100%;
 	height: 100%;
 }
+
+/*.tab-content {
+	padding-left: 250px;
+}*/
+
+.nav-tabs {
+	padding-left: 250px;
+}

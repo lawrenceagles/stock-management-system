@@ -4,7 +4,7 @@ import './onboardAdmin.css';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
 
-class OnboardAdmin extends Component {
+class OnBoardAdmin extends Component {
   constructor(props) {
     super(props);
 
@@ -42,7 +42,7 @@ class OnboardAdmin extends Component {
     };
 
     axios
-      .post('http://localhost:4000/admin', userData, { header: headers })
+      .post('http://localhost:8000/admin', userData, { header: headers })
       .then(res => {
         this.setState({ success: true });
       })
@@ -63,18 +63,14 @@ class OnboardAdmin extends Component {
       error,
     } = this.state;
     return (
-      <div className="wrapper">
-        <Sidebar />
-        <div className="main-content bg-light">
-          <TopNavbar />
 
-          <div className="content admin-content  mt-4">
+          <div className="content admin-content  mt-2">
             <div className="container ">
               <div className="row">
                 <div className="col-lg-9 ml-auto">
                   {success && (
                     <div className="alert alert-success" role="alert">
-                      OnboardAdmin Succesful
+                      OnboardAdmin Successful
                     </div>
                   )}
                   <div className="row pt-5 mt-3">
@@ -175,10 +171,8 @@ class OnboardAdmin extends Component {
               </div>
             </div>
           </div>
-        </div>
-      </div>
     );
   }
 }
 
-export default OnboardAdmin;
+export default OnBoardAdmin;
