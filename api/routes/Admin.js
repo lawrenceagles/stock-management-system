@@ -23,19 +23,14 @@ router.post('/profile', upload.single('image'), function (req, res, next) {
 
 });
 
-// Home route 
-// Ask what should the home route point to? 
-// The login Page?
-router.get('/', (req, res) => {
-    res.send({type: "WELCOME TO HOME LOGIN"});
-});
 
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
     Admin.find().then(doc => { 
         let log = new Log({
             action: `${req.admin.lastname} ${req.admin.firstname} viewed all admin profile`,
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+            user: "All admin"
         });
 
         log.save();
@@ -49,12 +44,6 @@ router.get('/admin',authenticate,(req, res) => {
     }
 );
 
-
-// Registration form Route
-router.get('/admin/register', (req, res)=> {
-    res.send({"Register": "This is the registration page"})
-});
-
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
     // let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -65,8 +54,9 @@ router.post('/admin',authenticate, (req, res) => {
     let admin = new Admin(body);
 
     let log = new Log({
-        action: `${req.admin.lastname} ${req.admin.firstname} created ${admin.firstname} ${admin.lastname} profile`,
-        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+        action: `${req.admin.lastname} ${req.admin.firstname} created a new admin`,
+        createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+        user: `${admin.firstname} ${admin.lastname}`
     });
 
     log.save();
@@ -104,12 +94,6 @@ router.post('/admin/login', (req, res) => {
 // signout/logout route
 router.delete('/admin/logout',authenticate, (req, res)=>{
   req.admin.removeToken(req.token).then(()=>{
-    let log = new Log({
-        action: `${req.admin.lastname} ${req.admin.firstname} logged out`
-    });
-
-    log.save();
-
     res.status(200).send();
   }, ()=>{
     res.status(400).send();
@@ -132,8 +116,9 @@ router.get('/admin/:id',authenticate, (req, res) => {
     // find the admin by id.
     Admin.findById(id).then((doc)=> {
         let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} viewed ${doc.firstname} ${doc.lastname} profile`,
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            action: `${req.admin.lastname} ${req.admin.firstname} viewed an admin profile`,
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+            user: `${doc.firstname} ${doc.lastname}`
         });
 
         log.save();
@@ -171,8 +156,9 @@ router.patch('/admin/:id',authenticate, (req, res) => {
 
         Admin.findById(id).then(doc=>{
             let log = new Log({
-                action: `${req.admin.lastname} ${req.admin.firstname} edited ${doc.firstname} ${doc.lastname} profile`,
-                createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                action: `${req.admin.lastname} ${req.admin.firstname} edited an admin profile`,
+                createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+                user: `${doc.firstname} ${doc.lastname}`
             });
 
             log.save();
@@ -201,8 +187,9 @@ router.delete('/admin/:id',authenticate, (req, res) => {
         }
 
         let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} deleted ${doc.firstname} ${doc.lastname} profile`,
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            action: `${req.admin.lastname} ${req.admin.firstname} deleted an admin profile`,
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+            user: `${doc.firstname} ${doc.lastname}`
         });
 
         log.save();

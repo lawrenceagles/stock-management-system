@@ -10,18 +10,18 @@ const Audit_Trail_Schema = new Schema({
 		type: String,
 		required: true
 	},
-	createdAT: {
-		type: Date,
-		default: Date.now
-	}
+	company: {
+		type: String,
+		required: true,
+		default: "Vetiva"
+	},
+	user: {
+		type: String,
+	},
+},
+{
+	timestamps: true
 });
-
-Audit_Trail_Schema.methods.auditTrail = function (admin, doc){
-	const log = this;
-	// let obj = this.toObject();
-	// let newAdmin = _.pick(obj, ['SN', 'createdAt']);
-	console.log ("Message: The audit Trail method is working");
-}
 
 const Log = mongoose.model('Audit_Trail', Audit_Trail_Schema);
 module.exports = {Log};
