@@ -83,7 +83,7 @@ AdminSchema.methods.toJSON = function() {
 AdminSchema.pre('save', function(next) {
   const admin = this // bind this
 
-  if (admin.$isDefault('password')) {
+  if (admin.isModified('password')) {
     bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
       if (err) {
         return next(err);

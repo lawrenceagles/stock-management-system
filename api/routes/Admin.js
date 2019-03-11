@@ -3,6 +3,7 @@ const router = express.Router();
 const _ = require('lodash');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
+const generator = require('generate-password');
 
 const {Admin} = require ('../models/admin');
 const {Log} = require ('../models/audit_Trail');
@@ -38,7 +39,19 @@ router.get('/admin',authenticate,(req, res) => {
 
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
-    let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
+    let randomPassword = generator.generate({
+            length: 12,
+            numbers: true,
+            symbols: false,
+            uppercase: true,
+            excludeSimilarCharacters: true,
+            exclude: '-,_'
+        });
+    console.log(randomPassword);
+    req.body.password = randomPassword;
+    console.log(req.body.password);
+
+    let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role', 'password']);
     let admin = new Admin(body);
 
     let log = new Log({
