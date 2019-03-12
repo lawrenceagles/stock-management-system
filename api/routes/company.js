@@ -44,10 +44,12 @@ router.post('/registration',(req,res,next)=>{
         company.paymentPeriod=req.body.paymentPeriod;
         company.userList = req.body.userList;
 
-        // let log = new Log({
-        //     action: `${req.admin.lastname} ${req.admin.firstname} created ${company.name} profile `,
-        //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`
-        // });
+        let log = new Log({
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+            action: `${req.admin.lastname} ${req.admin.firstname} created a company `,
+            company: `${company.name}`
+
+        });
 
         // log.save();
 
@@ -67,15 +69,23 @@ router.post('/registration',(req,res,next)=>{
     })
 })
 
-router.get('/list',(req,res,next)=>{ 
+router.get('/list',authenticate,(req,res,next)=>{ 
+    const sort = {}
+
     let pageOptions = {
         page: req.query.page || 0,
         limit: req.query.limit || 10
+    }
+
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
     }
     
     Company.find()
         .skip(pageOptions.page*pageOptions.limit)
         .limit(pageOptions.limit)
+        .sort(sort)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
             res.status(200).json(doc);
@@ -112,8 +122,10 @@ router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
                 }
                 else{
                     let log = new Log({
-                        action: `${req.admin.lastname} ${req.admin.firstname} deleted ${company.name} profile `,
-                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+                        action: `${req.admin.lastname} ${req.admin.firstname} deleted a company`,
+                        company: `${company.name}`
+                        
                     });
 
                     log.save();
@@ -227,8 +239,9 @@ router.put('/update/:id',authenticate,(req,res)=>{               //update
                     }
 
                     let log = new Log({
-                        action: `${req.admin.lastname} ${req.admin.firstname} created ${company.name} profile `,
-                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                        createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+                        action: `${req.admin.lastname} ${req.admin.firstname} created a company`,
+                        company: `${company.name}`
                     });
 
                     log.save();

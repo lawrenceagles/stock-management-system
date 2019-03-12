@@ -23,23 +23,19 @@ router.post('/profile', upload.single('image'), function (req, res, next) {
 
 });
 
-// Home route 
-// Ask what should the home route point to? 
-// The login Page?
-router.get('/', (req, res) => {
-    res.send({type: "WELCOME TO HOME LOGIN"});
-});
 
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
-    Admin.find().then(doc => { 
-        let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} viewed all admin profile`,
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
-        });
+    let options =  {
+        page: parseInt(req.query.page) || 0,
+        limit: parseInt(req.query.limit) || 3
+    }
 
-        log.save();
-
+    Admin.find()
+        .skip(options.page * options.limit)
+        .limit(options.limit)
+        .exec()
+        .then(doc => { 
         res.send(doc);
     });
     },
@@ -49,35 +45,37 @@ router.get('/admin',authenticate,(req, res) => {
     }
 );
 
+// SORT find by role
+router.get('/admin/:role',  (req, res)=>{
+    let role = req.params.role
+    Admin.find({role}).then(docs=>{
 
-// Registration form Route
-router.get('/admin/register', (req, res)=> {
-    res.send({"Register": "This is the registration page"})
-});
+        if(docs.length === 0){
+            return res.status(404).send(`No ${role} admin found`);
+        }
+
+        res.send(docs);
+
+    })
+    .catch((e)=>{
+        res.status(400).send();
+    })
+})
 
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
-    // let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    // let randomPassword = _.sample(possible, 10).join('');
-    // req.body.password = randomPassword;
-
-    let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role']);
+    let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role', 'password']);
     let admin = new Admin(body);
 
     let log = new Log({
-        action: `${req.admin.lastname} ${req.admin.firstname} created ${admin.firstname} ${admin.lastname} profile`,
-        createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+        action: `${req.admin.lastname} ${req.admin.firstname} created a new admin`,
+        createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+        user: `${admin.firstname} ${admin.lastname}`
     });
 
     log.save();
 
-    admin.save().then(() => { // save the admin instance 
-        return admin.generateToken(); // save the admin instance
-    }).then((token) => { // pass pass the token as the value of the custom header 'x-auth' and send header with the newly signed up admin.
-        res.header('x-auth', token).send(admin);
-    }).catch((e) => {
-        res.status(400).send(e);
-    });
+    admin.save();
 });
 
 // signin/login route
@@ -97,19 +95,13 @@ router.post('/admin/login', (req, res) => {
             });
         });
     }).catch((e)=> {
-        res.status(400).send(e);
+        res.status(400).send("not working");
     })
 });
 
 // signout/logout route
 router.delete('/admin/logout',authenticate, (req, res)=>{
   req.admin.removeToken(req.token).then(()=>{
-    let log = new Log({
-        action: `${req.admin.lastname} ${req.admin.firstname} logged out`
-    });
-
-    log.save();
-
     res.status(200).send();
   }, ()=>{
     res.status(400).send();
@@ -119,8 +111,6 @@ router.delete('/admin/logout',authenticate, (req, res)=>{
 
 // GET :id Route to get single admin
 router.get('/admin/:id',authenticate, (req, res) => {
-    // Log.auditTrail(req.admin, {name:"Lawrence Eagles"});
-
     // destructure the req.params object to get the object id.
     let id = req.params.id;
 
@@ -132,8 +122,9 @@ router.get('/admin/:id',authenticate, (req, res) => {
     // find the admin by id.
     Admin.findById(id).then((doc)=> {
         let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} viewed ${doc.firstname} ${doc.lastname} profile`,
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            action: `${req.admin.lastname} ${req.admin.firstname} viewed an admin profile`,
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+            user: `${doc.firstname} ${doc.lastname}`
         });
 
         log.save();
@@ -163,16 +154,16 @@ router.patch('/admin/:id',authenticate, (req, res) => {
             res.status(404).send();
         }
 
-        let saltRounds = 10;
-        let Password = doc.password;
-        let hash = bcrypt.hashSync(Password, saltRounds);
+        let password = doc.password;
+        let hash = bcrypt.hashSync(password, saltRounds);
         doc.password = hash;
         doc.save();
 
         Admin.findById(id).then(doc=>{
             let log = new Log({
-                action: `${req.admin.lastname} ${req.admin.firstname} edited ${doc.firstname} ${doc.lastname} profile`,
-                createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+                action: `${req.admin.lastname} ${req.admin.firstname} edited an admin profile`,
+                createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+                user: `${doc.firstname} ${doc.lastname}`
             });
 
             log.save();
@@ -201,8 +192,9 @@ router.delete('/admin/:id',authenticate, (req, res) => {
         }
 
         let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} deleted ${doc.firstname} ${doc.lastname} profile`,
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`
+            action: `${req.admin.lastname} ${req.admin.firstname} deleted an admin profile`,
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+            user: `${doc.firstname} ${doc.lastname}`
         });
 
         log.save();
@@ -214,8 +206,25 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 });
 
 // Audit Trail Route
-router.get('/audit', (req, res)=>{
-    let auditLog = Log.find({}).then((doc)=>{
+router.get('/audit',authenticate, (req, res)=>{
+    const sort = {}
+
+    let options =  {
+        page: parseInt(req.query.page) || 0,
+        limit: parseInt(req.query.limit) || 10
+    }
+
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    }
+
+    Log.find({})
+    .skip(options.page * options.limit)
+    .limit(options.limit)
+    .sort(sort)
+    .exec()
+    .then((doc)=>{
         res.send(doc);
     });
 });
