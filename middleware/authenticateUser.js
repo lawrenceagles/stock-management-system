@@ -8,11 +8,7 @@ let authenticateUser = (req, res, next) => {
         if(user){
             req.user = user;
             req.token = token;
-            // Role management
-            if(req.method === 'POST' || req.method === 'DELETE') {
-                return Promise.reject();
-                // you can redirect the user to the login page!
-            }
+            
             return next();
         }else{
              Admin.findByToken(token).then((admin)=>{

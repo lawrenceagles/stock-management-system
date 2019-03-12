@@ -6,6 +6,7 @@ const _ = require('lodash');
 const path = require("path");
 
 const {authenticateUser} = require('../../middleware/authenticateUser');
+const {authenticate} = require('../../middleware/authenticate');
 const {User} = require("../models/user");
 const {Log} = require ('../models/audit_Trail');
 const {ObjectId} = require('mongodb');
@@ -248,7 +249,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
  //    })
  // })
 
- router.delete('/user/delete/:id', (req,res,next)=>{   //delete
+ router.delete('/user/delete/:id',authenticate, (req,res,next)=>{   //delete
     const id = req.params.id
 
       // Validate the user id
