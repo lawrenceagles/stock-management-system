@@ -3,7 +3,7 @@ import axios from 'axios';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
 
-class OnBoardCompany extends Component {
+class EditCompany extends Component {
   constructor(props) {
     super(props);
 
@@ -129,7 +129,10 @@ class OnBoardCompany extends Component {
       error,
     } = this.state;
     return (
-      
+       <div className="wrapper">
+        <Sidebar />
+        <div className="main-content bg-light">
+          <TopNavbar />
           <div className="content">
             <section>
               <div className="container ">
@@ -141,7 +144,7 @@ class OnBoardCompany extends Component {
                       </div>
                     )}
                     <div className="row pt-5 mt-3 mb-5">
-                      <h3 className="mb-4"> Add Company Information </h3>
+                      <h3 className="mb-4"> Update Company Information </h3>
                       <form onSubmit={this.onBoardCompany}>
                         <div className="form-row mb-4">
                           <div className="form-group col-md-6">
@@ -455,7 +458,7 @@ class OnBoardCompany extends Component {
                           type="submit"
                           className="float-right p-2 btn c-btn-bg2"
                         >
-                          Next{' '}
+                          Update{' '}
                         </button>
                       </form>
                     </div>
@@ -464,8 +467,10 @@ class OnBoardCompany extends Component {
               </div>
             </section>
           </div>
+        </div>
+      </div>
     );
   }
 }
 
-export default OnBoardCompany;
+export default EditCompany;
