@@ -49,9 +49,9 @@ Remove a User
 
 In your command line tool (CLI), after you clone the repository or pull. Type `cd backend` or go into the backend folder manually. Type the command node app to start the server. If successful, you should see: **"localhost server started on 3004"** on your terminal. And once the app connects with Mongodb locally or on Mlab, you should see: **"Mongodb now connected"**. To exit press `Ctrl C`.
 
-##The Routes
+## The Routes
 
-####LOGIN: to login admin
+#### LOGIN: to login admin
 
 Route: `localhost:3004/admin/login`
 
@@ -84,9 +84,9 @@ A token is created for the admin once he logs in. The full data becomes somethin
     }
     ```
 
-####LOGOUT: to logout admin
+#### LOGOUT: to logout admin
 
-####Required authentication: This operation requires a token (key: token) to be passed in the header. something like this:
+#### Required authentication: This operation requires a token (key: token) to be passed in the header. something like this:
 `x-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YzdlMzg1OGQ1ODYzNzMwZDg2ZmRjOTUiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTUxNzc1ODMzfQ.X18xoGHmr5hwF4nAnicX9XMhECt_38PP-Nqeqe_vJ50` 
 
 Without this the operation would fail.
@@ -109,7 +109,7 @@ Everything in the tokens array is delete so it is empty. So the data becomes som
 
 
 
-####GET: to get all admin
+#### GET: to get all admin
 
 Route `localhost:3004/admin` 
 
@@ -133,7 +133,7 @@ Data to receive: an array of admin data as below;
     }
 ```
 
-####POST Registration: To register new admin
+#### POST Registration: To register new admin
 
 Route: `localhost:3004/admin`
 
@@ -174,7 +174,7 @@ Data to receive:
 
 Note: The generation of tokens means the user is automatically logged in.
 
-####GET Route to get an admin
+#### GET Route to get an admin
 
 Route: `localhost:3004/admin/:id`
 
@@ -197,11 +197,11 @@ Data to receive:
 }
 ```
 
-####PATCH Route to update an admin
+#### PATCH Route to update an admin
 
 Route: `localhost:3004/admin/:id`
 
-####Required authentication: This operation requires a token (key: token) to be passed in the header. something like this:
+#### Required authentication: This operation requires a token (key: token) to be passed in the header. something like this:
 `x-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YzdlMzg1OGQ1ODYzNzMwZDg2ZmRjOTUiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTUxNzc1ODMzfQ.X18xoGHmr5hwF4nAnicX9XMhECt_38PP-Nqeqe_vJ50` 
 Without this the operation would fail.
 
@@ -226,7 +226,7 @@ Data to receive:
 }
 ```
 
-####DELETE Route to delete an admin
+#### DELETE Route to delete an admin
 
 Route: `localhost:3004/admin/:id`
 
@@ -247,4 +247,121 @@ Data to Receive:
     "role": "super_admin",
     "tokens": []
 }
+```
+
+#### AUDIT_TRAIL Route to delete an admin
+
+Route: `localhost:3004/audit`
+
+#### Required authentication: This operation requires a token (key: token) to be passed in the header. something like this:
+`x-auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YzdlMzg1OGQ1ODYzNzMwZDg2ZmRjOTUiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTUxNzc1ODMzfQ.X18xoGHmr5hwF4nAnicX9XMhECt_38PP-Nqeqe_vJ50` 
+Without this the operation would fail.
+
+Data to receive: an array of admin data as below;
+
+```json
+[
+    {
+        "company": "Vetiva",
+        "_id": "5c87838b246ed7052dccc6dc",
+        "action": "Oputa Chinedu edited an admin profile",
+        "createdBy": "Oputa Chinedu",
+        "user": "Lawrence Eagles",
+        "createdAt": "2019-03-12T10:01:47.825Z",
+        "updatedAt": "2019-03-12T10:01:47.825Z",
+        "__v": 0
+    },
+    {
+        "company": "Vetiva",
+        "_id": "5c86863cd77f9f203e686d4e",
+        "action": "Oputa Chinedu edited an admin profile",
+        "createdBy": "Oputa Chinedu",
+        "user": "Lawrence Eagles",
+        "createdAt": "2019-03-11T16:01:00.436Z",
+        "updatedAt": "2019-03-11T16:01:00.436Z",
+        "__v": 0
+    },
+    {
+        "company": "Vetiva",
+        "_id": "5c86718798da541dbd37600f",
+        "action": "Oputa Chinedu created a new admin",
+        "createdBy": "Oputa Chinedu",
+        "user": "Lawrence Oputa",
+        "createdAt": "2019-03-11T14:32:39.023Z",
+        "updatedAt": "2019-03-11T14:32:39.023Z",
+        "__v": 0
+    },
+    {
+        "company": "Vetiva",
+        "_id": "5c867103bcf6851d4f9d4163",
+        "action": "Oputa Chinedu created a new admin",
+        "createdBy": "Oputa Chinedu",
+        "user": "Lawrence Oputa",
+        "createdAt": "2019-03-11T14:30:27.092Z",
+        "updatedAt": "2019-03-11T14:30:27.092Z",
+        "__v": 0
+    }
+]
+```
+
+#### Sorting with the audit trail route
+Sorting makes use of query string as show below.
+there is a sortBy that is = `<-- the sorting param -->: desc or asc` order below example used the createdAt timestamp and desc (decending sorting order).
+
+Route: `localhost:3004/audit?sortBy=createdAt:desc`
+
+another example using the createdAt and the asc (asending sorting order)
+
+Route: `localhost:3004/audit?sortBy=createdAt:asc`
+
+#### Sorting admin by role
+
+#### Route: `localhost:3004/admin/role` 
+the role should be a valid admin role e.g:
+`localhost:3004/admin/super_admin`
+This should return an array of all the super admin present in the database
+
+Data to receive:
+```json
+[
+    {
+        "firstname": "Lawrence",
+        "lastname": "Eagles",
+        "username": "law1",
+        "email": "law1@gmail.com",
+        "phone": "+234-818-222-4446",
+        "role": "super_admin",
+        "tokens": [
+            {
+                "_id": "5c87a0a60a37a92378d75816",
+                "access": "auth",
+                "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1Yzg3OWYzNmMxM2Q5NDIzMmVjZTU5NTUiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTUyMzkyMzU4fQ.WTjqWIruR7mgHQqrIxUeWYCLkHuV6guxhZUdixdEyRE"
+            }
+        ]
+    },
+    {
+        "firstname": "Hilary",
+        "lastname": "Israel",
+        "username": "hilary",
+        "email": "hill@gmail.com",
+        "phone": "+234-818-222-0006",
+        "role": "super_admin",
+        "tokens": [
+            {
+                "_id": "5c87e5ee64a9b3644f6befbe",
+                "access": "auth",
+                "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1Yzg3OWY1ZWMxM2Q5NDIzMmVjZTU5NTciLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTUyNDEwMDk0fQ.2S8iQ6sJitSqhAVpWE9i_qlD1qh3XXof6qBd7VXRLQ4"
+            }
+        ]
+    },
+    {
+        "firstname": "Paul",
+        "lastname": "Ayu",
+        "username": "paul",
+        "email": "paul@gmail.com",
+        "phone": "+234-818-222-0005",
+        "role": "super_admin",
+        "tokens": []
+    }
+]
 ```
