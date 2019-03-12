@@ -81,7 +81,6 @@ router.post('/admin',authenticate, (req, res) => {
 // signin/login route
 router.post('/admin/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
-    console.log(body);
     Admin.findByCredentials(body.email, body.password).then((admin)=> { 
 
         if(admin.tokens.length > 0){
@@ -208,14 +207,22 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 
 // Audit Trail Route
 router.get('/audit',authenticate, (req, res)=>{
+    const sort = {}
+
     let options =  {
         page: parseInt(req.query.page) || 0,
         limit: parseInt(req.query.limit) || 6
     }
 
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    }
+
     Log.find({})
     .skip(options.page * options.limit)
     .limit(options.limit)
+    .sort(sort)
     .exec()
     .then((doc)=>{
         res.send(doc);

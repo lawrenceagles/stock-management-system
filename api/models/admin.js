@@ -157,7 +157,6 @@ AdminSchema.statics.findByCredentials = function(email, password) {
 
 AdminSchema.statics.findByRole = function(role) {
     let Admin = this;
-    // console.log("find by role working");
     return Admin.find({role}).then((docs)=> { 
         if(!docs){  // handle docs not found
             console.log("docs not found");
