@@ -31,7 +31,7 @@ router.get('/admin',authenticate,(req, res) => {
         limit: parseInt(req.query.limit) || 6
     }
 
-    adminQuery = Admin.find()
+    Admin.find()
         .skip(options.page * options.limit)
         .limit(options.limit)
         .exec()
@@ -44,6 +44,23 @@ router.get('/admin',authenticate,(req, res) => {
       res.status(404).send();
     }
 );
+
+// SORT find by role
+router.get('/admin/:role',  (req, res)=>{
+    let role = req.params.role
+    Admin.find({role}).then(docs=>{
+
+        if(docs.length === 0){
+            return res.status(404).send(`No ${role} admin found`);
+        }
+
+        res.send(docs);
+
+    })
+    .catch((e)=>{
+        res.status(400).send();
+    })
+})
 
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
@@ -58,13 +75,7 @@ router.post('/admin',authenticate, (req, res) => {
 
     log.save();
 
-    admin.save().then(() => { // save the admin instance 
-        return admin.generateToken(); // save the admin instance
-    }).then((token) => { // pass pass the token as the value of the custom header 'x-auth' and send header with the newly signed up admin.
-        res.header('x-auth', token).send(admin);
-    }).catch((e) => {
-        res.status(400).send(e);
-    });
+    admin.save();
 });
 
 // signin/login route
@@ -197,7 +208,16 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 
 // Audit Trail Route
 router.get('/audit',authenticate, (req, res)=>{
-    let auditLog = Log.find({}).limit(10).then((doc)=>{
+    let options =  {
+        page: parseInt(req.query.page) || 0,
+        limit: parseInt(req.query.limit) || 6
+    }
+
+    Log.find({})
+    .skip(options.page * options.limit)
+    .limit(options.limit)
+    .exec()
+    .then((doc)=>{
         res.send(doc);
     });
 });
