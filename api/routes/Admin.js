@@ -28,7 +28,7 @@ router.post('/profile', upload.single('image'), function (req, res, next) {
 router.get('/admin',authenticate,(req, res) => {
     let options =  {
         page: parseInt(req.query.page) || 0,
-        limit: parseInt(req.query.limit) || 6
+        limit: parseInt(req.query.limit) || 3
     }
 
     Admin.find()
@@ -211,7 +211,7 @@ router.get('/audit',authenticate, (req, res)=>{
 
     let options =  {
         page: parseInt(req.query.page) || 0,
-        limit: parseInt(req.query.limit) || 6
+        limit: parseInt(req.query.limit) || 10
     }
 
     if (req.query.sortBy) {

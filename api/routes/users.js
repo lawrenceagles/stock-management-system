@@ -167,14 +167,20 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
 
 //read user info
  router.get('/users',authenticateUser,(req,res,next)=>{ 
+    const sort = {}
     let pageOptions = {
         page: req.query.page || 0,
         limit: req.query.limit || 10
+    }
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
     }
     
     User.find()
         .skip(pageOptions.page*pageOptions.limit)
         .limit(pageOptions.limit)
+        .sort(sort)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };            
             res.status(200).json(doc);
