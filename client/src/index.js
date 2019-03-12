@@ -4,10 +4,9 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import * as serviceWorker from './serviceWorker';
 import Login from './components/admin/login/Login';
 import Dashboard from './components/admin/dashboard/Dashboard.js';
-import OnBoardAdmin from './components/admin/onboard/onboardAdmin.js';
-import OnBoardCompany from './components/admin/onboard/onboardCompany.js';
 import AuditTrail from './components/admin/audittrail/auditTrail.js';
 import onBoard from './components/admin/onboard/onBoard.js';
+import Manage from './components/admin/manage/manage.js';
 
 ReactDOM.render(
   <Router>
@@ -16,6 +15,7 @@ ReactDOM.render(
       <Route exact path="/dashboard" component={Dashboard} />
       <Route exact path="/dashboard/activity" component={AuditTrail} />
       <Route exact path="/dashboard/onboard" component={onBoard} />
+      <Route exact path="/dashboard/manage" component={Manage} />
     </Switch>
   </Router>,
   document.getElementById('root')

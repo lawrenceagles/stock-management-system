@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import './onboardAdmin.css';
+import './Manage.css';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
 

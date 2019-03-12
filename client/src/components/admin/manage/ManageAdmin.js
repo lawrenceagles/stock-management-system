@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import './onboardAdmin.css';
+import './Manage.css';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
 
@@ -63,114 +63,122 @@ class ManageAdmin extends Component {
       error,
     } = this.state;
     return (
+      <div className="content company-reg">
+        <div className="container ">
+          <div className="row cusRow">
+            <div className="col-lg-3 form-group cus-info">
+              <div>
+                <label htmlFor="inputState">Role</label>
+                <select id="inputState" className="form-control">
+                  <option selected>Choose...</option>
+                  <option>Manager</option>
+                  <option>Super Admin</option>
+                  <option>Editor</option>
+                </select>
+              </div>
+            </div>
+            <div className="col-lg-3 ml-4 form-group">
+              <div style={{ marginTop: '30px' }}>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search Here"
+                />
+              </div>
+            </div>
+            <div
+              className="col-lg-3 ml-4"
+              style={{ marginTop: '30px', left: '75px' }}
+            >
+              <div>
+                <a href="#" className="c-btn-bg2 btn btn-primary">
+                  Add Admin
+                </a>
+              </div>
+            </div>
+          </div>
 
-          <div className="content admin-content  mt-2">
-            <div className="container ">
-              <div className="row">
-                <div className="col-lg-9 ml-auto">
-                  {success && (
-                    <div className="alert alert-success" role="alert">
-                      OnboardAdmin Successful
-                    </div>
-                  )}
-                  <div className="row pt-5 mt-3">
-                    <h3 className="mb-4"> Add Information </h3>
-                    <form onSubmit={this.onboardAdmin}>
-                      <div className="form-row mb-4">
-                        <div className="form-group col-md-4">
-                          <label htmlFor="inputEmail4">First Name</label>
-                          <input
-                            type="text"
-                            id="firstname"
-                            value={firstname}
-                            error={error}
-                            onChange={this.onChange}
-                            required
-                            className="form-control"
-                          />
-                        </div>
-                        <div className="form-group col-md-4">
-                          <label htmlFor="inputEmail4">Last Name</label>
-                          <input
-                            type="text"
-                            id="lastname"
-                            value={lastname}
-                            error={error}
-                            onChange={this.onChange}
-                            required
-                            className="form-control"
-                          />
-                        </div>
-                        <div className="form-group col-md-4">
-                          <label htmlFor="inputEmail4">Username</label>
-                          <input
-                            type="text"
-                            id="username"
-                            value={username}
-                            error={error}
-                            onChange={this.onChange}
-                            required
-                            className="form-control"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-row mb-4">
-                        <div className="form-group col-md-6">
-                          <label htmlFor="inputEmail4">Email</label>
-                          <input
-                            type="text"
-                            id="email"
-                            value={email}
-                            error={error}
-                            onChange={this.onChange}
-                            required
-                            className="form-control"
-                          />
-                        </div>
-                        <div className="form-group col-md-6">
-                          <label htmlFor="inputEmail4">Phone Number</label>
-                          <input
-                            type="text"
-                            id="phone"
-                            value={phone}
-                            error={error}
-                            onChange={this.onChange}
-                            required
-                            placeholder="+234-918-233-2551"
-                            className="form-control"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-row ">
-                        <div className="form-group col-md-4">
-                          <label htmlFor="inputState">Role</label>
-                          <select
-                            value={role}
-                            onChange={this.onChange}
-                            id="role"
-                            className="form-control"
-                          >
-                            <option>Choose...</option>
-                            <option value="manager">Manager</option>
-                            <option value="editor">Editor</option>
-                            <option value="super_admin">Super Admin</option>
-                          </select>
-                        </div>
-                      </div>
-                      <button
-                        type="submit"
-                        className="float-right p-2 btn c-btn-bg2 mb-4"
-                      >
-                        Add{' '}
-                      </button>
-                    </form>
-                  </div>
+          <div className="row cusRow">
+            <div className="col-lg-3 cus-info">
+              <div className="card" style={{ width: '18rem' }}>
+                <img
+                  className="card-img-top img-circle"
+                  src="/images/profile.png"
+                  alt="Card image cap"
+                />
+                <div className="card-body text-center">
+                  <h5 className="card-title">Johnson Pope</h5>
+                  <h5 className="card-title">Super Admin</h5>
+                  <a href="#" className="c-btn-bg2 btn btn-primary">
+                    Manage
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-3 ml-4">
+              <div className="card" style={{ width: '18rem' }}>
+                <img
+                  className="card-img-top img-circle"
+                  src="/images/profile.png"
+                  alt="Card image cap"
+                />
+                <div className="card-body text-center">
+                  <h5 className="card-title">Johnson Pope</h5>
+                  <h5 className="card-title">Super Admin</h5>
+                  <a href="#" className="c-btn-bg2 btn btn-primary">
+                    Manage
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-3 ml-4 mb-4">
+              <div className="card" style={{ width: '18rem' }}>
+                <img
+                  className="card-img-top img-circle"
+                  src="/images/profile.png"
+                  alt="Card image cap"
+                />
+                <div className="card-body text-center">
+                  <h5 className="card-title">Johnson Pope</h5>
+                  <h5 className="card-title">Super Admin</h5>
+                  <a href="#" className="c-btn-bg2 btn btn-primary">
+                    Manage
+                  </a>
                 </div>
               </div>
             </div>
           </div>
+          <nav aria-label="Page navigation example">
+            <ul className="pagination justify-content-end">
+              <li className="page-item disabled">
+                <a className="page-link" href="#" tabIndex="-1">
+                  Previous
+                </a>
+              </li>
+              <li className="page-item">
+                <a className="page-link" href="#">
+                  1
+                </a>
+              </li>
+              <li className="page-item">
+                <a className="page-link" href="#">
+                  2
+                </a>
+              </li>
+              <li className="page-item">
+                <a className="page-link" href="#">
+                  3
+                </a>
+              </li>
+              <li className="page-item">
+                <a className="page-link" href="#">
+                  Next
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
     );
   }
 }
