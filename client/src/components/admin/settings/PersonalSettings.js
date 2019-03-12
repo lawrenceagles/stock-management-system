@@ -111,17 +111,6 @@ class PersonalSettings extends Component {
                     </div>
                   </div>
 
-                  <div className="form-row">
-                    <div className="form-group col-md-4">
-                      <label htmlFor="inputState">Role</label>
-                      <select id="inputState" className="form-control">
-                        <option selected>Choose...</option>
-                        <option>Manager</option>
-                        <option>Editor</option>
-                        <option>Super Admin</option>
-                      </select>
-                    </div>
-                  </div>
                   <button
                     type="submit"
                     className="float-right p-2 btn c-btn-bg2"

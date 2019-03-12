@@ -7,6 +7,7 @@ import Dashboard from './components/admin/dashboard/Dashboard.js';
 import AuditTrail from './components/admin/audittrail/auditTrail.js';
 import onBoard from './components/admin/onboard/onBoard.js';
 import Manage from './components/admin/manage/manage.js';
+import Settings from './components/admin/settings/settings.js';
 
 ReactDOM.render(
   <Router>
@@ -16,6 +17,7 @@ ReactDOM.render(
       <Route exact path="/dashboard/activity" component={AuditTrail} />
       <Route exact path="/dashboard/onboard" component={onBoard} />
       <Route exact path="/dashboard/manage" component={Manage} />
+      <Route exact path="/dashboard/settings" component={Settings} />
     </Switch>
   </Router>,
   document.getElementById('root')

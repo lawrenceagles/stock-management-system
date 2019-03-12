@@ -52,83 +52,84 @@ class AdminSettings extends Component {
   };
 
   render() {
-    const {
-      email,
-      username,
-      firstname,
-      lastname,
-      role,
-      phone,
-      success,
-      error,
-    } = this.state;
     return (
-          <div class="content company-reg">
-        <div class="container ">
-           <div class="row">
-               <div class="col-lg-9 ml-auto">
-                   <div class="row ">
-                      <form>
-                        <div class="form-row mb-4 text-center">
-                            <img class="card-img-top img-circle"  src="images/profile.png" alt="Card image cap">
-                           
-                          </div>
+      <div className="content company-reg">
+        <div className="container ">
+          <div className="row">
+            <div className="col-lg-9 ml-auto">
+              <div className="row ">
+                <form>
+                  <div className="form-row mb-4 text-center">
+                    <img
+                      className="card-img-top img-circle"
+                      src="/images/profile.png"
+                      alt="admin"
+                    />
+                  </div>
 
+                  <div className="form-row mb-4">
+                    <div className="form-group col-md-4">
+                      <label htmlFor="inputEmail4">First Name</label>
+                      <input type="text" className="form-control" />
+                    </div>
+                    <div className="form-group col-md-4">
+                      <label htmlFor="inputEmail4">Last Name</label>
+                      <input type="text" className="form-control" />
+                    </div>
+                    <div className="form-group col-md-4">
+                      <label htmlFor="inputEmail4">Username</label>
+                      <input type="text" className="form-control" />
+                    </div>
+                  </div>
 
-                          <div class="form-row mb-4">                                
-                                <div class="form-group col-md-4">
-                                  <label for="inputEmail4">First Name</label>
-                                  <input type="text" class="form-control" >
-                                </div>
-                                <div class="form-group col-md-4">
-                                  <label for="inputEmail4">Last Name</label>
-                                  <input type="text" class="form-control">
-                                </div>
-                                <div class="form-group col-md-4">
-                                  <label for="inputEmail4">Username</label>
-                                  <input type="text" class="form-control">
-                                </div>
-                          </div>
+                  <div className="form-row ">
+                    <div className="form-group col-md-4">
+                      <label htmlFor="inputEmail4">Email</label>
+                      <input type="text" className="form-control" />
+                    </div>
+                    <div className="form-group col-md-4">
+                      <label htmlFor="inputEmail4">Phone No</label>
+                      <input type="text" className="form-control" />
+                    </div>
+                    <div className="form-group col-md-4">
+                      <label htmlFor="inputState">Sex</label>
+                      <select id="inputState" className="form-control">
+                        <option selected>Choose...</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                      </select>
+                    </div>
+                  </div>
 
-                          <div class="form-row ">
-                            <div class="form-group col-md-4">
-                                  <label for="inputEmail4">Email</label>
-                                  <input type="text" class="form-control" >
-                                </div>
-                                <div class="form-group col-md-4">
-                                  <label for="inputEmail4">Phone No</label>
-                                  <input type="text" class="form-control">
-                                </div>
-                                <div class="form-group col-md-4">
-                                <label for="inputState">Sex</label>
-                                  <select id="inputState" class="form-control">
-                                    <option selected>Choose...</option>
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                  </select>
-                            </div>                                                  
-                          </div>
-
-                          <div class="form-row">
-                               <div class="form-group col-md-4">
-                                <label for="inputState">Role</label>
-                                  <select id="inputState" class="form-control">
-                                    <option selected>Choose...</option>
-                                    <option>Manager</option>
-                                    <option>Editor</option>
-                                    <option>Super Admin</option>
-                                  </select>
-                            </div>
-                          </div>
-                           <button type="submit" class="float-right p-2 btn c-btn-bg2">Update </button>
-
-                        </form>
-                    </div>   
-               </div>
-           </div>
-       </div> 
- 
+                  <div className="form-row">
+                    <div className="form-group col-md-4">
+                      <label htmlFor="inputState">Role</label>
+                      <select id="inputState" className="form-control">
+                        <option selected>Choose...</option>
+                        <option>Manager</option>
+                        <option>Editor</option>
+                        <option>Super Admin</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    className="float-right p-2 btn c-btn-bg2"
+                  >
+                    Update{' '}
+                  </button>
+                  <button
+                    type="submit"
+                    className="float-right p-2 btn c-btn-bg2"
+                  >
+                    Update{' '}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     );
   }
 }

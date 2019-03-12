@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import './Manage.css';
+import './settings.css';
 import { Tabs, Tab } from 'react-bootstrap';
 import PersonalSettings   from './PersonalSettings';
 import AdminSettings    from './AdminSettings';
 import Sidebar       from '../templates/Sidebar';
 import TopNavbar     from '../templates/TopNavbar';
 
-class Manage extends Component {
+class Settings extends Component {
   render() {
     return (
       <div className="wrapper">
@@ -19,10 +19,10 @@ class Manage extends Component {
               defaultActiveKey="PersonalSettings"
               id="uncontrolled-tab-example"
             >
-              <Tab eventKey="PersonalSettings" title="Manage Company">
+              <Tab eventKey="PersonalSettings" title="Profile Settings">
                 <PersonalSettings />
               </Tab>
-              <Tab eventKey="AdminSettings" title="Manage Admin">
+              <Tab eventKey="AdminSettings" title="Admin Settings">
                 <AdminSettings />
               </Tab>
             </Tabs>
@@ -33,4 +33,4 @@ class Manage extends Component {
   }
 }
 
-export default Manage;
+export default Settings;
