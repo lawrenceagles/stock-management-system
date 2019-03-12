@@ -1,0 +1,98 @@
+.card-img-top {
+    width: 100%;
+    height: 14vw;
+    object-fit: none;
+}
+
+.cusRow {
+  margin-top: 40px;
+}
+
+.cus-info {
+  margin-left: 205px;
+}
+
+.chart {
+	background-color: #DAE1E7!important;
+	color: green;
+	font-size: 12px;
+	padding: 5px;
+	width: 40px;
+	margin-left: 90px;
+}
+
+.c-btn-bg-3 {
+	background: radial-gradient(103.45px at 43.16% 50%, #FFB41D 0%, #EF8D13 100%);
+    border-radius: 4px;
+}
+
+.btn-success:hover {
+    color: #fff;
+    background-color: #218838; 
+    border-color: #FFB41D; 
+}
+
+.dash {
+   background-image: url("/images/Vector.png");
+   background-repeat:  no-repeat;
+   background-position: right -18px bottom -15px;
+}
+
+.btn-success:not(:disabled):not(.disabled):active, .show>.btn-success.dropdown-toggle {
+    color: #fff;
+    background-color: #FFB41D;
+    border-color: #FFB41D;
+}
+
+.c-btn-bg4{
+    background: linear-gradient(105.18deg, #08833A -7.85%, #07923F 48.46%, #025122 96.15%);
+    color: #fff;
+    padding: 10px 25px;
+    margin-top: 78px;
+}
+
+.btn1 {
+  background: radial-gradient(103.45px at 43.16% 50%, #FFB41D 0%, #EF8D13 100%);
+   border-radius: 4px;
+}
+
+.btn2 {
+	background: #14E836;
+    border-radius: 5px;
+}
+
+.btn3 {
+	background: #E9281C;
+    border-radius: 5px;
+}
+
+.card-custom-body {
+   background-image: url("/images/cardsbg.png");
+   background-repeat:  repeat-x;
+   background-size: contain;
+   background-position:  right 3px bottom 0px;
+}
+
+.sidebar2 {
+	left: 0;
+	width: 220px;
+	height: 100vh;
+	background: #025122;
+    color: white;
+    padding: 10px;
+    position: fixed;
+}
+
+.main-content2 {
+	width: 900px;
+	margin-left: 225px;
+}
+
+.row {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    margin-right: 0px; 
+    margin-left: 0px;
+}
