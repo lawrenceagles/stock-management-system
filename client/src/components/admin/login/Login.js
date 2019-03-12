@@ -32,7 +32,7 @@ class Login extends Component {
     };
 
     axios
-      .post('http://localhost:8000/admin/login', userData, header)
+      .post('http://localhost:6000/admin/login', userData, header)
       .then(res => {
         if (res.data === 'You are already Logged in') {
           this.props.history.push('/dashboard');

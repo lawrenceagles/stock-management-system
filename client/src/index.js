@@ -14,8 +14,6 @@ ReactDOM.render(
     <Switch>
       <Route exact path="/" component={Login} />
       <Route exact path="/dashboard" component={Dashboard} />
-      <Route exact path="/admin/onboard" component={OnBoardAdmin} />
-      <Route exact path="/company/onboard" component={OnBoardCompany} />
       <Route exact path="/dashboard/activity" component={AuditTrail} />
       <Route exact path="/dashboard/onboard" component={onBoard} />
     </Switch>
