@@ -83,7 +83,7 @@ AdminSchema.methods.toJSON = function() {
 AdminSchema.pre('save', function(next) {
   const admin = this // bind this
 
-  if (admin.isModified('password')) {
+  if (admin.$isDefault('password')) {
     bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
       if (err) {
         return next(err);
@@ -140,9 +140,7 @@ AdminSchema.statics.findByCredentials = function(email, password) {
     let Admin = this;
     return Admin.findOne({email}).then((admin)=> { // find admin by email
         if(!admin){  // handle admin not found
-            return Promise.reject({
-              message:'Invalid Email'
-            });
+            return Promise.reject();
         }
 
         return new Promise((resolve, reject)=> {
@@ -150,9 +148,7 @@ AdminSchema.statics.findByCredentials = function(email, password) {
                 if(res) {
                     return resolve(admin);
                 }else{
-                    return reject({
-                      message:err
-                    });
+                    return reject("password bad");
                 }
             })
         });

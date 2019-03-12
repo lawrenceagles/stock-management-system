@@ -3,7 +3,6 @@ const router = express.Router();
 const _ = require('lodash');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
-const generator = require('generate-password');
 
 const {Admin} = require ('../models/admin');
 const {Log} = require ('../models/audit_Trail');
@@ -27,7 +26,16 @@ router.post('/profile', upload.single('image'), function (req, res, next) {
 
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
-    Admin.find().then(doc => { 
+    let options =  {
+        page: parseInt(req.query.page) || 0,
+        limit: parseInt(req.query.limit) || 6
+    }
+
+    adminQuery = Admin.find()
+        .skip(options.page * options.limit)
+        .limit(options.limit)
+        .exec()
+        .then(doc => { 
         res.send(doc);
     });
     },
@@ -39,18 +47,6 @@ router.get('/admin',authenticate,(req, res) => {
 
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
-    let randomPassword = generator.generate({
-            length: 12,
-            numbers: true,
-            symbols: false,
-            uppercase: true,
-            excludeSimilarCharacters: true,
-            exclude: '-,_'
-        });
-    console.log(randomPassword);
-    req.body.password = randomPassword;
-    console.log(req.body.password);
-
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role', 'password']);
     let admin = new Admin(body);
 
@@ -74,6 +70,7 @@ router.post('/admin',authenticate, (req, res) => {
 // signin/login route
 router.post('/admin/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
+    console.log(body);
     Admin.findByCredentials(body.email, body.password).then((admin)=> { 
 
         if(admin.tokens.length > 0){
@@ -88,7 +85,7 @@ router.post('/admin/login', (req, res) => {
             });
         });
     }).catch((e)=> {
-        res.status(400).send(e);
+        res.status(400).send("not working");
     })
 });
 
@@ -104,8 +101,6 @@ router.delete('/admin/logout',authenticate, (req, res)=>{
 
 // GET :id Route to get single admin
 router.get('/admin/:id',authenticate, (req, res) => {
-    // Log.auditTrail(req.admin, {name:"Lawrence Eagles"});
-
     // destructure the req.params object to get the object id.
     let id = req.params.id;
 
@@ -149,9 +144,8 @@ router.patch('/admin/:id',authenticate, (req, res) => {
             res.status(404).send();
         }
 
-        let saltRounds = 10;
-        let Password = doc.password;
-        let hash = bcrypt.hashSync(Password, saltRounds);
+        let password = doc.password;
+        let hash = bcrypt.hashSync(password, saltRounds);
         doc.password = hash;
         doc.save();
 
@@ -203,7 +197,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 
 // Audit Trail Route
 router.get('/audit',authenticate, (req, res)=>{
-    let auditLog = Log.find({}).then((doc)=>{
+    let auditLog = Log.find({}).limit(10).then((doc)=>{
         res.send(doc);
     });
 });
