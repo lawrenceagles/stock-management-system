@@ -243,16 +243,15 @@ router.get('/audit',authenticate, (req, res)=>{
 });
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/notification', (req,res)=>{
-    Notifcations.find({}).then(doc=>{
+router.get('/notification',authenticate, (req,res)=>{
+    Notifcations.find({receiver: "5c87e289cdc38061fddd8a54"}).then(doc=>{
         if(!doc){
             return res.status(404).send("Error: No notification found")
         }
         res.send(doc);
     }).catch(e=>{
         res.status(400).send("Error: problem with route")
-    })
-    
+    }) 
 })
 
 // POST ROUTE SEND NOTIFICATION FOR ADMIN
@@ -272,7 +271,7 @@ router.post('/notification',authenticate, (req, res)=>{
             sender:req.admin._id,
             receiver:[doc._id]
         }).save().then(doc=>{
-            res.send(doc);
+            res.status(201).send(doc);
         }).catch(e=>{
             res.status(400).send("Error with the route");
         });

@@ -37,5 +37,5 @@ const notificationSchema = new Schema({
 	timestamps:true
 });
 
-const Notifcations = mongoose.model('Notiifcations', notificationSchema);
+const Notifcations = mongoose.model('Notifcations', notificationSchema);
 module.exports = {Notifcations};
