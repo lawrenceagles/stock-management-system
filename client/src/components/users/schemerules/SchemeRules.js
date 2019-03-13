@@ -4,7 +4,7 @@ import axios from 'axios';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
 
-class AuditTrail extends Component {
+class SchemeRules extends Component {
   constructor(props) {
     super(props);
 
@@ -73,4 +73,4 @@ class AuditTrail extends Component {
   }
 }
 
-export default AuditTrail;
+export default SchemeRules;

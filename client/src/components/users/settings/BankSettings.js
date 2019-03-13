@@ -4,7 +4,7 @@ import './settings.css';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
 
-class PersonalSettings extends Component {
+class BankSettings extends Component {
   constructor(props) {
     super(props);
 
@@ -69,48 +69,21 @@ class PersonalSettings extends Component {
             <div className="col-lg-9 ml-auto">
               <div className="row ">
                 <form>
-                  <div className="form-row mb-4 text-center">
-                    <img
-                      className="card-img-top img-circle"
-                      src="/images/profile.png"
-                      alt="Card image cap"
-                    />
-                  </div>
-
+                 <h3 className="mb-4"> Bank Account Details </h3>
                   <div className="form-row mb-4">
                     <div className="form-group col-md-4">
-                      <label htmlFor="inputEmail4">First Name</label>
+                      <label htmlFor="inputEmail4">Account Name</label>
                       <input type="text" className="form-control" />
                     </div>
                     <div className="form-group col-md-4">
-                      <label htmlFor="inputEmail4">Last Name</label>
+                      <label htmlFor="inputEmail4">Account Number</label>
                       <input type="text" className="form-control" />
                     </div>
                     <div className="form-group col-md-4">
-                      <label htmlFor="inputEmail4">Username</label>
+                      <label htmlFor="inputEmail4">Bank Name</label>
                       <input type="text" className="form-control" />
                     </div>
                   </div>
-
-                  <div className="form-row ">
-                    <div className="form-group col-md-4">
-                      <label htmlFor="inputEmail4">Email</label>
-                      <input type="text" className="form-control" />
-                    </div>
-                    <div className="form-group col-md-4">
-                      <label htmlFor="inputEmail4">Phone No</label>
-                      <input type="text" className="form-control" />
-                    </div>
-                    <div className="form-group col-md-4">
-                      <label htmlFor="inputState">Sex</label>
-                      <select id="inputState" className="form-control">
-                        <option selected>Choose...</option>
-                        <option>Male</option>
-                        <option>Female</option>
-                      </select>
-                    </div>
-                  </div>
-
                   <button
                     type="submit"
                     className="float-right p-2 btn c-btn-bg2"
@@ -127,4 +100,4 @@ class PersonalSettings extends Component {
   }
 }
 
-export default PersonalSettings;
+export default BankSettings;

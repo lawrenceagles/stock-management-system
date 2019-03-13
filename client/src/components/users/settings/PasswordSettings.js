@@ -4,7 +4,7 @@ import './settings.css';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
 
-class AdminSettings extends Component {
+class PasswordSettings extends Component {
   constructor(props) {
     super(props);
 
@@ -59,57 +59,19 @@ class AdminSettings extends Component {
             <div className="col-lg-9 ml-auto">
               <div className="row ">
                 <form>
-                  <div className="form-row mb-4 text-center">
-                    <img
-                      className="card-img-top img-circle"
-                      src="/images/profile.png"
-                      alt="admin"
-                    />
-                  </div>
-
+                 
                   <div className="form-row mb-4">
                     <div className="form-group col-md-4">
-                      <label htmlFor="inputEmail4">First Name</label>
+                      <label htmlFor="inputEmail4">Old Password</label>
                       <input type="text" className="form-control" />
                     </div>
                     <div className="form-group col-md-4">
-                      <label htmlFor="inputEmail4">Last Name</label>
+                      <label htmlFor="inputEmail4">New Password</label>
                       <input type="text" className="form-control" />
                     </div>
                     <div className="form-group col-md-4">
-                      <label htmlFor="inputEmail4">Username</label>
+                      <label htmlFor="inputEmail4">New Password Again</label>
                       <input type="text" className="form-control" />
-                    </div>
-                  </div>
-
-                  <div className="form-row ">
-                    <div className="form-group col-md-4">
-                      <label htmlFor="inputEmail4">Email</label>
-                      <input type="text" className="form-control" />
-                    </div>
-                    <div className="form-group col-md-4">
-                      <label htmlFor="inputEmail4">Phone No</label>
-                      <input type="text" className="form-control" />
-                    </div>
-                    <div className="form-group col-md-4">
-                      <label htmlFor="inputState">Sex</label>
-                      <select id="inputState" className="form-control">
-                        <option selected>Choose...</option>
-                        <option>Male</option>
-                        <option>Female</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group col-md-4">
-                      <label htmlFor="inputState">Role</label>
-                      <select id="inputState" className="form-control">
-                        <option selected>Choose...</option>
-                        <option>Manager</option>
-                        <option>Editor</option>
-                        <option>Super Admin</option>
-                      </select>
                     </div>
                   </div>
                   <button
@@ -134,4 +96,4 @@ class AdminSettings extends Component {
   }
 }
 
-export default AdminSettings;
+export default PasswordSettings;
