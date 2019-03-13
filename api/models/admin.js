@@ -155,18 +155,14 @@ AdminSchema.statics.findByCredentials = function(email, password) {
     });
 }
 
-AdminSchema.statics.findByRole = function(role) {
+AdminSchema.statics.findByEmail = function(email) {
     let Admin = this;
-    return Admin.find({role}).then((docs)=> { 
-        if(!docs){  // handle docs not found
-            console.log("docs not found");
-            return Promise.reject();
+    return Admin.findOne({email}).then((admin)=> { // find admin by email
+        if(admin){ 
+            return resolve(admin);
         }
-
-        return resolve(docs);
     });
 }
-
 
 AdminSchema.methods.removeToken = function(token) {
   let admin = this;

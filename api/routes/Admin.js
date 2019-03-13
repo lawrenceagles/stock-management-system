@@ -65,6 +65,15 @@ router.get('/admin/:role',  (req, res)=>{
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role', 'password']);
+
+    Admin.findByEmail(body.email).then(doc=>{
+        if(doc){
+            return Promise.reject();
+        }
+    }).catch((e)=>{
+        return res.status(400).send("Admin already exists");
+    })
+
     let admin = new Admin(body);
 
     let log = new Log({
@@ -75,7 +84,9 @@ router.post('/admin',authenticate, (req, res) => {
 
     log.save();
 
-    admin.save();
+    admin.save().then(doc=>{
+        res.send(doc);
+    });
 });
 
 // signin/login route
