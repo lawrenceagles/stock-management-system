@@ -42,8 +42,8 @@ ReactDOM.render(
       />
       <Route exact path="/u/login" component={UserLogin} />
       <Route exact path="/u/dashboard" component={UserDashboard} />
-      <Route exact path="/u/dashboard/schemerules" component={SchemeRules} />
-      <Route exact path="/u/dashboard/settings" component={UserSettings} />
+      <Route exact path="/u/schemerules" component={SchemeRules} />
+      <Route exact path="/u/settings" component={UserSettings} />
     </Switch>
   </Router>,
   document.getElementById('root')

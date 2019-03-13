@@ -53,7 +53,7 @@ class PasswordSettings extends Component {
 
   render() {
     return (
-      <div className="content company-reg">
+      <div className="content company-reg mt-4">
         <div className="container ">
           <div className="row">
             <div className="col-lg-9 ml-auto">
@@ -74,12 +74,6 @@ class PasswordSettings extends Component {
                       <input type="text" className="form-control" />
                     </div>
                   </div>
-                  <button
-                    type="submit"
-                    className="float-right p-2 btn c-btn-bg2"
-                  >
-                    Update{' '}
-                  </button>
                   <button
                     type="submit"
                     className="float-right p-2 btn c-btn-bg2"

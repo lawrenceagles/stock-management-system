@@ -63,7 +63,7 @@ class PersonalSettings extends Component {
     //   error,
     // } = this.state;
     return (
-      <div className="content company-reg">
+      <div className="content company-reg mt-4">
         <div className="container ">
           <div className="row">
             <div className="col-lg-9 ml-auto">

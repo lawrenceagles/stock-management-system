@@ -63,7 +63,7 @@ class NextOfKinSettings extends Component {
     //   error,
     // } = this.state;
     return (
-      <div className="content company-reg">
+      <div className="content company-reg mt-4">
         <div className="container ">
           <div className="row">
             <div className="col-lg-9 ml-auto">
@@ -83,6 +83,20 @@ class NextOfKinSettings extends Component {
                       <label htmlFor="inputEmail4">Other Names</label>
                       <input type="text" className="form-control" />
                     </div>
+                    <div className="form-row ">
+                    <div className="form-group col-md-4">
+                      <label htmlFor="inputEmail4">Email</label>
+                      <input type="text" className="form-control" />
+                    </div>
+                    <div className="form-group col-md-4">
+                      <label htmlFor="inputEmail4">Phone Number</label>
+                      <input type="text" className="form-control" />
+                    </div>
+                    <div className="form-group col-md-4">
+                      <label htmlFor="inputEmail4">Relationship </label>
+                      <input type="text" className="form-control" />
+                    </div>
+                  </div>
                   </div>
                   <button
                     type="submit"
