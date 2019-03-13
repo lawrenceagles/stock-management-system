@@ -70,7 +70,7 @@ class ManageAdmin extends Component {
               <div>
                 <label htmlFor="inputState">Role</label>
                 <select id="inputState" className="form-control">
-                  <option selected>Choose...</option>
+                  <option >Choose...</option>
                   <option>Manager</option>
                   <option>Super Admin</option>
                   <option>Editor</option>

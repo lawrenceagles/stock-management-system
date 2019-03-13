@@ -15,7 +15,7 @@ class AuditTrail extends Component {
 
   componentDidMount() {
     axios
-      .get('http://localhost:8000/audit')
+      .get('http://localhost:7000/audit')
       .then(res => {
         this.setState({ audits: res.data });
         console.log(res.data)
@@ -57,10 +57,10 @@ class AuditTrail extends Component {
                       </div>
                       <div
                         className="col-sm-3"
-                        style={{ marginTop: '22px', left: '340px' }}
+                        style={{ marginTop: '22px', left: '300px' }}
                       >
                         <div>
-                          <a href="/" className="c-btn-bg2 btn btn-primary">
+                          <a href="/" className="c-btn-bg2 btn ">
                             Download
                           </a>
                         </div>
