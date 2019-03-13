@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import './settings.css';
 import { Tabs, Tab } from 'react-bootstrap';
-import PersonalSettings   from './PersonalSettings';
-import AdminSettings    from './AdminSettings';
-import Sidebar       from '../templates/Sidebar';
-import TopNavbar     from '../templates/TopNavbar';
+import PersonalSettings from './PersonalSettings';
+import NextOfKinSettings from './AdminSettings';
+import BankSettings from './AdminSettings';
+import PasswordSettings from './AdminSettings';
+import Sidebar from '../templates/Sidebar';
+import TopNavbar from '../templates/TopNavbar';
 
-class Settings extends Component {
+class UserSettings extends Component {
   render() {
     return (
       <div className="wrapper">
@@ -19,11 +21,17 @@ class Settings extends Component {
               defaultActiveKey="PersonalSettings"
               id="uncontrolled-tab-example"
             >
-              <Tab eventKey="PersonalSettings" title="Profile Settings">
+              <Tab eventKey="PersonalSettings" title="Personal">
                 <PersonalSettings />
               </Tab>
-              <Tab eventKey="AdminSettings" title="Admin Settings">
-                <AdminSettings />
+              <Tab eventKey="NextOfKinSettings" title="Next Of Kin">
+                <NextOfKinSettings />
+              </Tab>
+              <Tab eventKey="BankSettings" title="Bank Details">
+                <BankSettings />
+              </Tab>
+              <Tab eventKey="PasswordSettings" title="Change Password">
+                <PasswordSettings />
               </Tab>
             </Tabs>
           </div>
@@ -33,4 +41,4 @@ class Settings extends Component {
   }
 }
 
-export default Settings;
+export default UserSettings;

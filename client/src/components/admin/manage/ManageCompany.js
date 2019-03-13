@@ -52,11 +52,10 @@ class ManageCompany extends Component {
 
   onChange = e => {
     this.setState({ selectcompany: e.target.value });
+    
   };
 
-  // getcompany = hh
-
-
+  
   onBoardCompany = e => {
     e.preventDefault();
     const {

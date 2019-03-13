@@ -4,7 +4,7 @@ import axios from 'axios';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
 
-class Dashboard extends Component {
+class UserDashboard extends Component {
   constructor(props) {
     super(props);
 
@@ -33,130 +33,116 @@ class Dashboard extends Component {
         <div className="main-content bg-light">
           <TopNavbar />
           <div className="content">
-            <section>
-              <div className="container">
-                <div className="row">
-                  <div className="col-lg-9 comp-info">
-                    <div className="row pt-5 mt-3 mb-5">
-                      <div className="col-sm-3 ">
-                        <div className="card c1">
-                          <div className="card-body">
-                            <div className="text-center">
-                              <h6>Total Number of companies</h6>
-                              <h3>{companies.length}</h3>
-                            </div>
-                          </div>
+            <section className="m-4 ">
+              <div className="row">
+                <div className="col-lg-6 ">
+                  <div
+                    className="row custom-col"
+                    style={{ marginBottom: '20px' }}
+                  >
+                    <div className="card-body ">
+                      <h5 className="card-title mb-2">Interswitch Inc.</h5>
+                      <h6 className="card-title ">Today</h6>
+                      <h2 className="card-title mb-4">N 123.3</h2>
+                      <a href="#" className="btn new-btn mr-2 mt-4">
+                        Buy
+                      </a>
+                      <a href="#" className="btn new-btn2 mt-4">
+                        Sell
+                      </a>
+                    </div>
+                  </div>
+                  <div className="row" style={{ width: '566px' }}>
+                    <div className="col-lg-6">
+                      <div className="card card-custom-body mb-4">
+                        <div className="card-body">
+                          <h6 className="card-subtitle p-2">
+                            Total Allocated Shares
+                          </h6>
+                          <h4 className="card-title mb-2 text-muted">
+                            1,234 Units
+                          </h4>
                         </div>
                       </div>
-                      <div className="col-sm-3 ">
-                        <div className="card c2">
-                          <div className="card-body">
-                            <div className="text-center">
-                              <h6>Total Scheme Members</h6>
-                              <h3>3435</h3>
-                            </div>
-                          </div>
+                    </div>
+                    <div className="col-lg-6">
+                      <div className="card card-custom-body mb-4">
+                        <div className="card-body">
+                          <h6 className="card-subtitle p-2">
+                            Total Allocated Shares
+                          </h6>
+                          <h4 className="card-title mb-2 text-muted">
+                            1,234 Units
+                          </h4>
                         </div>
                       </div>
-                      <div className="col-sm-3 ">
-                        <div
-                          className="card c3"
-                          style={{ borderLeft: '4px solid green' }}
-                        >
-                          <div className="card-body">
-                            <div className="text-center">
-                              <h6>Total Number of Shares</h6>
-                              <h3>39,393</h3>
-                            </div>
-                          </div>
+                    </div>
+                    <div className="col-lg-6">
+                      <div className="card card-custom-body mb-4">
+                        <div className="card-body">
+                          <h6 className="card-subtitle p-2">
+                            Total Allocated Shares
+                          </h6>
+                          <h4 className="card-title mb-2 text-muted">
+                            1,234 Units
+                          </h4>
                         </div>
                       </div>
-                      <div className="col-sm-3 ">
-                        <div
-                          className="card c4"
-                          style={{ borderLeft: '4px solid red' }}
-                        >
-                          <div className="card-body">
-                            <div className="text-center">
-                              <h6>Total Number of Alloted Shares </h6>
-                              <h3>1,239</h3>
-                            </div>
-                          </div>
+                    </div>
+                    <div className="col-lg-6">
+                      <div className="card card-custom-body mb-4">
+                        <div className="card-body">
+                          <h6 className="card-subtitle p-2">
+                            Total Allocated Shares
+                          </h6>
+                          <h4 className="card-title mb-2 text-muted">
+                            1,234 Units
+                          </h4>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-lg-6">
+                      <div className="card card-custom-body mb-4">
+                        <div className="card-body">
+                          <h6 className="card-subtitle p-2">
+                            Total Allocated Shares
+                          </h6>
+                          <h4 className="card-title mb-2 text-muted">
+                            1,234 Units
+                          </h4>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-lg-6">
+                      <div className="card card-custom-body mb-4">
+                        <div className="card-body">
+                          <h6 className="card-subtitle p-2">
+                            Total Allocated Shares
+                          </h6>
+                          <h4 className="card-title mb-2 text-muted">
+                            1,234 Units
+                          </h4>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </section>
-
-            <section>
-              <div className="container">
-                <div className="row mb-5">
-                  <div className="col-xl-10 col-lg-9 col-md-8 ml-auto">
-                    <div className="row">
-                      <div className="col-12">
-                        <h5 className="text-dark text-left mb-3">
-                          All Companies
-                        </h5>
-                        <table className="table table-bordered bg-white text-center">
-                          <thead>
-                            <tr className="text-muted">
-                              <th>S/N</th>
-                              <th>Company Name</th>
-                              <th>Company Type</th>
-                              <th>Total Shares</th>
-                              <th>Total Allocated Shares</th>
-                              <th>Total Scheme Members</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {companies.map((company, index) => (
-                              <tr key={index}>
-                                <th>{++index}</th>
-                                <th>{company.name}</th>
-                                <th>{company.type}</th>
-                                <th>{company.totalSharesAllotedToScheme}</th>
-                                <th>
-                                  {company.totalSharesAllotedToSchemeMembers}
-                                </th>
-                                <th>{company.totalSchemeMembers}</th>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                        <nav aria-label="Page navigation example">
-                          <ul className="pagination justify-content-end">
-                            <li className="page-item disabled">
-                              <a className="page-link" href="/" tabIndex="-1">
-                                Previous
-                              </a>
-                            </li>
-                            <li className="page-item">
-                              <a className="page-link" href="/">
-                                1
-                              </a>
-                            </li>
-                            <li className="page-item">
-                              <a className="page-link" href="/">
-                                2
-                              </a>
-                            </li>
-                            <li className="page-item">
-                              <a className="page-link" href="/">
-                                3
-                              </a>
-                            </li>
-                            <li className="page-item">
-                              <a className="page-link" href="/">
-                                Next
-                              </a>
-                            </li>
-                          </ul>
-                        </nav>
-                      </div>
+                <div className="col-lg-4 ml-auto">
+                  <div className="card custom-chart mb-4">
+                    <div className="card-body">
+                      <h6 className="card-subtitle p-2">Shares Vested</h6>
+                      <div id="circle" />
+                      <h6 className="card-subtitle p-2">Date Alloted</h6>
+                      <h4 className="card-title mb-2 text-muted">29/12/12</h4>
+                      <h6 className="card-subtitle p-2">Date Alloted</h6>
+                      <h4 className="card-title mb-2 text-muted">29/12/12</h4>
+                      <h6 className="card-subtitle p-2">Date Alloted</h6>
+                      <h4 className="card-title mb-2 text-muted">29/12/12</h4>
                     </div>
                   </div>
+                  <a href="#" className="btn new-btn3 mt-4">
+                    Download
+                  </a>
                 </div>
               </div>
             </section>
@@ -167,4 +153,4 @@ class Dashboard extends Component {
   }
 }
 
-export default Dashboard;
+export default UserDashboard;
