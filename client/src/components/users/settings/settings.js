@@ -3,9 +3,9 @@ import axios from 'axios';
 import './settings.css';
 import { Tabs, Tab } from 'react-bootstrap';
 import PersonalSettings from './PersonalSettings';
-import NextOfKinSettings from './AdminSettings';
-import BankSettings from './AdminSettings';
-import PasswordSettings from './AdminSettings';
+import NextOfKinSettings from './NextOfKinSettings';
+import BankSettings from './BankSettings';
+import PasswordSettings from './PasswordSettings';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
 

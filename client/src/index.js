@@ -18,8 +18,7 @@ import EditUser from './components/admin/manage/EditUser.js';
 import UserLogin from './components/users/login/Login';
 import UserDashboard from './components/users/dashboard/Dashboard.js';
 import SchemeRules from './components/users/schemerules/SchemeRules.js';
-import Manage from './components/admin/manage/manage.js';
-import Usersettings from './components/users/settings/settings.js';
+import UserSettings from './components/users/settings/settings.js';
 
 ReactDOM.render(
   <Router>

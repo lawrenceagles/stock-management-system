@@ -144,7 +144,7 @@ a:hover{
 }
 
 .dash {
-   background-image: url("../images/Vector.png");
+   background-image: url("/images/Vector.png");
    background-repeat:  no-repeat;
    background-position: right -18px bottom -15px;
 }
@@ -178,7 +178,7 @@ a:hover{
 }
 
 .card-custom-body {
-   background-image: url("../images/cardsbg.png");
+   background-image: url("/images/cardsbg.png");
    background-repeat:  repeat-x;
    background-size: contain;
    background-position:  right 3px bottom 0px;

@@ -60,7 +60,7 @@
 
 
 .card-custom-body {
-   background-image: url("../images/cardsbg.png");
+   background-image: url("/images/cardsbg.png");
    background-repeat:  repeat-x;
    background-size: contain;
    background-position:  right 3px bottom 0px;

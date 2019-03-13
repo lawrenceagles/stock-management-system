@@ -100,4 +100,4 @@ class NextOfKinSettings extends Component {
   }
 }
 
-export default NextOfSettings;
+export default NextOfKinSettings;
