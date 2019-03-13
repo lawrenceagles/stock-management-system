@@ -5,21 +5,32 @@ const Schema = mongoose.Schema;
 const notificationSchema = new Schema({
 	title: {
 		type: String,
-		required: true
+		required: true,
+		default: "You have received a new message"
 	},
 	body: {
 		type: String,
 		required: true
 	},
-	sendBy:{
+	sender:{
 		type: mongoose.Schema.Types.ObjectId,
-		required: true
+		required: true,
+		refpath: 'onModel'
 	},
-	receivedBy: {
+	receiver: [{
 		type: mongoose.Schema.Types.ObjectId,
-		required: true
-	},
+		required: true,
+		refpath: 'onModel'
+	}],
+	onModel: {
+	    type: String,
+	    required: true,
+	    enum: ['Admin', 'User']
+  	},
 	{
 		timestamp:true
 	}
 });
+
+const Notifcations = mongoose.model('Notiifcations', notificationSchema);
+module.exports = {Notifcations};

@@ -175,5 +175,17 @@ AdminSchema.methods.removeToken = function(token) {
   })
 }
 
+AdminSchema.virtual('sentNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'sender'
+});
+
+AdminSchema.virtual('receivedNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'receiver'
+});
+
 const Admin = mongoose.model('Admin', AdminSchema);
 module.exports = {Admin};
