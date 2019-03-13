@@ -293,5 +293,27 @@ userSchema.methods.removeToken = function(token) {
   })
 }
 
+userSchema.statics.findByEmail = function(email) {
+    let Admin = this;
+    return Admin.findOne({email}).then((admin)=> { // find admin by email
+        if(admin){ 
+            return resolve(admin);
+        }
+    });
+}
+
+
+userSchema.virtual('sentNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'sender'
+});
+
+userSchema.virtual('receivedNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'receiver'
+});
+
 const User = mongoose.model('User', userSchema);
 module.exports = {User};

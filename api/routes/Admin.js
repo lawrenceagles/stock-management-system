@@ -5,7 +5,9 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 
 const {Admin} = require ('../models/admin');
+const {User} = require("../models/user");
 const {Log} = require ('../models/audit_Trail');
+const {Notifcations} = require('../models/notifications');
 const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
 
@@ -239,5 +241,46 @@ router.get('/audit',authenticate, (req, res)=>{
         res.send(doc);
     });
 });
+
+// GET ROUTE VIEW ALL NOTIFICATIONS
+router.get('/notification', (req,res)=>{
+    Notifcations.find({}).then(doc=>{
+        if(!doc){
+            return res.status(404).send("Error: No notification found")
+        }
+        res.send(doc);
+    }).catch(e=>{
+        res.status(400).send("Error: problem with route")
+    })
+    
+})
+
+// POST ROUTE SEND NOTIFICATION FOR ADMIN
+router.post('/notification',authenticate, (req, res)=>{
+    let receiverEmail = req.body.email;
+    req.body.onSenderModel = 'Admin'; // set the refPath 
+    req.body.onReceiverModel = 'User';
+
+    User.findOne({email:receiverEmail}).then(doc=>{
+
+        if(!doc){
+            return res.status(404).send("error no user found");
+        }
+
+        new Notifcations({
+            ...req.body,
+            sender:req.admin._id,
+            receiver:[doc._id]
+        }).save().then(doc=>{
+            res.send(doc);
+        }).catch(e=>{
+            res.status(400).send("Error with the route");
+        });
+
+        // res.send(doc);
+    }).catch(e=>{
+        res.status(404).send("Error no receiver like this in database");
+    });
+})
 
 module.exports = router;

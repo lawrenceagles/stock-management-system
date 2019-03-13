@@ -8,7 +8,7 @@ const notificationSchema = new Schema({
 		required: true,
 		default: "You have received a new message"
 	},
-	body: {
+	message: {
 		type: String,
 		required: true
 	},
@@ -22,14 +22,19 @@ const notificationSchema = new Schema({
 		required: true,
 		refpath: 'onModel'
 	}],
-	onModel: {
+	onSenderModel: {
 	    type: String,
 	    required: true,
 	    enum: ['Admin', 'User']
   	},
-	{
-		timestamp:true
-	}
+  	onReceiverModel: {
+	    type: String,
+	    required: true,
+	    enum: ['Admin', 'User']
+  	}
+},
+{
+	timestamps:true
 });
 
 const Notifcations = mongoose.model('Notiifcations', notificationSchema);
