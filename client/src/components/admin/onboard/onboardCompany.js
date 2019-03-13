@@ -2,29 +2,31 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
+import PORT from '../../../config/config'
+
 
 class OnBoardCompany extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      companyName: '',
-      companyType: '',
-      totalShares: '',
-      totalAllocatedShares: '',
+      name: '',
+      type: '',
+      totalSharesAllotedToScheme: '',
+      totalSharesAllotedToSchemeMembers: '',
       totalUnallocatedShares: '',
       totalSchemeMembers: '',
-      allocationDate: '',
-      vestingDateSchedule: '',
-      cash: false,
+      dateOfAllocation: '',
+      vestingDate: '',
+      dividendTypeCash: false,
       bonus: false,
-      share: '',
-      shareBonus: '',
-      currentShareValue: '',
-      canBuy: false,
-      canSell: false,
+      dividendTypeShare: '',
+      dividendRatePerShares: '',
+      currentShareValuation: '',
+      canBuyShares: false,
+      canSellShares: false,
       totalSharesForfieted: '',
-      collaterizedShares: false,
+      canCollateriseShares: false,
       purchasePrice: '',
       paymentPeriod: '',
       grade: '',
@@ -42,23 +44,23 @@ class OnBoardCompany extends Component {
   onBoardCompany = e => {
     e.preventDefault();
     const {
-      companyName,
-      companyType,
-      totalShares,
-      totalAllocatedShares,
+      name,
+      type,
+      totalSharesAllotedToScheme,
+      totalSharesAllotedToSchemeMembers,
       totalUnallocatedShares,
       totalSchemeMembers,
-      allocationDate,
-      vestingDateSchedule,
-      cash,
+      dateOfAllocation,
+      vestingDate,
+      dividendTypeCash,
       bonus,
-      share,
-      shareBonus,
-      currentShareValue,
-      canBuy,
-      canSell,
+      dividendTypeShare,
+      dividendRatePerShares,
+      currentShareValuation,
+      canBuyShares,
+      canSellShares,
       totalSharesForfieted,
-      collaterizedShares,
+      canCollateriseShares,
       purchasePrice,
       paymentPeriod,
       grade,
@@ -67,23 +69,23 @@ class OnBoardCompany extends Component {
     } = this.state;
 
     const companyData = {
-      companyName,
-      companyType,
-      totalShares,
-      totalAllocatedShares,
+      name,
+      type,
+      totalSharesAllotedToScheme,
+      totalSharesAllotedToSchemeMembers,
       totalUnallocatedShares,
       totalSchemeMembers,
-      allocationDate,
-      vestingDateSchedule,
-      cash,
+      dateOfAllocation,
+      vestingDate,
+      dividendTypeCash,
       bonus,
-      share,
-      shareBonus,
-      currentShareValue,
-      canBuy,
-      canSell,
+      dividendTypeShare,
+      dividendRatePerShares,
+      currentShareValuation,
+      canBuyShares,
+      canSellShares,
       totalSharesForfieted,
-      collaterizedShares,
+      canCollateriseShares,
       purchasePrice,
       paymentPeriod,
       grade,
@@ -91,35 +93,37 @@ class OnBoardCompany extends Component {
       schemeRules,
     };
 
-    axios
-      .post('http://localhost:8000/registration', companyData)
+    axios.post(`http://localhost:${PORT}/registration`, companyData)
       .then(res => {
-        this.setState({ success: true });
+        this.setState({ 
+          success: true,
+          res
+         });
       })
       .catch(error => {
-        this.setState({ error });
+       console.log(error) 
       });
   };
 
   render() {
     const {
-      companyName,
-      companyType,
-      totalShares,
-      totalAllocatedShares,
+      name,
+      type,
+      totalSharesAllotedToScheme,
+      totalSharesAllotedToSchemeMembers,
       totalUnallocatedShares,
       totalSchemeMembers,
-      allocationDate,
-      vestingDateSchedule,
-      cash,
+      dateOfAllocation,
+      vestingDate,
+      dividendTypeCash,
       bonus,
-      share,
-      shareBonus,
-      currentShareValue,
-      canBuy,
-      canSell,
+      dividendTypeShare,
+      dividendRatePerShares,
+      currentShareValuation,
+      canBuyShares,
+      canSellShares,
       totalSharesForfieted,
-      collaterizedShares,
+      canCollateriseShares,
       purchasePrice,
       paymentPeriod,
       grade,
@@ -148,8 +152,8 @@ class OnBoardCompany extends Component {
                             <label htmlFor="inputEmail4">Company Name</label>
                             <input
                               type="text"
-                              id="companyName"
-                              value={companyName}
+                              id="name"
+                              value={name}
                               error={error}
                               onChange={this.onChange}
                               required
@@ -159,8 +163,8 @@ class OnBoardCompany extends Component {
                           <div className="form-group col-md-4">
                             <label htmlFor="inputState">Company Type</label>
                             <select
-                              id="companyType"
-                              value={companyType}
+                              id="type"
+                              value={type}
                               onChange={this.onChange}
                               className="form-control"
                             >
@@ -179,8 +183,8 @@ class OnBoardCompany extends Component {
                             </label>
                             <input
                               type="text"
-                              id="totalShares"
-                              value={totalShares}
+                              id="totalSharesAllotedToScheme"
+                              value={totalSharesAllotedToScheme}
                               error={error}
                               onChange={this.onChange}
                               required
@@ -193,8 +197,8 @@ class OnBoardCompany extends Component {
                             </label>
                             <input
                               type="text"
-                              id="totalAllocatedShares"
-                              value={totalAllocatedShares}
+                              id="totalSharesAllotedToSchemeMembers"
+                              value={totalSharesAllotedToSchemeMembers}
                               error={error}
                               onChange={this.onChange}
                               required
@@ -236,8 +240,8 @@ class OnBoardCompany extends Component {
                             <label htmlFor="inputEmail4">Allocation Date</label>
                             <input
                               type="text"
-                              id="allocationDate"
-                              value={allocationDate}
+                              id="dateOfAllocation"
+                              value={dateOfAllocation}
                               error={error}
                               onChange={this.onChange}
                               required
@@ -249,9 +253,9 @@ class OnBoardCompany extends Component {
                               Vesting Date/Schedule
                             </label>
                             <select
-                              value={vestingDateSchedule}
+                              value={vestingDate}
                               onChange={this.onChange}
-                              id="vestingDateSchedule"
+                              id="vestingDate"
                               className="form-control"
                             >
                               <option>Choose...</option>
@@ -267,9 +271,9 @@ class OnBoardCompany extends Component {
                             <input
                               className="form-check-input"
                               type="checkbox"
-                              value={cash}
+                              value={dividendTypeCash}
                               onChange={this.onChange}
-                              id="cash"
+                              id="dividendTypeCash"
                             />
                             <label
                               className="form-check-label"
@@ -297,9 +301,9 @@ class OnBoardCompany extends Component {
                             <label htmlFor="inputEmail4">share</label>
                             <input
                               type="text"
-                              value={share}
+                              value={dividendTypeShare}
                               onChange={this.onChange}
-                              id="share"
+                              id="dividendTypeShare"
                               className="form-control"
                             />
                           </div>
@@ -308,9 +312,9 @@ class OnBoardCompany extends Component {
                             <label htmlFor="inputEmail4">Bonus Rate</label>
                             <input
                               type="text"
-                              value={shareBonus}
+                              value={dividendRatePerShares}
                               onChange={this.onChange}
-                              id="shareBonus"
+                              id="dividendRatePerShares"
                               className="form-control"
                             />
                           </div>
@@ -324,9 +328,9 @@ class OnBoardCompany extends Component {
                             </label>
                             <input
                               type="text"
-                              value={currentShareValue}
+                              value={currentShareValuation}
                               onChange={this.onChange}
-                              id="currentShareValue"
+                              id="currentShareValuation"
                               className="form-control"
                             />
                           </div>
@@ -338,9 +342,9 @@ class OnBoardCompany extends Component {
                               <input
                                 className="form-check-input"
                                 type="checkbox"
-                                value={canSell}
+                                value={canSellShares}
                                 onChange={this.onChange}
-                                id="canSell"
+                                id="canSellShares"
                               />
                               <label
                                 className="form-check-label"
@@ -353,9 +357,9 @@ class OnBoardCompany extends Component {
                               <input
                                 className="form-check-input"
                                 type="checkbox"
-                                value={canBuy}
+                                value={canBuyShares}
                                 onChange={this.onChange}
-                                id="canBuy"
+                                id="canBuyShares"
                               />
                               <label
                                 className="form-check-label"
@@ -388,9 +392,9 @@ class OnBoardCompany extends Component {
                               <input
                                 className="form-check-input"
                                 type="checkbox"
-                                value={collaterizedShares}
+                                value={canCollateriseShares}
                                 onChange={this.onChange}
-                                id="collaterizedShares"
+                                id="canCollateriseShares"
                               />
                               <label
                                 className="form-check-label"
@@ -454,8 +458,9 @@ class OnBoardCompany extends Component {
                         <button
                           type="submit"
                           className="float-right p-2 btn c-btn-bg2"
+                          onClick={this.onBoardCompany}
                         >
-                          Next{' '}
+                          Submit{' '}
                         </button>
                       </form>
                     </div>

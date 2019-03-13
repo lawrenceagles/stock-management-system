@@ -33,19 +33,11 @@ const companySchema = new Schema({
         type: Number,
         required: true
     },
-    totalSharesSold: {
-        type: Number,
-        required: true
-    },
-    totalSharesBought: {
-        type: Number,
-        required: true
-    },
     totalSharesForfieted: {
         type: Number,
         required: true
     },
-    totalSharesRepurchased: {
+    totalSharesRepurchased:{
         type: Number,
         required: true
     },
@@ -61,10 +53,19 @@ const companySchema = new Schema({
         type: Date,
         required: true
     },
-    dividendType: {
-        type: String,
-        required: true,
-        enum: ['cash', 'shares']
+    level:{
+        type:String,
+        required:true,
+        default:null,
+        maxlength:200
+    },
+    dividendTypeShare: {
+        type: Boolean,
+        required: true
+    },
+    dividendTypeCash: {
+        type: Boolean,
+        required: true
     },
     dividendRatePerShares: {
         type: Number, // is this still needed?
@@ -78,6 +79,11 @@ const companySchema = new Schema({
         type: Boolean,
         required: true
     },
+    bonus:{
+        type:String,
+        default:0,
+        maxlength:200
+    },
     canSellShares: {
         type: Boolean,
         required: true
@@ -86,10 +92,7 @@ const companySchema = new Schema({
         type: Boolean,
         required: true        
     },
-    sharePrice: {
-        type: Number,
-        required: true
-    },
+
     currentShareValuation: {
         type: Number,
         required: true
@@ -106,10 +109,9 @@ const companySchema = new Schema({
         type: Number,
         required: true
     },
-    
-    dateOfPurchase: {
-        type: Date,
-        required: true
+    grade:{
+        type:String,
+        maxlength:190
     },
     paymentPeriod:{
         type:String,

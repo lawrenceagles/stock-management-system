@@ -22,25 +22,25 @@ router.post('/registration',(req,res,next)=>{
         company.totalSharesAllotedToScheme=req.body.totalSharesAllotedToScheme;
         company.totalSharesAllotedToSchemeMembers=req.body.totalSharesAllotedToSchemeMembers;
         company.totalUnallotedShares=req.body.totalUnallotedShares;
-        company.totalSharesSold=req.body.totalSharesSold;
-        company.totalSharesBought=req.body.totalSharesBought;
         company.totalSharesForfieted=req.body.totalSharesForfieted;
         company.totalSharesRepurchased=req.body.totalSharesRepurchased;
         company.totalDividentDeclared=req.body.totalDividentDeclared;
         company.vestingDate=req.body.vestingDate;
         company.dateOfAllocation=req.body.dateOfAllocation;
-        company.dividendType=req.body.dividendType;
-        company.dividendRatePerShares=req.body.dividendRatePerShares;
+        company.dividendTypeCash=req.body.dividendTypeCash;
+        company.bonus = req.body.bonus;
+        company.dividendTypeShare=req.body.dividendTypeShare;
+        company.dividendRatePerShares = req.body.dividendRatePerShares;
         company.canBuyShares=req.body.canBuyShares;
+        company.grade=req.body.grade;
+        company.level = req.body.level;
         company.canSellShares=req.body.canSellShares;
         company.canCollateriseShares=req.body.canCollateriseShares;
-        company.sharePrice=req.body.sharePrice;
         company.currentShareValuation=req.body.currentShareValuation;
         company.canRepurchase=req.body.canRepurchase;
         company.initialShareSale=req.body.initialShareSale;
         company.purchasePrice=req.body.purchasePrice;
         company.schemeRules=req.body.schemeRules;
-        company.dateOfPurchase=req.body.dateOfPurchase;
         company.paymentPeriod=req.body.paymentPeriod;
         company.userList = req.body.userList;
 
@@ -54,7 +54,6 @@ router.post('/registration',(req,res,next)=>{
         company.save()
     .then(response=>{
              res.status(200).json({
-                response,
                 info:"save successfull"
             })
         })
@@ -165,11 +164,9 @@ router.put('/update/:id',authenticate,(req,res)=>{               //update
                     if(req.body.totalUnallotedShares){
                         company.totalUnallotedShares = req.body.totalUnallotedShares;
                     }
-                    if(req.body.totalSharesSold){
-                        company.totalSharesSold = req.body.totalSharesSold;
-                    }
-                    if(req.body.totalSharesBought){
-                        company.totalSharesBought = req.body.totalSharesBought;
+                    
+                    if(req.body.grade){
+                        company.grade = req.body.grade;
                     }
                     if(req.body.totalSharesForfieted){
                         company.totalSharesForfieted = req.body.totalSharesForfieted;
@@ -186,8 +183,11 @@ router.put('/update/:id',authenticate,(req,res)=>{               //update
                     if(req.body.dateOfAllocation){
                         company.dateOfAllocation = req.body.dateOfAllocation;
                     }
-                    if(req.body.dividendType){
-                        company.dividendType = req.body.dividendType;
+                    if(req.body.dividendTypeCash){
+                        company.dividendTypeCash = req.body.dividendTypeCash;
+                    }
+                    if(req.body.dividendTypeShare){
+                        company.dividendTypeShare = req.body.dividendTypeShare;
                     }
                     if(req.body.dividendRatePerShares){
                         company.dividendRatePerShares = req.body.dividendRatePerShares;
@@ -201,8 +201,8 @@ router.put('/update/:id',authenticate,(req,res)=>{               //update
                     if(req.body.canCollateriseShares){
                         company.canCollateriseShares = req.body.canCollateriseShares;
                     }
-                    if(req.body.sharePrice){
-                        company.sharePrice = req.body.sharePrice;
+                    if(req.body.bonus){
+                        company.bonus = req.body.bonus;
                     }
                     if(req.body.currentShareValuation){
                         company.currentShareValuation = req.body.currentShareValuation;
@@ -216,11 +216,11 @@ router.put('/update/:id',authenticate,(req,res)=>{               //update
                     if(req.body.purchasePrice){
                         company.purchasePrice = req.body.purchasePrice
                     }
-                    if(req.body.dateOfPurchase){
-                        company.dateOfPurchase = req.body.dateOfPurchase;
-                    }
                     if(req.body.paymentPeriod){
                         company.paymentPeriod = req.body.paymentPeriod;
+                    }
+                    if(req.body.level){
+                        company.level= req.body.level;
                     }
                     if(req.body.schemeRules){
                         company.schemeRules = req.body.schemeRules;

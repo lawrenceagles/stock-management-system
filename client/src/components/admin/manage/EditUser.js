@@ -3,6 +3,8 @@ import axios from 'axios';
 import './Manage.css';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
+import PORT from '../../../config/config'
+
 
 class EditUser extends Component {
   constructor(props) {
@@ -42,7 +44,7 @@ class EditUser extends Component {
     };
 
     axios
-      .post('http://localhost:8000/admin', userData, { header: headers })
+      .post(`http://localhost:${PORT}/admin`, userData, { header: headers })
       .then(res => {
         this.setState({ success: true });
       })

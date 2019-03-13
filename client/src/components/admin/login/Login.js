@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import './Login.styles.css';
+import PORT from '../../../config/config'
 
 class Login extends Component {
   constructor(props) {
@@ -32,7 +33,7 @@ class Login extends Component {
     };
 
     axios
-      .post('http://localhost:6000/admin/login', userData, header)
+      .post(`http://localhost:${PORT}/admin/login`, userData, header)
       .then(res => {
         if (res.data === 'You are already Logged in') {
           this.props.history.push('/dashboard');
