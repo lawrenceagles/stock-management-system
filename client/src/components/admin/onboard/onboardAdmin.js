@@ -42,7 +42,7 @@ class OnBoardAdmin extends Component {
     };
 
     axios
-      .post('http://localhost:8000/admin', userData, { header: headers })
+      .post('http://localhost:7000/admin', userData, { header: headers })
       .then(res => {
         this.setState({ success: true });
       })

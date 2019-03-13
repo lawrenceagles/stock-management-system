@@ -44,19 +44,18 @@ router.post('/registration',(req,res,next)=>{
         company.paymentPeriod=req.body.paymentPeriod;
         company.userList = req.body.userList;
 
-        let log = new Log({
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-            action: `${req.admin.lastname} ${req.admin.firstname} created a company `,
-            company: `${company.name}`
+        // let log = new Log({
+        //     createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+        //     action: `${req.admin.lastname} ${req.admin.firstname} created a company `,
+        //     company: `${company.name}`
 
-        });
+        // });
 
         // log.save();
 
         company.save()
     .then(response=>{
              res.status(200).json({
-                response,
                 info:"save successfull"
             })
         })
@@ -69,7 +68,7 @@ router.post('/registration',(req,res,next)=>{
     })
 })
 
-router.get('/list',authenticate,(req,res,next)=>{ 
+router.get('/list',(req,res,next)=>{ 
     const sort = {}
 
     let pageOptions = {
