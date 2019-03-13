@@ -430,4 +430,55 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
        });
 })
 
+
+// GET ROUTE VIEW ALL NOTIFICATIONS
+router.get('/notification',authenticateUser, (req,res)=>{
+    // get the user id from req.user._id
+    // Notifcations.find({receiver: req.user._id}).then(doc=>{
+    //     if(!doc){
+    //         return res.status(404).send("Error: No notification found")
+    //     }
+    //     res.send(doc);
+    // }).catch(e=>{
+    //     res.status(400).send("Error: problem with route")
+    // }) 
+    
+    let user = req.user;
+    user.populate({
+      path: 'sentNotifications'
+    })
+    .execPopulate()
+    .then(doc=>{
+        res.send(user.sentNotifications);
+    })
+})
+
+// POST ROUTE SEND NOTIFICATION FOR user
+router.post('/notification',authenticateUser, (req, res)=>{
+    let receiverEmail = req.body.email;
+    req.body.onSenderModel = 'Admin'; // set the refPath 
+    req.body.onReceiverModel = 'User';
+
+    User.findOne({email:receiverEmail}).then(doc=>{
+
+        if(!doc){
+            return res.status(404).send("error no user found");
+        }
+
+        new Notifcations({
+            ...req.body,
+            sender:req.admin._id,
+            receiver:[doc._id]
+        }).save().then(doc=>{
+            res.status(201).send(doc);
+        }).catch(e=>{
+            res.status(400).send("Error with the route");
+        });
+
+        // res.send(doc);
+    }).catch(e=>{
+        res.status(404).send("Error no receiver like this in database");
+    });
+})
+
 module.exports = router;

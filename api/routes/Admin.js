@@ -244,14 +244,24 @@ router.get('/audit',authenticate, (req, res)=>{
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
 router.get('/notification',authenticate, (req,res)=>{
-    Notifcations.find({receiver: "5c87e289cdc38061fddd8a54"}).then(doc=>{
-        if(!doc){
-            return res.status(404).send("Error: No notification found")
-        }
-        res.send(doc);
-    }).catch(e=>{
-        res.status(400).send("Error: problem with route")
-    }) 
+    // get the admin id from req.admin._id
+    // Notifcations.find({sender: req.admin._id}).then(doc=>{
+    //     if(!doc){
+    //         return res.status(404).send("Error: No notification found")
+    //     }
+    //     res.send(doc);
+    // }).catch(e=>{
+    //     res.status(400).send("Error: problem with route")
+    // }) 
+    
+    let admin = req.admin;
+        admin.populate({
+            path: 'sentNotifications'
+        })
+        .execPopulate()
+        .then(doc=>{
+            res.send(admin.sentNotifications);
+        })
 })
 
 // POST ROUTE SEND NOTIFICATION FOR ADMIN

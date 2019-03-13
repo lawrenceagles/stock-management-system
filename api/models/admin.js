@@ -71,6 +71,18 @@ const AdminSchema = new Schema({
     }]
 });
 
+AdminSchema.virtual('sentNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'sender'
+});
+
+AdminSchema.virtual('receivedNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'receiver'
+});
+
 // convert mongoose Model to Object and pick needed properties
 // this function overwrites the toJSON function. It is called implicitly
 AdminSchema.methods.toJSON = function() {
@@ -174,18 +186,6 @@ AdminSchema.methods.removeToken = function(token) {
     }
   })
 }
-
-AdminSchema.virtual('sentNotifications', {
-  ref: 'Notifcations',
-  localField: '_id',
-  foreignField: 'sender'
-});
-
-AdminSchema.virtual('receivedNotifications', {
-  ref: 'Notifcations',
-  localField: '_id',
-  foreignField: 'receiver'
-});
 
 const Admin = mongoose.model('Admin', AdminSchema);
 module.exports = {Admin};
