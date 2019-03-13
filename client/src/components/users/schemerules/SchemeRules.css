@@ -1,0 +1,111 @@
+ /** Login Styles */
+ body {
+  font-family: 'Niramit', sans-serif; 
+}
+
+
+/** Login Styles End */
+
+/** SideBar Styles Start */
+.wrapper {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar {
+	float: left;
+	width: 220px;
+	height: 100vh;
+	background: #025122;
+    color: white;
+    padding: 10px;
+    position: fixed;
+}
+
+.main-content {
+	
+	margin-left: 220px;
+}
+
+
+.navbar {
+	padding: 2px;
+	padding-left: 220px;
+	height: 50px;
+}
+.comp-info {
+	margin-left: 190px;
+}
+.c-li {
+	background-color: #08833A;
+	border-radius: 8px;
+	width: 102px;
+	height: 72px;
+	font-size: 14px;
+	padding: 5px;
+}
+
+
+.c-btn-bg2 { 
+  background: linear-gradient(105.18deg, #08833A -7.85%, #07923F 48.46%, #025122 96.15%);
+  width: 150px;
+  color: #fff;
+  padding: 10px;
+}
+
+.form-control {
+	height: 50px !important;
+}
+
+
+.card-custom-body {
+   background-image: url("../images/cardsbg.png");
+   background-repeat:  repeat-x;
+   background-size: contain;
+   background-position:  right 3px bottom 0px;
+}
+
+.sidebar2 {
+	left: 0;
+	width: 220px;
+	height: 100vh;
+	background: #025122;
+    color: white;
+    padding: 10px;
+    position: fixed;
+}
+
+.main-content2 {
+	width: 900px;
+	margin-left: 225px;
+}
+
+.row {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    margin-right: 0px; 
+    margin-left: 0px;
+}
+
+
+
+.new-btn3 {
+	width: 264px;
+	height: 48px;
+	background: linear-gradient(99.78deg, #FFB41D -7.85%, #F28E12 48.46%, #C8670D 96.15%);
+    border-radius: 4px;
+	color: #fff;
+	
+}
+
+.sc-btn {
+	margin-left: 900px;
+	width: 164px;
+	height: 48px;
+	background: linear-gradient(99.78deg, #FFB41D -7.85%, #F28E12 48.46%, #C8670D 96.15%);
+    border-radius: 4px;
+	color: #fff;
+}
