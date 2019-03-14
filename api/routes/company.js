@@ -27,13 +27,13 @@ router.post('/company/registration',authenticate,(req,res,next)=>{
         log.save();
 
         company.save()
-    .then(response=>{
-             res.status(200).json({
-                response,
-                info:"save successfull"
+        .then(response=>{
+                 res.status(200).json({
+                    response,
+                    info:"save successfull"
+                })
             })
-        })
-    .catch(err=>{
+        .catch(err=>{
             return res.status(404).json({
                 message:'something is wrong '+ err
             });

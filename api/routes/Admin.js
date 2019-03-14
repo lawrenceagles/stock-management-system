@@ -79,7 +79,7 @@ router.post('/admin',authenticate, (req, res) => {
     let admin = new Admin(body);
 
     let log = new Log({
-        action: `${req.admin.lastname} ${req.admin.firstname} created a new admin`,
+        action: `Created a new admin`,
         createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
         user: `${admin.firstname} ${admin.lastname}`
     });
@@ -174,7 +174,7 @@ router.patch('/admin/:id',authenticate, (req, res) => {
 
         Admin.findById(id).then(doc=>{
             let log = new Log({
-                action: `${req.admin.lastname} ${req.admin.firstname} edited an admin profile`,
+                action: `$Edited an admin profile`,
                 createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
                 user: `${doc.firstname} ${doc.lastname}`
             });
@@ -205,7 +205,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
         }
 
         let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} deleted an admin profile`,
+            action: `Deleted an admin profile`,
             createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
             user: `${doc.firstname} ${doc.lastname}`
         });

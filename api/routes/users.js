@@ -264,7 +264,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
          let log = new Log({
               createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
-              action: `${req.admin.lastName} ${req.admin.firstName} deleted a user`,
+              action: `deleted a user`,
               user: `${doc.firstName} ${doc.lastName}`,
               company: `${doc.Company_Name}`
           });
@@ -408,7 +408,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
                     let log = new Log({
                         createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
-                        action: `${req.admin.lastName} ${req.admin.firstName} updated a user`,
+                        action: `updated a user`,
                         user: `${user.firstName} ${user.lastName}`,
                         company: `${user.Company_Name}`
                     });
