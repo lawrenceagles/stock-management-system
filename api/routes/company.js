@@ -258,5 +258,4 @@ router.put('/update/:id',authenticate,(req,res)=>{               //update
             };
        });
 })
-
 module.exports = router;

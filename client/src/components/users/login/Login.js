@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import './Login.styles.css';
 
-class Login extends Component {
+class UserLogin extends Component {
   constructor(props) {
     super(props);
 
@@ -110,4 +110,4 @@ class Login extends Component {
   }
 }
 
-export default Login;
+export default UserLogin;
