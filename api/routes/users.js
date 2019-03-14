@@ -59,7 +59,7 @@ router.post("/upload", (req, res, next) => {
     });
   });  
 //create new user
-router.post("/users",authenticateUser,(req, res, next) => {
+router.post("/users",(req, res, next) => {
     User.findOne({'employee_number':req.body.employee_number},(err,newuser)=>{
         if(newuser) return res.status(404).json({
              message:` User already exist`
@@ -69,25 +69,22 @@ router.post("/users",authenticateUser,(req, res, next) => {
             user.employee_number=req.body.employee_number;
             user.firstName=req.body.firstName;
             user.lastName=req.body.lastName;
+            user.password = req.body.password;
             user.email=req.body.email;
+            user.otherNames=req.body.otherNames;
             user.gender = req.body.gender;
             user.phone=req.body.phone;
-            user.password=req.body.password;
-            user.UserImage = req.body.UserImage;
-            user.date_of_joining_company=req.body.date_of_joining_company;
+            user.otherPhoneNumber = req.body.otherPhoneNumber;
             user.grade_level=req.body.grade_level;
             user.Company_Name=req.body.Company_Name;
             user.Company_Schemerules = req.body.Company_Schemerules;
             user.bankDetails.bankName = req.body.bankName;
-            user.bankDetails.bankBranch  = req.body.bankBranch;
             user.bankDetails.accountName = req.body.accountName;
             user.bankDetails.accountNumber = req.body.accountNumber;
             user.next_of_kin_information.fullName = req.body.fullName;
             user.next_of_kin_information.NextOfKinEmail = req.body.NextOfKinEmail;
-            user.next_of_kin_information.NextOfKinState = req.body.NextOfKinState;
             user.next_of_kin_information.NextOfKinPhone = req.body.NextOfKinPhone;
-            user.next_of_kin_information.NextOfKinStreet = req.body.NextOfKinStreet;
-            user.next_of_kin_information.NextOfKinCity = req.body.NextOfKinCity;
+            user.next_of_kin_information.NextOfKinlastName = req.body.NextOfKinlastName;
             user.next_of_kin_information.NextOfKinRelationship = req.body.NextOfKinRelationship;
             user.current_value_of_shares=req.body.current_value_of_shares;
             user.dividend_received = req.body.dividend_received;
@@ -101,12 +98,12 @@ router.post("/users",authenticateUser,(req, res, next) => {
             user.corresponding_vesting_date = req.body.corresponding_vesting_date;
             user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
 
-            let log = new Log({
-                action: `${req.admin.lastName} ${req.admin.firstName} created a new user with Name: ${user.firstName} ${user.lastName}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
-                createdBy: `${req.admin.lastName} ${req.admin.firstName}`
-            });
+            // let log = new Log({
+            //     action: `${req.admin.lastName} ${req.admin.firstName} created a new user with Name: ${user.firstName} ${user.lastName}, Employee Number:${user.employee_number}, in ${user.Company_Name}`,
+            //     createdBy: `${req.admin.lastName} ${req.admin.firstName}`
+            // });
 
-            log.save();
+            // log.save();
             
             user.save().then(() => { // save the user instance 
                 return user.generateToken(); // save the user instance
@@ -327,6 +324,9 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                     if(req.body.lastName){
                         user.lastName = req.body.lastName;
                     }
+                    if(req.body.otherNames){
+                        user.otherNames = req.body.otherNames;
+                    }
                     if(req.body.email){
                         user.email = req.body.email;
                     }
@@ -393,6 +393,10 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                     if(req.body.number_of_allocated_shares){
                         user.number_of_allocated_shares = req.body.number_of_allocated_shares
                     }
+                    if(req.body.NextOfKinlastName){
+                        user.NextOfKinlastName =req.body.NextOfKinlastName;
+                    }
+
                     if(req.body.number_of_vested_shares){
                         user.number_of_vested_shares = req.body.number_of_vested_shares;
                     }

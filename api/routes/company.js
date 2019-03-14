@@ -1,27 +1,27 @@
 const express = require("express");
 const router = express.Router();
 
-
-const {Company} = require('../models/company')
+const {CompanyModel} = require('../models/company')
 const {authenticate} = require('../../middleware/authenticate');
-const {Log} = require ('../models/audit_Trail');
+const {Log} = require('../models/audit_Trail');
+
 
 // Company Onboarding Route
-router.post('/registration',(req,res,next)=>{
-    Company.find({name:req.body.name},(err,doc)=>{
+router.post('/reg',(req,res,next)=>{
+    CompanyModel.find({name:req.body.name},(err,doc)=>{
     if(doc.length){
         res.status(400).json({
          message:`Bad request name conflict`
         })
      }
     else{
-       const company = new Company
+       const company = new CompanyModel
         company.name=req.body.name;
         company.type=req.body.type;
         company.totalSchemeMembers=req.body.totalSchemeMembers;
         company.totalSharesAllotedToScheme=req.body.totalSharesAllotedToScheme;
         company.totalSharesAllotedToSchemeMembers=req.body.totalSharesAllotedToSchemeMembers;
-        company.totalUnallotedShares=req.body.totalUnallotedShares;
+        company.totalUnallocatedShares=req.body.totalUnallocatedShares;
         company.totalSharesForfieted=req.body.totalSharesForfieted;
         company.totalSharesRepurchased=req.body.totalSharesRepurchased;
         company.totalDividentDeclared=req.body.totalDividentDeclared;
@@ -66,13 +66,30 @@ router.post('/registration',(req,res,next)=>{
     })
 })
 
+router.get('/company/:id',(req,res,next)=>{ 
+    let id = req.params.id
+    CompanyModel.find({_id:id})
+        .exec( (err, doc)=>{
+            if(err) { res.status(500).json(err); };
+            res.status(200).json(doc);
+        })   
+})
+
+router.get('/listall',(req,res,next)=>{     
+    CompanyModel.find()
+        .exec( (err, doc)=>{
+            if(err) { res.status(500).json(err); return; };
+            res.status(200).json(doc);
+        })   
+})
+
 router.get('/list',(req,res,next)=>{ 
     let pageOptions = {
         page: req.query.page || 0,
         limit: req.query.limit || 10
     }
     
-    Company.find()
+    CompanyModel.find()
         .skip(pageOptions.page*pageOptions.limit)
         .limit(pageOptions.limit)
         .exec( (err, doc)=>{
@@ -97,7 +114,7 @@ router.get('/list',(req,res,next)=>{
   //delet
 router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
  const id = req.params.id
-   Company.findOneAndDelete({_id:id})
+   CompanyModel.findOneAndDelete({_id:id})
     .then(response=>{
        res.status(200).json({
            message:"Company has been deleted"
@@ -133,7 +150,7 @@ router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
 
 router.put('/update/:id',authenticate,(req,res)=>{               //update
     const id = req.params.id;
-        Company.findOne({_id:id},(err, company)=>{
+        CompanyModel.findOne({_id:id},(err, company)=>{
             if (err) {
                 res.status(500).json({
                     message:'Bad request update failed'
@@ -161,8 +178,8 @@ router.put('/update/:id',authenticate,(req,res)=>{               //update
                     if(req.body.totalSharesAllotedToSchemeMembers){
                         company.totalSharesAllotedToSchemeMembers = req.body.totalSharesAllotedToSchemeMembers;
                     }
-                    if(req.body.totalUnallotedShares){
-                        company.totalUnallotedShares = req.body.totalUnallotedShares;
+                    if(req.body.totalUnallocatedShares){
+                        company.totalUnallocatedShares = req.body.totalUnallocatedShares;
                     }
                     
                     if(req.body.grade){

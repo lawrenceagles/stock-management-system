@@ -23,6 +23,11 @@ const userSchema = new Schema({
         maxlength:120,
         required: [true, 'User Last Name is required']
     },
+    otherNames: {
+        type: String,
+        maxlength:120,
+        required: [true, 'User Last Name is required']
+    },
     email: {
         type: String,
         required: [true, 'User email required'],
@@ -43,18 +48,16 @@ const userSchema = new Schema({
         required: [true, 'User phone number is required'],
         maxlength:100,
       },
-    password: {
+      otherPhoneNumber:{
+        type: String,
+        required: [true, 'User phone number is required'],
+        maxlength:100,
+      },
+      password: {
         type: String,
         trim:true,
         required: [true, 'User password is required'],
         minlength:5,
-    },
-    token:{
-        type:String
-    },
-    Company_Name:{
-        type:String,
-        maxlength:200
     },
     Company_Schemerules:{   //cannot be updated by users
         type:String,
@@ -62,10 +65,6 @@ const userSchema = new Schema({
     User_Loan_Request:{
        type:String,
        maxlength:120
-    },
-    date_of_joining_company: {
-        type: Date,
-        required: [true, 'This field is required']
     },
     grade_level: {
         type: String,
@@ -76,11 +75,6 @@ const userSchema = new Schema({
                 type: String,
                 required: [true, 'Bank name is required'],
                 maxlength:300,
-            },
-            bankBranch: {
-                type: String,
-                maxlength:200,
-                required: [true, 'Bank branch is required']
             },
             accountName: {
                 type: String,
@@ -94,13 +88,6 @@ const userSchema = new Schema({
             }
         },
     next_of_kin_information: {
-        fullName:{
-            type:String,
-            required:[true, 'FirstName is required'],
-            maxlength:300,
-            
-        },
-        
         NextOfKinEmail: {
             type: String,
             required: [true, 'User email required'],
@@ -108,22 +95,17 @@ const userSchema = new Schema({
             unique:false,
             maxlength:200
         },
-        NextOfKinStreet:{
-            type:String,
-            required:true,
-            maxlength:200
-        },
-        NextOfKinCity:{
+        NextOfKinlastName:{
             type: String,
             required:true,
             maxlength:120
         },
-        NextOfKinState: {
-            type: String,
-            uppercase: true,
-            required: true,
-            maxlength:100
-        },
+        // NextOfKinState: {
+        //     type: String,
+        //     uppercase: true,
+        //     required: true,
+        //     maxlength:100
+        // },
         NextOfKinPhone: {
             type: Number,
             required: [true, 'User phone number required'],
@@ -142,7 +124,7 @@ const userSchema = new Schema({
         required: [true, 'This field is required']
     },
     dividend_received: {
-        type: String,
+        type: Array,
         maxlength:120,
         required: [true, 'This field is required']
     },
@@ -159,12 +141,13 @@ const userSchema = new Schema({
     make_buy_request:{
         type:Boolean,
         maxlength:500,
-        required:[true,'This field is required']
+        required:[false,'This field is required']
     },
+    
     make_sell_request:{
         type:Boolean,
         maxlength:120,
-        required:[true,'This field is required']
+        required:[false,'This field is required']
     },
     number_of_vested_shares: {
         type: Number,
@@ -181,14 +164,14 @@ const userSchema = new Schema({
         type: Date,
         required: [true, 'This field is required']
     },
-    corresponding_vesting_date: {
-        type: Date,
-        required: [true, 'This field is required']
-    },
-    corresponding_date_of_sale: {
-        type: Date,
-        required: [true, 'This field is required']
-    },
+    // corresponding_vesting_date: {
+    //     type: Date,
+    //     required: [true, 'This field is required']
+    // },
+    // corresponding_date_of_sale: {
+    //     type: Date,
+    //     required: [true, 'This field is required']
+    // },
     role:{
         type: String,
         default: "user"

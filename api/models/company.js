@@ -29,7 +29,7 @@ const companySchema = new Schema({
         type: Number,
         required: true
     },
-    totalUnallotedShares: {
+    totalUnallocatedShares: {
         type: Number,
         required: true
     },
@@ -46,9 +46,9 @@ const companySchema = new Schema({
         required: true
     },
     vestingDate:{
-    type:Date,
+    type:String,
     required:true
-    },
+},
     dateOfAllocation: {
         type: Date,
         required: true
@@ -60,7 +60,7 @@ const companySchema = new Schema({
         maxlength:200
     },
     dividendTypeShare: {
-        type: Boolean,
+        type: String,
         required: true
     },
     dividendTypeCash: {
@@ -105,10 +105,6 @@ const companySchema = new Schema({
         type: Number,
         required: true
     },
-    purchasePrice: {
-        type: Number,
-        required: true
-    },
     grade:{
         type:String,
         maxlength:190
@@ -120,14 +116,10 @@ const companySchema = new Schema({
     schemeRules: {
         type: String,
         required: true
-    },
-    user: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-    }]    
+    }    
 });
 
 
 
-const Company = mongoose.model('Company', companySchema);
-module.exports = {Company};
+const CompanyModel = mongoose.model('Company', companySchema);
+module.exports = {CompanyModel};

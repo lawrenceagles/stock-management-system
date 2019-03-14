@@ -15,8 +15,11 @@ class OnBoardCompany extends Component {
       totalSharesAllotedToScheme: '',
       totalSharesAllotedToSchemeMembers: '',
       totalUnallocatedShares: '',
+      totalSharesRepurchased:'',
+      totalDividentDeclared:'',
       totalSchemeMembers: '',
       dateOfAllocation: '',
+      initialShareSale:'',
       vestingDate: '',
       dividendTypeCash: false,
       bonus: false,
@@ -25,6 +28,7 @@ class OnBoardCompany extends Component {
       currentShareValuation: '',
       canBuyShares: false,
       canSellShares: false,
+      canRepurchase:'',
       totalSharesForfieted: '',
       canCollateriseShares: false,
       purchasePrice: '',
@@ -49,7 +53,10 @@ class OnBoardCompany extends Component {
       totalSharesAllotedToScheme,
       totalSharesAllotedToSchemeMembers,
       totalUnallocatedShares,
+      totalDividentDeclared,
+      totalSharesRepurchased,
       totalSchemeMembers,
+      totalUnallotedShares,
       dateOfAllocation,
       vestingDate,
       dividendTypeCash,
@@ -59,9 +66,11 @@ class OnBoardCompany extends Component {
       currentShareValuation,
       canBuyShares,
       canSellShares,
+      canRepurchase,
       totalSharesForfieted,
       canCollateriseShares,
       purchasePrice,
+      initialShareSale,
       paymentPeriod,
       grade,
       level,
@@ -75,6 +84,9 @@ class OnBoardCompany extends Component {
       totalSharesAllotedToSchemeMembers,
       totalUnallocatedShares,
       totalSchemeMembers,
+      totalSharesRepurchased,
+      totalUnallotedShares,
+      totalDividentDeclared,
       dateOfAllocation,
       vestingDate,
       dividendTypeCash,
@@ -82,30 +94,67 @@ class OnBoardCompany extends Component {
       dividendTypeShare,
       dividendRatePerShares,
       currentShareValuation,
+      canRepurchase,
       canBuyShares,
       canSellShares,
+      initialShareSale,
       totalSharesForfieted,
       canCollateriseShares,
       purchasePrice,
       paymentPeriod,
       grade,
       level,
-      schemeRules,
+      schemeRules
     };
+    const data = {
+      name:"Nokia",
+      type:"private",
+      totalSchemeMembers:23,
+      totalSharesAllotedToScheme:100000,
+      totalSharesAllotedToSchemeMembers:70000,
+        totalUnallotedShares:30000,
+        totalSharesForfieted:210000,
+        totalSharesRepurchased:3000,
+        totalDividentDeclared:23444,
+        dividendTypeShare:"false",
+        dividendTypeCash:"true",
+        vestingDate:"4/3/12",
+        schedule:"cash",
+        bonus:"12",
+        grade:"senior",
+        level:"null",
+        dividendType:"cash",
+        dividendRatePerShares:"12",
+        canBuyShares:true,
+        canSellShares:true,
+        currentShareValuation:"22",
+        canCollateriseShares:false,
+        sharePrice:211,
+        canRepurchase:true,
+        initialShareSale:122,
+        schemeRules:"i am a scheme rule",
+        dateOfAllocation:23,
+        dateOfPurchase:2001,
+        paymentPeriod:"annual"
+    }
 
-    axios.post(`http://localhost:${PORT}/registration`, companyData)
-      .then(res => {
-        this.setState({ 
-          success: true,
-          res
-         });
-      })
-      .catch(error => {
-       console.log(error) 
-      });
-  };
+      axios.post(`http://localhost:${PORT}/reg`, companyData,
+       {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+})
+.then(response => { 
+	console.log(response)
+})
+.catch(error => {
+    console.log(error.response)
+});
+   };
 
   render() {
+    
+    console.log(this.state) 
     const {
       name,
       type,
@@ -113,6 +162,9 @@ class OnBoardCompany extends Component {
       totalSharesAllotedToSchemeMembers,
       totalUnallocatedShares,
       totalSchemeMembers,
+      initialShareSale,
+      totalDividentDeclared,
+      totalSharesRepurchased,
       dateOfAllocation,
       vestingDate,
       dividendTypeCash,
@@ -124,6 +176,7 @@ class OnBoardCompany extends Component {
       canSellShares,
       totalSharesForfieted,
       canCollateriseShares,
+      canRepurchase,
       purchasePrice,
       paymentPeriod,
       grade,
@@ -133,7 +186,6 @@ class OnBoardCompany extends Component {
       error,
     } = this.state;
     return (
-      
           <div className="content">
             <section>
               <div className="container ">
@@ -220,6 +272,68 @@ class OnBoardCompany extends Component {
                             />
                           </div>
                         </div>
+                        <div className="form-row mb-4">
+                          <div className="form-group col-md-6">
+                            <label htmlFor="inputEmail4">
+                              Repurchased Shares
+                            </label>
+                            <input
+                              type="text"
+                              id="totalSharesRepurchased"
+                              value={totalSharesRepurchased}
+                              error={error}
+                              onChange={this.onChange}
+                              required
+                              className="form-control"
+                            />
+                          </div>
+                          <div className="form-group col-md-6">
+                            <label htmlFor="inputEmail4">
+                              Dividend Declared
+                            </label>
+                            <input
+                              type="text"
+                              id="totalDividentDeclared"
+                              value={totalDividentDeclared}
+                              error={error}
+                              onChange={this.onChange}
+                              required
+                              className="form-control"
+                            />
+                          </div>
+                        </div>
+                        <div className="form-row mb-4">
+                          <div className="form-group col-md-6">
+                            <label htmlFor="inputEmail4">
+                              Can Repurchase Shares
+                            </label>
+                            <input
+                              type="text"
+                              id="canRepurchase"
+                              value={canRepurchase}
+                              error={error}
+                              onChange={this.onChange}
+                              required
+                              placeholder='true/false'
+                              className="form-control"
+                            />
+                          </div>
+                          <div className="form-group col-md-6">
+                            <label htmlFor="inputEmail4">
+                              Initail Share Sale
+                            </label>
+                            <input
+                              type="text"
+                              id="initialShareSale"
+                              value={initialShareSale}
+                              error={error}
+                              onChange={this.onChange}
+                              required
+                              className="form-control"
+                            />
+                          </div>
+                        </div>
+
 
                         <div className="form-row ">
                           <div className="form-group col-md-4">
@@ -460,7 +574,7 @@ class OnBoardCompany extends Component {
                           className="float-right p-2 btn c-btn-bg2"
                           onClick={this.onBoardCompany}
                         >
-                          Submit{' '}
+                          Submit
                         </button>
                       </form>
                     </div>
