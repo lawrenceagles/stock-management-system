@@ -5,7 +5,9 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 
 const {Admin} = require ('../models/admin');
+const {User} = require("../models/user");
 const {Log} = require ('../models/audit_Trail');
+const {Notifcations} = require('../models/notifications');
 const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
 
@@ -65,6 +67,15 @@ router.get('/admin/:role',  (req, res)=>{
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role', 'password']);
+
+    Admin.findByEmail(body.email).then(doc=>{
+        if(doc){
+            return Promise.reject();
+        }
+    }).catch((e)=>{
+        return res.status(400).send("Admin already exists");
+    })
+
     let admin = new Admin(body);
 
     let log = new Log({
@@ -75,7 +86,9 @@ router.post('/admin',authenticate, (req, res) => {
 
     log.save();
 
-    admin.save();
+    admin.save().then(doc=>{
+        res.send(doc);
+    });
 });
 
 // signin/login route
@@ -228,5 +241,62 @@ router.get('/audit', (req, res)=>{
         res.send(doc);
     });
 });
+
+// GET ROUTE VIEW ALL NOTIFICATIONS
+router.get('/notification',authenticate, (req,res)=>{
+    // get the admin id from req.admin._id
+    // Notifcations.find({sender: req.admin._id}).then(doc=>{
+    //     if(!doc){
+    //         return res.status(404).send("Error: No notification found")
+    //     }
+    //     res.send(doc);
+    // }).catch(e=>{
+    //     res.status(400).send("Error: problem with route")
+    // }) 
+    
+    const sort = {}
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    }
+    
+    let admin = req.admin;
+        admin.populate({
+            path: 'sentNotifications',
+            sort
+        })
+        .execPopulate()
+        .then(doc=>{
+            res.send(admin.sentNotifications);
+        })
+})
+
+// POST ROUTE SEND NOTIFICATION FOR ADMIN
+router.post('/notification',authenticate, (req, res)=>{
+    let receiverEmail = req.body.email;
+    req.body.onSenderModel = 'Admin'; // set the refPath 
+    req.body.onReceiverModel = 'User';
+
+    User.findOne({email:receiverEmail}).then(doc=>{
+
+        if(!doc){
+            return res.status(404).send("error no user found");
+        }
+
+        new Notifcations({
+            ...req.body,
+            sender:req.admin._id,
+            receiver:[doc._id]
+        }).save().then(doc=>{
+            res.status(201).send(doc);
+        }).catch(e=>{
+            res.status(400).send("Error with the route");
+        });
+
+        // res.send(doc);
+    }).catch(e=>{
+        res.status(404).send("Error no receiver like this in database");
+    });
+})
 
 module.exports = router;

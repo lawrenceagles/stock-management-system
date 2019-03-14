@@ -6,6 +6,7 @@ const _ = require('lodash');
 const path = require("path");
 
 const {authenticateUser} = require('../../middleware/authenticateUser');
+const {authenticate} = require('../../middleware/authenticate');
 const {User} = require("../models/user");
 const {Log} = require ('../models/audit_Trail');
 const {ObjectId} = require('mongodb');
@@ -248,7 +249,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
  //    })
  // })
 
- router.delete('/user/delete/:id', (req,res,next)=>{   //delete
+ router.delete('/user/delete/:id',authenticate, (req,res,next)=>{   //delete
     const id = req.params.id
 
       // Validate the user id
@@ -427,6 +428,64 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                 }
             };
        });
+})
+
+
+// GET ROUTE VIEW ALL NOTIFICATIONS
+router.get('/notification',authenticateUser, (req,res)=>{
+    // get the user id from req.user._id
+    // Notifcations.find({receiver: req.user._id}).then(doc=>{
+    //     if(!doc){
+    //         return res.status(404).send("Error: No notification found")
+    //     }
+    //     res.send(doc);
+    // }).catch(e=>{
+    //     res.status(400).send("Error: problem with route")
+    // }) 
+    
+    const sort = {}
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    }
+
+    let user = req.user;
+    user.populate({
+      path: 'sentNotifications',
+      sort
+    })
+    .execPopulate()
+    .then(doc=>{
+        res.send(user.sentNotifications);
+    })
+})
+
+// POST ROUTE SEND NOTIFICATION FOR user
+router.post('/notification',authenticateUser, (req, res)=>{
+    let receiverEmail = req.body.email;
+    req.body.onSenderModel = 'Admin'; // set the refPath 
+    req.body.onReceiverModel = 'User';
+
+    User.findOne({email:receiverEmail}).then(doc=>{
+
+        if(!doc){
+            return res.status(404).send("error no user found");
+        }
+
+        new Notifcations({
+            ...req.body,
+            sender:req.admin._id,
+            receiver:[doc._id]
+        }).save().then(doc=>{
+            res.status(201).send(doc);
+        }).catch(e=>{
+            res.status(400).send("Error with the route");
+        });
+
+        // res.send(doc);
+    }).catch(e=>{
+        res.status(404).send("Error no receiver like this in database");
+    });
 })
 
 module.exports = router;

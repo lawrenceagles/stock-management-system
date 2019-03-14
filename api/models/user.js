@@ -193,6 +193,11 @@ const userSchema = new Schema({
         type: String,
         default: "user"
     },
+    company:{
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Company'
+    },
     tokens: [{
         access: {
           type: String,
@@ -203,6 +208,18 @@ const userSchema = new Schema({
           required: true
         }
     }]
+});
+
+userSchema.virtual('sentNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'sender'
+});
+
+userSchema.virtual('receivedNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'receiver'
 });
 
 userSchema.pre('save',function(next){
@@ -291,6 +308,15 @@ userSchema.methods.removeToken = function(token) {
       }
     }
   })
+}
+
+userSchema.statics.findByEmail = function(email) {
+    let Admin = this;
+    return Admin.findOne({email}).then((admin)=> { // find admin by email
+        if(admin){ 
+            return resolve(admin);
+        }
+    });
 }
 
 const User = mongoose.model('User', userSchema);
