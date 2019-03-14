@@ -15,12 +15,8 @@ class Dashboard extends Component {
   }
 
   componentDidMount() {
-    // const header = {
-    //   'x-auth': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YzgxMGViMzcxYjU4MjY4YzNhNTdlMWYiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTUxOTYxNzc5fQ.2xIyEsLyJaMwXrQ3e3vFNow8L1K1mDwEPvU4HDAaDUw',
-    // };
-
     axios
-      .get('http://localhost:8000/list')
+      .get('http://localhost:7000/list')
       .then(res => {
         this.setState({ companies: res.data });
       })

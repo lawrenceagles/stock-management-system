@@ -92,7 +92,7 @@ class OnBoardCompany extends Component {
     };
 
     axios
-      .post('http://localhost:8000/registration', companyData)
+      .post('http://localhost:7000/registration', companyData)
       .then(res => {
         this.setState({ success: true });
       })

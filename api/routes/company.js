@@ -16,20 +16,19 @@ router.post('/company/registration',authenticate,(req,res,next)=>{
      }
     else{
        const company = new Company({...req.body});
-
+      
         let log = new Log({
             createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
             action: `created a company `,
             company: `${company.name}`
 
-        });
+         });
 
         log.save();
 
         company.save()
     .then(response=>{
              res.status(200).json({
-                response,
                 info:"save successfull"
             })
         })
