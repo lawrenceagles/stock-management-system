@@ -118,13 +118,15 @@ const companySchema = new Schema({
     schemeRules: {
         type: String,
         required: true
-    },
-    user: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-    }]    
+    }    
 });
 
+
+companySchema.virtual('staffs', {
+  ref: 'User',
+  localField: '_id',
+  foreignField: 'company'
+});
 
 
 const Company = mongoose.model('Company', companySchema);

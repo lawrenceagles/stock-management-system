@@ -193,6 +193,11 @@ const userSchema = new Schema({
         type: String,
         default: "user"
     },
+    company:{
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Company'
+    },
     tokens: [{
         access: {
           type: String,
@@ -203,6 +208,18 @@ const userSchema = new Schema({
           required: true
         }
     }]
+});
+
+userSchema.virtual('sentNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'sender'
+});
+
+userSchema.virtual('receivedNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'receiver'
 });
 
 userSchema.pre('save',function(next){
@@ -301,19 +318,6 @@ userSchema.statics.findByEmail = function(email) {
         }
     });
 }
-
-
-userSchema.virtual('sentNotifications', {
-  ref: 'Notifcations',
-  localField: '_id',
-  foreignField: 'sender'
-});
-
-userSchema.virtual('receivedNotifications', {
-  ref: 'Notifcations',
-  localField: '_id',
-  foreignField: 'receiver'
-});
 
 const User = mongoose.model('User', userSchema);
 module.exports = {User};

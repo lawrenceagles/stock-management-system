@@ -7,51 +7,24 @@ const {authenticate} = require('../../middleware/authenticate');
 const {Log} = require ('../models/audit_Trail');
 
 // Company Onboarding Route
-router.post('/registration',(req,res,next)=>{
+router.post('/company/registration',authenticate,(req,res,next)=>{
     Company.find({name:req.body.name},(err,doc)=>{
     if(doc.length){
         res.status(400).json({
-         message:`Bad request name conflict`
+         message:`A company with that name already exists`
         })
      }
     else{
-       const company = new Company
-        company.name=req.body.name;
-        company.type=req.body.type;
-        company.totalSchemeMembers=req.body.totalSchemeMembers;
-        company.totalSharesAllotedToScheme=req.body.totalSharesAllotedToScheme;
-        company.totalSharesAllotedToSchemeMembers=req.body.totalSharesAllotedToSchemeMembers;
-        company.totalUnallotedShares=req.body.totalUnallotedShares;
-        company.totalSharesSold=req.body.totalSharesSold;
-        company.totalSharesBought=req.body.totalSharesBought;
-        company.totalSharesForfieted=req.body.totalSharesForfieted;
-        company.totalSharesRepurchased=req.body.totalSharesRepurchased;
-        company.totalDividentDeclared=req.body.totalDividentDeclared;
-        company.vestingDate=req.body.vestingDate;
-        company.dateOfAllocation=req.body.dateOfAllocation;
-        company.dividendType=req.body.dividendType;
-        company.dividendRatePerShares=req.body.dividendRatePerShares;
-        company.canBuyShares=req.body.canBuyShares;
-        company.canSellShares=req.body.canSellShares;
-        company.canCollateriseShares=req.body.canCollateriseShares;
-        company.sharePrice=req.body.sharePrice;
-        company.currentShareValuation=req.body.currentShareValuation;
-        company.canRepurchase=req.body.canRepurchase;
-        company.initialShareSale=req.body.initialShareSale;
-        company.purchasePrice=req.body.purchasePrice;
-        company.schemeRules=req.body.schemeRules;
-        company.dateOfPurchase=req.body.dateOfPurchase;
-        company.paymentPeriod=req.body.paymentPeriod;
-        company.userList = req.body.userList;
+       const company = new Company({...req.body});
 
         let log = new Log({
             createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-            action: `${req.admin.lastname} ${req.admin.firstname} created a company `,
+            action: `created a company `,
             company: `${company.name}`
 
         });
 
-        // log.save();
+        log.save();
 
         company.save()
     .then(response=>{
@@ -69,7 +42,7 @@ router.post('/registration',(req,res,next)=>{
     })
 })
 
-router.get('/list',authenticate,(req,res,next)=>{ 
+router.get('/comapany/list',authenticate,(req,res,next)=>{ 
     const sort = {}
 
     let pageOptions = {
@@ -91,6 +64,20 @@ router.get('/list',authenticate,(req,res,next)=>{
             res.status(200).json(doc);
         })   
 })
+
+
+// GET Route to get all company staffs
+router.get('/company/:name',authenticate, (req,res)=>{
+    let name = req.params.name;
+    Company.findOne({name}).then(doc=>{
+        if(!doc){
+            res.status(404).send("Error: No company with that name")
+        }
+        res.send(doc);
+    })
+});
+
+
 //log out
     router.get('/logout',  function (req, res, next)  {
     console.log(req.token)
@@ -123,7 +110,7 @@ router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
                 else{
                     let log = new Log({
                         createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-                        action: `${req.admin.lastname} ${req.admin.firstname} deleted a company`,
+                        action: `deleted a company`,
                         company: `${company.name}`
                         
                     });
