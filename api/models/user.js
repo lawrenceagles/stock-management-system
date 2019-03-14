@@ -16,18 +16,20 @@ const userSchema = new Schema({
     firstName: {
         type: String,
         maxlength:120,
+        trim: true,
         required: [true, 'User First Name is required']
     },
     lastName: {
         type: String,
         maxlength:120,
+        trim: true,
         required: [true, 'User Last Name is required']
     },
     email: {
         type: String,
         required: [true, 'User email required'],
-        trim: true,
         maxlength:120,
+        trim: true,
         validate: {
             validator: validator.isEmail,
             message: '{VALUE }is not a valid Email!'
@@ -45,19 +47,15 @@ const userSchema = new Schema({
       },
     password: {
         type: String,
-        trim:true,
         required: [true, 'User password is required'],
         minlength:5,
     },
     token:{
-        type:String
-    },
-    Company_Name:{
         type:String,
-        maxlength:200
     },
     Company_Schemerules:{   //cannot be updated by users
         type:String,
+        trim: true,
     },
     User_Loan_Request:{
        type:String,
@@ -74,21 +72,25 @@ const userSchema = new Schema({
     bankDetails:{
             bankName: {
                 type: String,
+                trim: true,
                 required: [true, 'Bank name is required'],
                 maxlength:300,
             },
             bankBranch: {
                 type: String,
+                trim: true,
                 maxlength:200,
                 required: [true, 'Bank branch is required']
             },
             accountName: {
                 type: String,
+                trim: true,
                 maxlength:300,
                 required: [true, 'Account name is required']
             },
             accountNumber: {
                 type: Number,
+                trim: true,
                 maxlength:300,
                 required: [true, 'Account number is required']
             }
@@ -96,6 +98,7 @@ const userSchema = new Schema({
     next_of_kin_information: {
         fullName:{
             type:String,
+            trim: true,
             required:[true, 'FirstName is required'],
             maxlength:300,
             
@@ -103,34 +106,39 @@ const userSchema = new Schema({
         
         NextOfKinEmail: {
             type: String,
-            required: [true, 'User email required'],
             trim: true,
+            required: [true, 'User email required'],
             unique:false,
             maxlength:200
         },
         NextOfKinStreet:{
             type:String,
+            trim: true,
             required:true,
             maxlength:200
         },
         NextOfKinCity:{
             type: String,
+            trim: true,
             required:true,
             maxlength:120
         },
         NextOfKinState: {
             type: String,
+            trim: true,
             uppercase: true,
             required: true,
             maxlength:100
         },
         NextOfKinPhone: {
             type: Number,
+            trim: true,
             required: [true, 'User phone number required'],
             maxlength:120,
           },
         NextOfKinRelationship: {
-               type: String,
+              type: String,
+              trim: true,
               required: [true, 'This field cannot be empty'],
               maxlength:120,
         }
@@ -143,6 +151,7 @@ const userSchema = new Schema({
     },
     dividend_received: {
         type: String,
+        trim: true,
         maxlength:120,
         required: [true, 'This field is required']
     },

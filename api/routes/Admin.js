@@ -48,7 +48,7 @@ router.get('/admin',authenticate,(req, res) => {
 );
 
 // SORT find by role
-router.get('/admin/:role',  (req, res)=>{
+router.get('/admin/role/:role',  (req, res)=>{
     let role = req.params.role
     Admin.find({role}).then(docs=>{
 
@@ -79,7 +79,7 @@ router.post('/admin',authenticate, (req, res) => {
     let admin = new Admin(body);
 
     let log = new Log({
-        action: `${req.admin.lastname} ${req.admin.firstname} created a new admin`,
+        action: `Created a new admin`,
         createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
         user: `${admin.firstname} ${admin.lastname}`
     });
@@ -123,19 +123,19 @@ router.delete('/admin/logout',authenticate, (req, res)=>{
 
 
 // GET :id Route to get single admin
-router.get('/admin/:id',authenticate, (req, res) => {
+router.get('/admin/:username',authenticate, (req, res) => {
     // destructure the req.params object to get the object id.
-    let id = req.params.id;
+    let username = req.params.username;
 
     // checks if the object is valid
-    if(!ObjectId.isValid(id)) {
-        res.status(404).send();
-    }
+    // if(!ObjectId.isValid(id)) {
+    //     res.status(400).send("Invalid ObjectId");
+    // }
 
     // find the admin by id.
-    Admin.findById(id).then((doc)=> {
+    Admin.findOne({username}).then((doc)=> {
         let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} viewed an admin profile`,
+            action: `viewed an admin profile`,
             createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
             user: `${doc.firstname} ${doc.lastname}`
         });
@@ -143,9 +143,9 @@ router.get('/admin/:id',authenticate, (req, res) => {
         log.save();
 
         // if admin is not found return error 404 otherwise send the admin.
-        doc ? res.send(doc) : res.status(404).send();
+        doc ? res.send(doc) : res.status(404).send("No admin found");
     }).catch((e)=>{
-        res.status(400).send();
+        res.status(400).send("Error: Something is wrong with the route");
     })
 
 });
@@ -167,14 +167,18 @@ router.patch('/admin/:id',authenticate, (req, res) => {
             res.status(404).send();
         }
 
-        let password = doc.password;
-        let hash = bcrypt.hashSync(password, saltRounds);
-        doc.password = hash;
+        if(req.password !== doc.password){
+            let password = doc.password;
+            let saltRounds = 10;
+            let hash = bcrypt.hashSync(password, saltRounds);
+            doc.password = hash;
+        }
+
         doc.save();
 
         Admin.findById(id).then(doc=>{
             let log = new Log({
-                action: `${req.admin.lastname} ${req.admin.firstname} edited an admin profile`,
+                action: `$Edited an admin profile`,
                 createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
                 user: `${doc.firstname} ${doc.lastname}`
             });
@@ -184,7 +188,7 @@ router.patch('/admin/:id',authenticate, (req, res) => {
         })
         
     }).catch((e)=>{
-        res.status(400).send();
+        res.status(400).send(e, "Error update error");
     });
     
 });
@@ -205,14 +209,14 @@ router.delete('/admin/:id',authenticate, (req, res) => {
         }
 
         let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} deleted an admin profile`,
+            action: `Deleted an admin profile`,
             createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
             user: `${doc.firstname} ${doc.lastname}`
         });
 
         log.save();
 
-        res.send(doc); // return the deleted doc (admin) if found and deleted
+        res.send("Admin succefully deleted"); // return the deleted doc (admin) if found and deleted
     }).catch((e)=>{
         res.status(400).send();
     });

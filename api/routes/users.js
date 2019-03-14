@@ -8,6 +8,7 @@ const path = require("path");
 const {authenticateUser} = require('../../middleware/authenticateUser');
 const {authenticate} = require('../../middleware/authenticate');
 const {User} = require("../models/user");
+const {Company} = require('../models/company');
 const {Log} = require ('../models/audit_Trail');
 const {ObjectId} = require('mongodb');
 
@@ -59,67 +60,68 @@ router.post("/upload", (req, res, next) => {
     });
   });  
 //create new user
-router.post("/users",authenticateUser,(req, res, next) => {
-    User.findOne({'employee_number':req.body.employee_number},(err,newuser)=>{
-        if(newuser) return res.status(404).json({
-             message:` User already exist`
-         })
+router.post("/:companyName/users",authenticateUser,(req, res, next) => {
+    let companyName = req.params.companyName;
+    let email = req.body.email;
+    let employee_number = req.body.employee_number;
 
-        let user = new User
-            user.employee_number=req.body.employee_number;
-            user.firstName=req.body.firstName;
-            user.lastName=req.body.lastName;
-            user.email=req.body.email;
-            user.gender = req.body.gender;
-            user.phone=req.body.phone;
-            user.password=req.body.password;
-            user.UserImage = req.body.UserImage;
-            user.date_of_joining_company=req.body.date_of_joining_company;
-            user.grade_level=req.body.grade_level;
-            user.Company_Name=req.body.Company_Name;
-            user.Company_Schemerules = req.body.Company_Schemerules;
-            user.bankDetails.bankName = req.body.bankName;
-            user.bankDetails.bankBranch  = req.body.bankBranch;
-            user.bankDetails.accountName = req.body.accountName;
-            user.bankDetails.accountNumber = req.body.accountNumber;
-            user.next_of_kin_information.fullName = req.body.fullName;
-            user.next_of_kin_information.NextOfKinEmail = req.body.NextOfKinEmail;
-            user.next_of_kin_information.NextOfKinState = req.body.NextOfKinState;
-            user.next_of_kin_information.NextOfKinPhone = req.body.NextOfKinPhone;
-            user.next_of_kin_information.NextOfKinStreet = req.body.NextOfKinStreet;
-            user.next_of_kin_information.NextOfKinCity = req.body.NextOfKinCity;
-            user.next_of_kin_information.NextOfKinRelationship = req.body.NextOfKinRelationship;
-            user.current_value_of_shares=req.body.current_value_of_shares;
-            user.dividend_received = req.body.dividend_received;
-            user.number_of_shares_collaterised = req.body.number_of_shares_collaterised;
-            user.number_of_allocated_shares = req.body.number_of_allocated_shares;
-            user.number_of_vested_shares = req.body.number_of_vested_shares;
-            user.number_of_shares_sold = req.body.number_of_shares_sold;
-            user.allocation_date = req.body.allocation_date;
-            user.make_buy_request = req.body.make_buy_request;
-            user.make_sell_request = req.body.make_sell_request;
-            user.corresponding_vesting_date = req.body.corresponding_vesting_date;
-            user.corresponding_date_of_sale = req.body.corresponding_date_of_sale;
+    Company.findOne({name:companyName}).then(company=>{
+      if(!company){
+        return res.status(400).send("Error No company was selected")
+      }
 
-            let log = new Log({
-                createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
-                action: `${req.admin.lastName} ${req.admin.firstName} created a new user`,
-                user: `${user.firstName} ${user.lastName}`,
-                company: `${user.Company_Name}`             
-            });
+      let companyID = company._id;
+      User.find({email, employee_number}).then(doc=>{
+        console.log(email,employee_number)
+        console.log(doc);
+        if(doc.length > 0){
+          return res.status(400).send("This user already exists in this company");
+        }
 
-            log.save();
+        // create the user
+        let user = new User({
+          ...req.body,
+          company: companyID
+        });
+
+        // log audit trail
+        let log = new Log({
+            createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
+            action: `created a new user`,
+            user: `${user.firstName} ${user.lastName}`,
+            company: `${user.Company_Name}`             
+        });
+
+        log.save();
+
+        user.save().then(doc=>{
+          res.status(201).send(doc);
+        })
+      })
+
+    });
+
+
+    // User.findOne({'employee_number':req.body.employee_number},(err,newuser)=>{
+    //     if(newuser) return res.status(404).json({
+    //          message:` User already exist`
+    //      })
+
+    //     let user = new User({...req.body});
+    //         let log = new Log({
+    //             createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
+    //             action: `created a new user`,
+    //             user: `${user.firstName} ${user.lastName}`,
+    //             company: `${user.Company_Name}`             
+    //         });
+
+    //         log.save();
             
-            user.save().then(() => { // save the user instance 
-                return user.generateToken(); // save the user instance
-            }).then((token) => { // pass pass the token as the value of the custom header 'x-auth' and send header with the newly signed up user.
-                res.header('x-auth', token).send(user);
-            }).catch(err=>{
-                        res.json({
-                            message:`Server error ${err}`
-                        })
-                    })
-                })
+    //           user.save().then(doc=>{
+    //             res.status(201).send(doc);
+    //           })
+
+    //           })
             })
  //login
  router.post('/user/login',(req,res)=>{
@@ -262,7 +264,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
          let log = new Log({
               createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
-              action: `${req.admin.lastName} ${req.admin.firstName} deleted a user`,
+              action: `deleted a user`,
               user: `${doc.firstName} ${doc.lastName}`,
               company: `${doc.Company_Name}`
           });
@@ -406,7 +408,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
                     let log = new Log({
                         createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
-                        action: `${req.admin.lastName} ${req.admin.firstName} updated a user`,
+                        action: `updated a user`,
                         user: `${user.firstName} ${user.lastName}`,
                         company: `${user.Company_Name}`
                     });
