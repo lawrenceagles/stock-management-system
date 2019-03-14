@@ -69,12 +69,21 @@ router.get('/comapany/list',authenticate,(req,res,next)=>{
 // GET Route to get all company staffs
 router.get('/company/:name',authenticate, (req,res)=>{
     let name = req.params.name;
-    Company.findOne({name}).then(doc=>{
-        if(!doc){
-            res.status(404).send("Error: No company with that name")
-        }
-        res.send(doc);
-    })
+    Company.findOne({name})
+        .then(doc=>{
+            doc
+            .populate({
+                path: 'staffs'
+            })
+            .execPopulate()
+            .then(company=>{
+                if(!company){
+                    return res.status(404).send("No scheme member for this company")
+                }
+                res.send(company.staffs);
+            });
+        })
+
 });
 
 
