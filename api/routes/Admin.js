@@ -48,7 +48,7 @@ router.get('/admin',authenticate,(req, res) => {
 );
 
 // SORT find by role
-router.get('/admin/:role',  (req, res)=>{
+router.get('/admin/role/:role',  (req, res)=>{
     let role = req.params.role
     Admin.find({role}).then(docs=>{
 
@@ -123,19 +123,19 @@ router.delete('/admin/logout',authenticate, (req, res)=>{
 
 
 // GET :id Route to get single admin
-router.get('/admin/:id',authenticate, (req, res) => {
+router.get('/admin/:username',authenticate, (req, res) => {
     // destructure the req.params object to get the object id.
-    let id = req.params.id;
+    let username = req.params.username;
 
     // checks if the object is valid
-    if(!ObjectId.isValid(id)) {
-        res.status(404).send();
-    }
+    // if(!ObjectId.isValid(id)) {
+    //     res.status(400).send("Invalid ObjectId");
+    // }
 
     // find the admin by id.
-    Admin.findById(id).then((doc)=> {
+    Admin.findOne({username}).then((doc)=> {
         let log = new Log({
-            action: `${req.admin.lastname} ${req.admin.firstname} viewed an admin profile`,
+            action: `viewed an admin profile`,
             createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
             user: `${doc.firstname} ${doc.lastname}`
         });
@@ -143,9 +143,9 @@ router.get('/admin/:id',authenticate, (req, res) => {
         log.save();
 
         // if admin is not found return error 404 otherwise send the admin.
-        doc ? res.send(doc) : res.status(404).send();
+        doc ? res.send(doc) : res.status(404).send("No admin found");
     }).catch((e)=>{
-        res.status(400).send();
+        res.status(400).send("Error: Something is wrong with the route");
     })
 
 });

@@ -52,10 +52,6 @@ const userSchema = new Schema({
     token:{
         type:String
     },
-    Company_Name:{
-        type:String,
-        maxlength:200
-    },
     Company_Schemerules:{   //cannot be updated by users
         type:String,
     },
