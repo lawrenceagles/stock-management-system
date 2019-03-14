@@ -167,9 +167,13 @@ router.patch('/admin/:id',authenticate, (req, res) => {
             res.status(404).send();
         }
 
-        let password = doc.password;
-        let hash = bcrypt.hashSync(password, saltRounds);
-        doc.password = hash;
+        if(req.password !== doc.password){
+            let password = doc.password;
+            let saltRounds = 10;
+            let hash = bcrypt.hashSync(password, saltRounds);
+            doc.password = hash;
+        }
+
         doc.save();
 
         Admin.findById(id).then(doc=>{
@@ -184,7 +188,7 @@ router.patch('/admin/:id',authenticate, (req, res) => {
         })
         
     }).catch((e)=>{
-        res.status(400).send();
+        res.status(400).send(e, "Error update error");
     });
     
 });
@@ -212,7 +216,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 
         log.save();
 
-        res.send(doc); // return the deleted doc (admin) if found and deleted
+        res.send("Admin succefully deleted"); // return the deleted doc (admin) if found and deleted
     }).catch((e)=>{
         res.status(400).send();
     });
