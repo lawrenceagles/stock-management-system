@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
+import PORT from '../../../config/config'
 
 class EditCompany extends Component {
   constructor(props) {
@@ -92,7 +93,7 @@ class EditCompany extends Component {
     };
 
     axios
-      .post('http://localhost:8000/registration', companyData)
+      .post(`http://localhost:${PORT}/registration`, companyData)
       .then(res => {
         this.setState({ success: true });
       })

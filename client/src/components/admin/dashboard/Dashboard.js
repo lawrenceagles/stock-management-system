@@ -3,6 +3,8 @@ import './Dashboard.styles.css';
 import axios from 'axios';
 import Sidebar from '../templates/Sidebar';
 import TopNavbar from '../templates/TopNavbar';
+import PORT from '../../../config/config'
+
 
 class Dashboard extends Component {
   constructor(props) {
@@ -16,12 +18,12 @@ class Dashboard extends Component {
 
   componentDidMount() {
     axios
-      .get('http://localhost:7000/list')
+      .get(`http://localhost:${PORT}/list`)
       .then(res => {
         this.setState({ companies: res.data });
       })
       .catch(error => {
-        this.setState({ error });
+        this.setState({ error }); 
       });
   }
 

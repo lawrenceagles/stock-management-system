@@ -100,29 +100,8 @@ router.post("/:companyName/users",authenticateUser,(req, res, next) => {
       })
 
     });
+})
 
-
-    // User.findOne({'employee_number':req.body.employee_number},(err,newuser)=>{
-    //     if(newuser) return res.status(404).json({
-    //          message:` User already exist`
-    //      })
-
-    //     let user = new User({...req.body});
-    //         let log = new Log({
-    //             createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
-    //             action: `created a new user`,
-    //             user: `${user.firstName} ${user.lastName}`,
-    //             company: `${user.Company_Name}`             
-    //         });
-
-    //         log.save();
-            
-    //           user.save().then(doc=>{
-    //             res.status(201).send(doc);
-    //           })
-
-    //           })
-            })
  //login
  router.post('/user/login',(req,res)=>{
     User.findOne({'email':req.body.email},(err,user)=>{
@@ -204,52 +183,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
     }).catch((e)=>{
         res.status(400).send();
     })
-
-
-    // User.find({_id:id})
-    // .then(doc=>{
-
-    //     // let log = new Log({
-    //     //     action: `${req.admin.lastName} ${req.admin.firstName} Viewed a user profile, with Name: ${doc.firstName} ${doc.lastName}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
-    //     //     createdBy: `${req.admin.lastName} ${req.admin.firstName}`
-    //     // });
-
-    //     // log.save();
-
-    //    res.status(200).json({
-    //      doc
-    //     })
-    // })
-    // .catch(err=>{
-    //     res.status(500).json({
-    //      message:`an error has occured`
-    //  })
-    // })
  })
-
- // 
- // router.post("/user/:id",authenticateUser,(req,res,next)=>{
- //    let id = req.params.id;
- //    User.find({_id:id})
- //    .then(doc=>{
-
- //       // let log = new Log({
- //       //      action: `${req.admin.lastName} ${req.admin.firstName} updated a user profile, with Name: ${doc.firstName} ${doc.lastName}, Employee Number:${doc.employee_number}, in ${doc.Company_Name}`,
- //       //      createdBy: `${req.admin.lastName} ${req.admin.firstName}`
- //       //  });
-
- //       //  log.save();
-
- //       res.status(200).json({
- //         doc
- //        })
- //    })
- //    .catch(err=>{
- //        res.status(500).json({
- //         message:`an error has occured`
- //     })
- //    })
- // })
 
  router.delete('/user/delete/:id',authenticate, (req,res,next)=>{   //delete
     const id = req.params.id
@@ -324,6 +258,9 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                     if(req.body.lastName){
                         user.lastName = req.body.lastName;
                     }
+                    if(req.body.otherNames){
+                        user.otherNames = req.body.otherNames;
+                    }
                     if(req.body.email){
                         user.email = req.body.email;
                     }
@@ -390,6 +327,10 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                     if(req.body.number_of_allocated_shares){
                         user.number_of_allocated_shares = req.body.number_of_allocated_shares
                     }
+                    if(req.body.NextOfKinlastName){
+                        user.NextOfKinlastName =req.body.NextOfKinlastName;
+                    }
+
                     if(req.body.number_of_vested_shares){
                         user.number_of_vested_shares = req.body.number_of_vested_shares;
                     }
@@ -435,15 +376,6 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
 router.get('/notification',authenticateUser, (req,res)=>{
-    // get the user id from req.user._id
-    // Notifcations.find({receiver: req.user._id}).then(doc=>{
-    //     if(!doc){
-    //         return res.status(404).send("Error: No notification found")
-    //     }
-    //     res.send(doc);
-    // }).catch(e=>{
-    //     res.status(400).send("Error: problem with route")
-    // }) 
     
     const sort = {}
     if (req.query.sortBy) {
