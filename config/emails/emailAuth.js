@@ -4,21 +4,20 @@ const sgMail = require('@sendgrid/mail');
 
 sgMail.setApiKey("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");
 
-const sendCounsellationEmail = (senderEmail, receiverEmail, firstname, lastname)=>{
+const deleteAccountEmail = (Email, firstname, lastname)=>{
 	const msg = {
-	  to: receiverEmail,
-	  from: senderEmail,
-	  subject: `Hello ${lastname} ${firstname} you account has been successfully deleted`,
-	  text: 'and easy to do anywhere, even with Node.js',
-	  html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+	  to: Email,
+	  from: 'vetiva@gmail.com',
+	  subject: "ACCOUNT CANCELLATION",
+	  text: 'Hello ${lastname} ${firstname} your account has been successfully deleted'
 	};
 
 	sgMail.send(msg);
 }
 
 
-const sendBulkEmail = (senderEmail, receiverEmail, firstname, lastname)=>{
-	const receiverBulkEmail = receiverEmail.map(email => ({
+const sendBulkEmail = (receiversEmail, firstname, lastname)=>{
+	const receiverBulkEmail = receiversEmail.map(email => ({
 	    to: [{ email }],
 	    substitutions: emailTemplate.substitutions
 	}));
@@ -29,7 +28,7 @@ const sendBulkEmail = (senderEmail, receiverEmail, firstname, lastname)=>{
 	    body: {
 	        personalizations,
 	        from: {
-	            email: 'vetiva@awwapp.com',
+	            email: 'vetiva@gmail.com',
 	            name: 'Dorotea from AWW'
 	        },
 	        template_id: emailTemplate.template_id,
@@ -40,20 +39,19 @@ const sendBulkEmail = (senderEmail, receiverEmail, firstname, lastname)=>{
 
 
 
-const sendUpdatePasswordEmail = (senderEmail, receiverEmail, firstname, lastname)=>{
+const sendUpdatePasswordEmail = (Email, firstname, lastname)=>{
 	const msg = {
-	  to: receiverEmail,
-	  from: senderEmail,
-	  subject: `Password update request`,
-	  text: '${lastname} ${firstname} has made a request to update passord',
-	  html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+	  to: Email,
+	  from: 'vetiva@gmail.com',
+	  subject: `PASSWORD UPDATE REQUEST`,
+	  text: `${lastname} ${firstname} has made a request to update passord, kindly ignore this mail if it is not you.`
 	};
 
 	sgMail.send(msg);
 }
 
 module.exports = {
-	sendCounsellationEmail,
+	deleteAccountEmail,
 	sendBulkEmail,
 	sendUpdatePasswordEmail
 }

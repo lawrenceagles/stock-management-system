@@ -40,6 +40,10 @@ const userSchema = new Schema({
             message: '{VALUE }is not a valid Email!'
         }
     },
+    toEmail:{
+      type: Boolean,
+      default:false
+    },
     gender:{
         type: String,
         required: true,

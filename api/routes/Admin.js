@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 
 const {Admin} = require ('../models/admin');
 const {User} = require("../models/user");
+const {deleteAccountEmail, sendUpdatePasswordEmail} = require("../../config/emails/emailAuth");
 const {Log} = require ('../models/audit_Trail');
 const {Notifcations} = require('../models/notifications');
 const {ObjectId} = require('mongodb');
@@ -91,6 +92,20 @@ router.post('/admin',authenticate, (req, res) => {
     });
 });
 
+// update Password Route
+router.post('admin/forgetpassword', (req,res)=>{
+    Admin.findOne({email:req.body.email}).then(doc=>{
+        if(!doc){// handle if the user with that email is not found
+            return res.status(404).send("Error this user does not exists in our database");
+        }
+
+        // send forget password email.
+        sendUpdatePasswordEmail(doc.email, doc.firstname, doc.lastname);
+
+        
+    })
+})
+
 // signin/login route
 router.post('/admin/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
@@ -116,6 +131,7 @@ router.post('/admin/login', (req, res) => {
 // signout/logout route
 router.delete('/admin/logout',authenticate, (req, res)=>{
   req.admin.removeToken(req.token).then(()=>{
+    deleteAccountEmail(req.admin.email, req.admin.firstname, req.admin.lastname);
     res.status(200).send("You have successfully logged out");
   }, ()=>{
     res.status(400).send("Error logging out");
@@ -126,7 +142,7 @@ router.delete('/admin/logout',authenticate, (req, res)=>{
 // GET :id Route to get single admin
 router.get('/admin/:id',authenticate, (req, res) => {
     // destructure the req.params object to get the object id.
-    let username = req.params.id;
+    let id = req.params.id;
 
     // checks if the object is valid
     if(!ObjectId.isValid(id)) {
