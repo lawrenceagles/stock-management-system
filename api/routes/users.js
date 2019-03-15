@@ -72,11 +72,11 @@ router.post("/:companyName/users",authenticateUser,(req, res, next) => {
 
       let companyID = company._id;
       User.find({email, employee_number}).then(doc=>{
-        console.log(email,employee_number)
-        console.log(doc);
         if(doc.length > 0){
           return res.status(400).send("This user already exists in this company");
         }
+
+        req.body.username = req.body.username.toLowerCase(); // change username to all lowercase
 
         // create the user
         let user = new User({

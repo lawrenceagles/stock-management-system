@@ -16,7 +16,7 @@ const deleteAccountEmail = (Email, firstname, lastname)=>{
 }
 
 
-const sendBulkEmail = (receiversEmail, firstname, lastname)=>{
+const sendBulkEmail = (receiversEmail, firstname, lastname, password)=>{
 	const receiverBulkEmail = receiversEmail.map(email => ({
 	    to: [{ email }],
 	    substitutions: emailTemplate.substitutions
@@ -39,18 +39,30 @@ const sendBulkEmail = (receiversEmail, firstname, lastname)=>{
 
 
 
-const sendUpdatePasswordEmail = (Email, firstname, lastname)=>{
+const sendUpdatePasswordEmail = (Email, firstname, lastname, password)=>{
 	const msg = {
 	  to: Email,
 	  from: 'vetiva@gmail.com',
 	  subject: `PASSWORD UPDATE REQUEST`,
-	  text: `${lastname} ${firstname} has made a request to update passord, kindly ignore this mail if it is not you.`
+	  text: `${lastname} ${firstname} has made a request to update passord, please login with the passowrd: ${password} and change your password or kindly ignore this mail if it is not you.`
+	};
+
+	sgMail.send(msg);
+}
+
+const sendWelcomePasswordEmail = (Email, firstname, lastname, passord)=>{
+	const msg = {
+	  to: Email,
+	  from: 'vetiva@gmail.com',
+	  subject: `WELCOME TO VETIVA SHARE SCHEME MANAGEMENT PROGRAM`,
+	  text: `${lastname} ${firstname}, your account has been successfully created. Kindly login with the password ${password}`
 	};
 
 	sgMail.send(msg);
 }
 
 module.exports = {
+	sendWelcomePasswordEmail,
 	deleteAccountEmail,
 	sendBulkEmail,
 	sendUpdatePasswordEmail
