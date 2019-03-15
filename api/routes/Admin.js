@@ -102,22 +102,23 @@ router.post('/admin/login', (req, res) => {
 
         return admin.generateToken().then((token)=> {
             return res.header('x-auth', token).send({
+                _id: admin.id,
                 username: admin.username,
                 role:admin.role,
                 token
             });
         });
     }).catch((e)=> {
-        res.status(400).send("not working");
+        res.status(400).send(e,"not working");
     })
 });
 
 // signout/logout route
 router.delete('/admin/logout',authenticate, (req, res)=>{
   req.admin.removeToken(req.token).then(()=>{
-    res.status(200).send();
+    res.status(200).send("You have successfully logged out");
   }, ()=>{
-    res.status(400).send();
+    res.status(400).send("Error logging out");
   })
 });
 
