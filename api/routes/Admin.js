@@ -102,7 +102,7 @@ router.post('/admin/login', (req, res) => {
 
         return admin.generateToken().then((token)=> {
             return res.header('x-auth', token).send({
-                _id: admin.id,
+                id: admin._id,
                 username: admin.username,
                 role:admin.role,
                 token
@@ -124,17 +124,17 @@ router.delete('/admin/logout',authenticate, (req, res)=>{
 
 
 // GET :id Route to get single admin
-router.get('/admin/:username',authenticate, (req, res) => {
+router.get('/admin/:id',authenticate, (req, res) => {
     // destructure the req.params object to get the object id.
-    let username = req.params.username;
+    let username = req.params.id;
 
     // checks if the object is valid
-    // if(!ObjectId.isValid(id)) {
-    //     res.status(400).send("Invalid ObjectId");
-    // }
+    if(!ObjectId.isValid(id)) {
+        res.status(400).send("Invalid ObjectId");
+    }
 
     // find the admin by id.
-    Admin.findOne({username}).then((doc)=> {
+    Admin.findOne({_id:id}).then((doc)=> {
         let log = new Log({
             action: `viewed an admin profile`,
             createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
