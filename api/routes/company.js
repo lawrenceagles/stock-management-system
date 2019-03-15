@@ -42,7 +42,7 @@ router.post('/company/registration',authenticate,(req,res,next)=>{
     })
 })
 
-router.get('/comapany/list',authenticate,(req,res,next)=>{ 
+router.get('/company/list',authenticate,(req,res,next)=>{ 
     const sort = {}
 
     let pageOptions = {
@@ -258,4 +258,5 @@ router.put('/update/:id',authenticate,(req,res)=>{               //update
             };
        });
 })
+
 module.exports = router;
