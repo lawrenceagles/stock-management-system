@@ -15,6 +15,16 @@ const deleteAccountEmail = (Email, firstname, lastname)=>{
 	sgMail.send(msg);
 }
 
+const sendToOneUser = (Email, firstname, lastname)=>{
+	const msg = {
+	  to: Email,
+	  from: 'vetiva@gmail.com',
+	  subject: "DYNAMIC SUBJECT",
+	  text: 'DYNAMICALLY GENERATED CONTENT'
+	};
+
+	sgMail.send(msg);
+}
 
 const sendBulkEmail = (receiversEmail, firstname, lastname, password)=>{
 	const receiverBulkEmail = receiversEmail.map(email => ({

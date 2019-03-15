@@ -125,7 +125,7 @@ router.patch('/admin/forgetpassword', (req,res)=>{
 
         // save admin with new password
         admin.save().then(doc=>{
-            res.status(200).send(`${randomPassword}, new password successfully regenerated. Hashed: ${hashpassword}`);
+            res.status(200).send(`new password successfully regenerated.`);
         }).catch(e=>{
             return res.status().send(`Failed to update password with error ${e}`)
         })
@@ -255,7 +255,9 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 
         log.save();
 
-        res.send("Admin succefully deleted"); // return the deleted doc (admin) if found and deleted
+        deleteAccountEmail(doc.email, doc.firstname, doc.lastname); // send accound cancellation email to admin
+
+        return res.send("Admin succefully deleted"); // return the deleted doc (admin) if found and deleted
     }).catch((e)=>{
         res.status(400).send();
     });
