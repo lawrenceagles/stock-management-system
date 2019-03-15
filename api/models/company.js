@@ -120,6 +120,12 @@ const companySchema = new Schema({
 });
 
 
+companySchema.virtual('staffs', {
+  ref: 'User',
+  localField: '_id',
+  foreignField: 'company'
+});
+
 
 const Company = mongoose.model('Company', companySchema);
 module.exports = {Company};

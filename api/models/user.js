@@ -16,11 +16,13 @@ const userSchema = new Schema({
     firstName: {
         type: String,
         maxlength:120,
+        trim: true,
         required: [true, 'User First Name is required']
     },
     lastName: {
         type: String,
         maxlength:120,
+        trim: true,
         required: [true, 'User Last Name is required']
     },
     otherNames: {
@@ -31,8 +33,8 @@ const userSchema = new Schema({
     email: {
         type: String,
         required: [true, 'User email required'],
-        trim: true,
         maxlength:120,
+        trim: true,
         validate: {
             validator: validator.isEmail,
             message: '{VALUE }is not a valid Email!'
@@ -55,12 +57,12 @@ const userSchema = new Schema({
       },
       password: {
         type: String,
-        trim:true,
         required: [true, 'User password is required'],
         minlength:5,
     },
     Company_Schemerules:{   //cannot be updated by users
         type:String,
+        trim: true,
     },
     User_Loan_Request:{
        type:String,
@@ -73,16 +75,19 @@ const userSchema = new Schema({
     bankDetails:{
             bankName: {
                 type: String,
+                trim: true,
                 required: [true, 'Bank name is required'],
                 maxlength:300,
             },
             accountName: {
                 type: String,
+                trim: true,
                 maxlength:300,
                 required: [true, 'Account name is required']
             },
             accountNumber: {
                 type: Number,
+                trim: true,
                 maxlength:300,
                 required: [true, 'Account number is required']
             }
@@ -90,13 +95,14 @@ const userSchema = new Schema({
     next_of_kin_information: {
         NextOfKinEmail: {
             type: String,
-            required: [true, 'User email required'],
             trim: true,
+            required: [true, 'User email required'],
             unique:false,
             maxlength:200
         },
         NextOfKinlastName:{
             type: String,
+            trim: true,
             required:true,
             maxlength:120
         },
@@ -108,11 +114,13 @@ const userSchema = new Schema({
         // },
         NextOfKinPhone: {
             type: Number,
+            trim: true,
             required: [true, 'User phone number required'],
             maxlength:120,
           },
         NextOfKinRelationship: {
-               type: String,
+              type: String,
+              trim: true,
               required: [true, 'This field cannot be empty'],
               maxlength:120,
         }
@@ -176,6 +184,11 @@ const userSchema = new Schema({
         type: String,
         default: "user"
     },
+    company:{
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Company'
+    },
     tokens: [{
         access: {
           type: String,
@@ -186,6 +199,18 @@ const userSchema = new Schema({
           required: true
         }
     }]
+});
+
+userSchema.virtual('sentNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'sender'
+});
+
+userSchema.virtual('receivedNotifications', {
+  ref: 'Notifcations',
+  localField: '_id',
+  foreignField: 'receiver'
 });
 
 userSchema.pre('save',function(next){
@@ -274,6 +299,15 @@ userSchema.methods.removeToken = function(token) {
       }
     }
   })
+}
+
+userSchema.statics.findByEmail = function(email) {
+    let Admin = this;
+    return Admin.findOne({email}).then((admin)=> { // find admin by email
+        if(admin){ 
+            return resolve(admin);
+        }
+    });
 }
 
 const User = mongoose.model('User', userSchema);

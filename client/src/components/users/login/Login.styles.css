@@ -1,0 +1,23 @@
+ /** Login Styles */
+ body {
+  font-family: 'Niramit', sans-serif; 
+}
+
+.c-btn-bg { 
+  background: linear-gradient(105.18deg, #08833A -7.85%, #07923F 48.46%, #025122 96.15%);
+   color: white;
+}
+
+.form-control:focus {
+  border-color: inherit;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.btn:hover {
+  color: #fff;
+}
+
+a:hover{
+	text-decoration: none;
+}
