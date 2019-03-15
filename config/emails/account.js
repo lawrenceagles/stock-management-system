@@ -2,20 +2,7 @@
 // https://github.com/sendgrid/sendgrid-nodejs
 const sgMail = require('@sendgrid/mail');
 
-sgMail.setApiKey("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")
-
-
-const sendWelcomeEmail = (email, firstname, lastname)=>{
-	const msg = {
-	  to: receiverEmail,
-	  from: senderEmail,
-	  subject: `Welcome ${lastname} ${firstname} to the vetiva scheme management program`,
-	  text: 'and easy to do anywhere, even with Node.js',
-	  html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-	};
-
-	sgMail.send(msg);
-}
+sgMail.setApiKey("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");
 
 const sendCounsellationEmail = (senderEmail, receiverEmail, firstname, lastname)=>{
 	const msg = {
