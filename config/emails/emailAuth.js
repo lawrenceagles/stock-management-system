@@ -44,13 +44,13 @@ const sendUpdatePasswordEmail = (Email, firstname, lastname, password)=>{
 	  to: Email,
 	  from: 'vetiva@gmail.com',
 	  subject: `PASSWORD UPDATE REQUEST`,
-	  text: `${lastname} ${firstname} has made a request to update passord, please login with the passowrd: ${password} and change your password or kindly ignore this mail if it is not you.`
+	  text: `${lastname} ${firstname} has made a request to retrive passord, please login with the passowrd: ${password} and update your password or kindly ignore this mail if it is not you.`
 	};
 
 	sgMail.send(msg);
 }
 
-const sendWelcomePasswordEmail = (Email, firstname, lastname, passord)=>{
+const sendWelcomePasswordEmail = (Email, firstname, lastname, password)=>{
 	const msg = {
 	  to: Email,
 	  from: 'vetiva@gmail.com',

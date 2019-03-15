@@ -100,30 +100,38 @@ router.post('/admin',authenticate, (req, res) => {
     });
 });
 
-// update Password Request Route
-router.post('admin/forgetpassword', (req,res)=>{
+// forgot Password Request Route
+router.patch('/admin/forgetpassword', (req,res)=>{
     Admin.findOne({email:req.body.email}).then(admin=>{
         if(!admin){// handle if the user with that email is not found
             return res.status(404).send("Error this admin does not exists in our database");
         }
 
-        // check if user is log in and log the user in 
+        // handle user is logged in
         if(admin.tokens.length > 0){
             return res.status(400).send("Error you have to be logged out to make this request");
         }
 
-        // send email with link to update password.
-        sendUpdatePasswordEmail(admin.email, admin.firstname, admin.lastname);
+        // generate a new secure random password for the client
+        randomPassword = genRandomPassword(15);
 
-        return admin.generateToken().then((token)=> {
-            return res.header('x-auth', token).send({
-                id: admin._id,
-                username: admin.username,
-                role:admin.role,
-                token
-            });
-        });           
+        // send email with link to update password.
+        sendUpdatePasswordEmail(admin.email, admin.firstname, admin.lastname, randomPassword);
+
+        let hashpassword = bcrypt.hashSync(randomPassword, 10);          
+
+        // update the user password
+        admin.password = hashpassword;
+
+        // save admin with new password
+        admin.save().then(doc=>{
+            res.status(200).send(`${randomPassword}, new password successfully regenerated. Hashed: ${hashpassword}`);
+        }).catch(e=>{
+            return res.status().send(`Failed to update password with error ${e}`)
+        })
         
+    }).catch(e=>{
+        return res.status(400).send(`Error {e} occured in the update password process. Please try again`);
     })
 });
 
