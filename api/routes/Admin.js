@@ -200,13 +200,13 @@ router.delete('/admin/:id',authenticate, (req, res) => {
     let id = req.params.id;
     // validate the company id
     if(!ObjectId.isValid(id)){
-        res.status(400).send();
+        return res.status(400).send();
     }
     // query to find admin and delete
     Admin.findByIdAndDelete(id).then((doc)=>{
 
         if(!doc){ // if doc is not found return error 404.
-            res.status(404).send("This user is not in the database");
+            return res.status(404).send("This user is not in the database");
         }
 
         let log = new Log({

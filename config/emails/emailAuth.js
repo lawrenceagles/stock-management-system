@@ -53,7 +53,6 @@ const sendUpdatePasswordEmail = (senderEmail, receiverEmail, firstname, lastname
 }
 
 module.exports = {
-	sendWelcomeEmail,
 	sendCounsellationEmail,
 	sendBulkEmail,
 	sendUpdatePasswordEmail
