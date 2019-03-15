@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 
 
-const {Company} = require('../models/company')
+const {Company} = require('../models/company');
+const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
 const {Log} = require ('../models/audit_Trail');
 
@@ -67,7 +68,7 @@ router.get('/company/list',authenticate,(req,res,next)=>{
 
 
 // GET Route to get all company staffs
-router.get('/company/:name',authenticate, (req,res)=>{
+router.get('/companymember/:name',authenticate, (req,res)=>{
     let name = req.params.name;
     Company.findOne({name})
         .then(doc=>{
@@ -83,6 +84,30 @@ router.get('/company/:name',authenticate, (req,res)=>{
                 res.send(company.staffs);
             });
         })
+
+});
+
+
+// GET Route to get all company staffs
+router.get('/company/:id',authenticate, (req,res)=>{
+    let id = req.params.id;
+
+    // validate the company id
+    if(!ObjectId.isValid(id)){
+        return res.status(400).send("Error invalid ObjectId");
+    }
+
+    Company.findOne({_id:id}).then(company=>{
+        if(!company){
+            return res.status(404).send("Error No company Found");
+        }
+
+        res.send(company);
+
+    }).catch(e=>{
+        res.status(400).send(`Error ${e}`);
+    })
+        
 
 });
 
