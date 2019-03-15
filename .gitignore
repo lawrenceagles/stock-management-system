@@ -26,6 +26,5 @@
 
 # SERVER FILES TO BE IGNORED 
 /node_modules
-/config/config.json
 
 
