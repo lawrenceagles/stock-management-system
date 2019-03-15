@@ -258,6 +258,4 @@ router.put('/update/:id',authenticate,(req,res)=>{               //update
             };
        });
 })
-
->>>>>>> cc95f6e8d1959e959abbaf76979b678d6ff9dc00
 module.exports = router;
