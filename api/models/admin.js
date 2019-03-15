@@ -37,6 +37,10 @@ const AdminSchema = new Schema({
             message: '{VALUE }is not a valid Email!'
         }
     },
+    toEmail:{
+      type: Boolean,
+      default:false
+    },
     password: {
       type: String,
       required: [true, "Password is required"],
