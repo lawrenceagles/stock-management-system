@@ -9,6 +9,8 @@ const {Log} = require ('../models/audit_Trail');
 
 // Company Onboarding Route
 router.post('/company/registration',authenticate,(req,res,next)=>{
+    req.body.name = req.body.name.toLowerCase(); // change company name to lower case
+    
     Company.find({name:req.body.name},(err,doc)=>{
     if(doc.length){
         res.status(400).json({

@@ -6,11 +6,12 @@ const bcrypt = require('bcryptjs');
 
 const {Admin} = require ('../models/admin');
 const {User} = require("../models/user");
-const {deleteAccountEmail, sendUpdatePasswordEmail} = require("../../config/emails/emailAuth");
 const {Log} = require ('../models/audit_Trail');
 const {Notifcations} = require('../models/notifications');
 const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
+const {sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail} = require("../../config/emails/emailAuth");
+const {genRandomPassword} = require('../../config/genPassword.js');
 
 const upload = multer({ dest: 'uploads/' }); // configure multer
 
@@ -25,7 +26,6 @@ router.post('/profile', upload.single('image'), function (req, res, next) {
   res.status(200).send(req.file);
 
 });
-
 
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
@@ -67,9 +67,11 @@ router.get('/admin/role/:role',  (req, res)=>{
 
 // POST Route onboard admin
 router.post('/admin',authenticate, (req, res) => {
+    // pick out fields to set and from req.body
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role', 'password']);
+    body.username = body.username.toLowerCase(); // change user name to lowercase
 
-    Admin.findByEmail(body.email).then(doc=>{
+    Admin.findByEmail(body.email).then(doc=>{ // handle already registered admin
         if(doc){
             return Promise.reject();
         }
@@ -77,7 +79,13 @@ router.post('/admin',authenticate, (req, res) => {
         return res.status(400).send("Admin already exists");
     })
 
+    // Auto generate random password for admin
+    body.password = genRandomPassword(10);
+
     let admin = new Admin(body);
+
+    // send welcome email containing password
+    sendWelcomePasswordEmail(body.email,body.firstname,body.lastname,body.password);
 
     let log = new Log({
         action: `Created a new admin`,
@@ -92,19 +100,40 @@ router.post('/admin',authenticate, (req, res) => {
     });
 });
 
-// update Password Route
-router.post('admin/forgetpassword', (req,res)=>{
-    Admin.findOne({email:req.body.email}).then(doc=>{
-        if(!doc){// handle if the user with that email is not found
-            return res.status(404).send("Error this user does not exists in our database");
+// forgot Password Request Route
+router.patch('/admin/forgetpassword', (req,res)=>{
+    Admin.findOne({email:req.body.email}).then(admin=>{
+        if(!admin){// handle if the user with that email is not found
+            return res.status(404).send("Error this admin does not exists in our database");
         }
 
-        // send forget password email.
-        sendUpdatePasswordEmail(doc.email, doc.firstname, doc.lastname);
+        // handle user is logged in
+        if(admin.tokens.length > 0){
+            return res.status(400).send("Error you have to be logged out to make this request");
+        }
 
+        // generate a new secure random password for the client
+        randomPassword = genRandomPassword(15);
+
+        // send email with link to update password.
+        sendUpdatePasswordEmail(admin.email, admin.firstname, admin.lastname, randomPassword);
+
+        let hashpassword = bcrypt.hashSync(randomPassword, 10);          
+
+        // update the user password
+        admin.password = hashpassword;
+
+        // save admin with new password
+        admin.save().then(doc=>{
+            res.status(200).send(`${randomPassword}, new password successfully regenerated. Hashed: ${hashpassword}`);
+        }).catch(e=>{
+            return res.status().send(`Failed to update password with error ${e}`)
+        })
         
+    }).catch(e=>{
+        return res.status(400).send(`Error {e} occured in the update password process. Please try again`);
     })
-})
+});
 
 // signin/login route
 router.post('/admin/login', (req, res) => {
@@ -151,13 +180,6 @@ router.get('/admin/:id',authenticate, (req, res) => {
 
     // find the admin by id.
     Admin.findOne({_id:id}).then((doc)=> {
-        let log = new Log({
-            action: `viewed an admin profile`,
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-            user: `${doc.firstname} ${doc.lastname}`
-        });
-
-        log.save();
 
         // if admin is not found return error 404 otherwise send the admin.
         doc ? res.send(doc) : res.status(404).send("No admin found");

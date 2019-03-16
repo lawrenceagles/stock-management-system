@@ -44,8 +44,7 @@ const AdminSchema = new Schema({
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: 6,
-      default: '###$eatles'
+      minlength: 6
     },
     phone: {
         type: String,
@@ -99,7 +98,7 @@ AdminSchema.methods.toJSON = function() {
 AdminSchema.pre('save', function(next) {
   const admin = this // bind this
 
-  if (admin.$isDefault('password')) {
+  if (admin.isModified('password')) {
     bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
       if (err) {
         return next(err);
