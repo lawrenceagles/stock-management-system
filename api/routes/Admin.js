@@ -61,7 +61,7 @@ router.get('/admin/role/:role',  (req, res)=>{
 
     })
     .catch((e)=>{
-        res.status(400).send();
+        res.status(400).send(`Error cannot get user ${e}`);
     })
 })
 
@@ -131,7 +131,7 @@ router.patch('/admin/forgetpassword', (req,res)=>{
         })
         
     }).catch(e=>{
-        return res.status(400).send(`Error {e} occured in the update password process. Please try again`);
+        return res.status(304).send(`Error {e} occured in the update password process. Please try again`);
     })
 });
 

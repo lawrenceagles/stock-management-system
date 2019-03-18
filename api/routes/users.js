@@ -79,6 +79,8 @@ router.post("/:companyname/users",authenticateUser,(req, res, next) => {
         }
 
         req.body.username = req.body.username.toLowerCase(); // change username to all lowercase
+          // Auto generate random password for admin
+          body.password = genRandomPassword(10);
 
         // create the user
         let user = new User({
