@@ -41,8 +41,7 @@ const userSchema = new Schema({
         }
     },
     toEmail:{
-      type: Boolean,
-      default:false
+      type: Boolean
     },
     gender:{
         type: String,

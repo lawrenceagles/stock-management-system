@@ -91,6 +91,39 @@ router.get('/companymember/:name',authenticate, (req,res)=>{
 
 
 // GET Route to get all company staffs
+// router.get('/company/:name/user/:id',authenticate, (req,res)=>{
+//     let name = req.params.name;
+//     let userID = req.params.id;
+    
+//     console.log(name)
+//     console.log(userID)
+//     console.log(req.params);
+
+// });
+
+
+// get company users by id
+router.get('/companystaff/:id', authenticate, (req,res)=>{
+    let id = req.params.name;
+    Company.findOne({id})
+        .then(doc=>{
+            doc
+            .populate({
+                path: 'staffs'
+            })
+            .execPopulate()
+            .then(company=>{
+                if(!company){
+                    return res.status(404).send("No scheme member for this company")
+                }
+                res.send(company.staffs);
+            });
+        })
+
+})
+
+
+// GET Route to get get company by id
 router.get('/company/:id',authenticate, (req,res)=>{
     let id = req.params.id;
 
@@ -113,22 +146,7 @@ router.get('/company/:id',authenticate, (req,res)=>{
 
 });
 
-
-//log out
-    router.get('/logout',  function (req, res, next)  {
-    console.log(req.token)
-         if (req.token) {
-       req.token.destroy(function (err) {
-         if (err) {
-           return next(err);
-         } else {
-           return res.redirect('/');
-         }
-       });
-     }
-  });
-
-  //delet
+  //delete a company
 router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
  const id = req.params.id
    Company.findOneAndDelete({_id:id})
@@ -201,4 +219,10 @@ router.patch('/company/:id',authenticate,(req,res)=>{               //update
             res.status(400).send(`${e}`, "Error update error");
         });
 })
+
+router.get('/companyusersemail/:id', (req,res)=>{
+    let id = req.params.id;
+
+})
+
 module.exports = router;

@@ -10,7 +10,7 @@ const {Log} = require ('../models/audit_Trail');
 const {Notifcations} = require('../models/notifications');
 const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
-const {sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail} = require("../../config/emails/emailAuth");
+const {sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
 const {genRandomPassword} = require('../../config/genPassword.js');
 
 const upload = multer({ dest: 'uploads/' }); // configure multer
@@ -61,7 +61,7 @@ router.get('/admin/role/:role',  (req, res)=>{
 
     })
     .catch((e)=>{
-        res.status(400).send();
+        res.status(400).send(`Error cannot get user ${e}`);
     })
 })
 
@@ -125,13 +125,13 @@ router.patch('/admin/forgetpassword', (req,res)=>{
 
         // save admin with new password
         admin.save().then(doc=>{
-            res.status(200).send(`${randomPassword}, new password successfully regenerated. Hashed: ${hashpassword}`);
+            res.status(200).send(`new password successfully regenerated.`);
         }).catch(e=>{
             return res.status().send(`Failed to update password with error ${e}`)
         })
         
     }).catch(e=>{
-        return res.status(400).send(`Error {e} occured in the update password process. Please try again`);
+        return res.status(304).send(`Error {e} occured in the update password process. Please try again`);
     })
 });
 
@@ -200,7 +200,7 @@ router.patch('/admin/:id',authenticate, (req, res) => {
         res.status(400).send();
     }
     // find and update the admin by id if it is found, throw error 404 if not
-    Admin.findOneAndUpdate({_id:id}, {$set:body}, {new: true}).then((doc)=>{
+    Admin.findOneAndUpdate({_id:id}, {$set:body}, {new: true, runValidators: true  }).then((doc)=>{
         // check if doc was foun and updated
         if(!doc){
             res.status(404).send();
@@ -255,7 +255,9 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 
         log.save();
 
-        res.send("Admin succefully deleted"); // return the deleted doc (admin) if found and deleted
+        deleteAccountEmail(doc.email, doc.firstname, doc.lastname); // send accound cancellation email to admin
+
+        return res.send("Admin succefully deleted"); // return the deleted doc (admin) if found and deleted
     }).catch((e)=>{
         res.status(400).send();
     });
@@ -326,14 +328,20 @@ router.post('/notification',authenticate, (req, res)=>{
             return res.status(404).send("error no user found");
         }
 
-        new Notifcations({
-            ...req.body,
-            sender:req.admin._id,
-            receiver:[doc._id]
-        }).save().then(doc=>{
+        let sentMessage = new Notifcations({
+                ...req.body,
+                sender:req.admin._id,
+                receiver:[doc._id]
+            });
+
+        if(toEmail){// handle send to email
+            sendToOne(doc.email, doc.firstname, doc.lastname);
+        } 
+
+        sentMessage.save().then(doc=>{
             res.status(201).send(doc);
         }).catch(e=>{
-            res.status(400).send("Error with the route");
+            res.status(400).send(`${e} Error with the route`);
         });
 
         // res.send(doc);

@@ -53,14 +53,16 @@ checkFileType = (file, callback) => {
 router.post("/upload", (req, res, next) => {
     upload(req, res, err => {
       if (err) {
-        console.log(err);
+        res.send(err);
       } else {
         res.send(req.file);
       }
     });
   });  
+
+
 //create new user
-router.post("/:companyName/users",authenticateUser,(req, res, next) => {
+router.post("/:companyname/users",authenticateUser,(req, res, next) => {
     let companyName = req.params.companyName;
     let email = req.body.email;
     let employee_number = req.body.employee_number;
@@ -77,12 +79,17 @@ router.post("/:companyName/users",authenticateUser,(req, res, next) => {
         }
 
         req.body.username = req.body.username.toLowerCase(); // change username to all lowercase
+          // Auto generate random password for admin
+          body.password = genRandomPassword(10);
 
         // create the user
         let user = new User({
           ...req.body,
           company: companyID
         });
+
+        // send welcome email containing password
+      sendWelcomePasswordEmail(req.body.email,req.body.firstname,req.body.lastname,req.body.password);
 
         // log audit trail
         let log = new Log({
@@ -101,6 +108,64 @@ router.post("/:companyName/users",authenticateUser,(req, res, next) => {
 
     });
 })
+
+
+//create new user
+router.get("/:companyname/users",authenticateUser,(req, res, next) => {
+    let companyName = req.params.companyName;
+    let email = req.body.email;
+
+    Company.find({name:companyName}).then(company=>{
+      if(!company){
+        return res.status(400).send("Error No company was selected")
+      }
+
+      let companyID = company._id;
+      User.find({email, employee_number}).then(doc=>{
+        if(doc.length > 0){
+          return res.status(400).send("This user already exists in this company");
+        }
+
+      })
+
+    });
+})
+
+
+// forgot Password Request Route
+router.patch('/user/forgetpassword', (req,res)=>{
+    User.findOne({email:req.body.email}).then(user=>{
+        if(!user){// handle if the user with that email is not found
+            return res.status(404).send("Error this user does not exists in our database");
+        }
+
+        // handle user is logged in
+        if(user.tokens.length > 0){
+            return res.status(400).send("Error you have to be logged out to make this request");
+        }
+
+        // generate a new secure random password for the client
+        randomPassword = genRandomPassword(15);
+
+        // send email with link to update password.
+        sendUpdatePasswordEmail(user.email, user.firstname, user.lastname, randomPassword);
+
+        let hashpassword = bcrypt.hashSync(randomPassword, 10);          
+
+        // update the user password
+        user.password = hashpassword;
+
+        // save user with new password
+        user.save().then(doc=>{
+            res.status(200).send(`new password successfully regenerated.`);
+        }).catch(e=>{
+            return res.status().send(`Failed to update password with error ${e}`)
+        })
+        
+    }).catch(e=>{
+        return res.status(400).send(`Error {e} occured in the update password process. Please try again`);
+    })
+});
 
  //login
  router.post('/user/login',(req,res)=>{
@@ -129,7 +194,7 @@ router.post("/:companyName/users",authenticateUser,(req, res, next) => {
                     })
                 }
             else {
-                console.log('ERROR: Could not log in');
+                res.status(400).send("Error could not login")
             }
          })
     }) 
@@ -139,10 +204,9 @@ router.post("/:companyName/users",authenticateUser,(req, res, next) => {
 router.delete('/user/logout',authenticateUser, (req, res)=>{
     req.user.removeToken(req.token).then(()=>{
 
-      res.status(200).send();
+      res.status(200).send("Logout successfull");
     }, ()=>{
-      console.log()
-      res.status(400).send();
+      res.status(400).send(`Error Logout not successfull ${e}`);
     })
 
     });
@@ -204,6 +268,8 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
           });
 
           log.save();
+
+           deleteAccountEmail(doc.email, doc.firstname, doc.lastname); // send accound cancellation email to admin
 
           res.status(200).json({
               message:"User deleted"
@@ -406,14 +472,18 @@ router.post('/notification',authenticateUser, (req, res)=>{
             return res.status(404).send("error no user found");
         }
 
-        new Notifcations({
-            ...req.body,
-            sender:req.admin._id,
-            receiver:[doc._id]
-        }).save().then(doc=>{
+        let sentMessage = new Notifcations({
+                ...req.body,
+                sender:req.admin._id,
+                receiver:[doc._id]
+            });
+
+        sendToOne(doc.email, doc.firstname, doc.lastname); // send this notification by email also
+
+        sentMessage.save().then(doc=>{
             res.status(201).send(doc);
         }).catch(e=>{
-            res.status(400).send("Error with the route");
+            res.status(400).send(`${e} Error with the route`);
         });
 
         // res.send(doc);

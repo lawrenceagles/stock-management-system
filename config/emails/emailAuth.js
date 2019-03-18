@@ -9,34 +9,33 @@ const deleteAccountEmail = (Email, firstname, lastname)=>{
 	  to: Email,
 	  from: 'vetiva@gmail.com',
 	  subject: "ACCOUNT CANCELLATION",
-	  text: 'Hello ${lastname} ${firstname} your account has been successfully deleted'
+	  text: `Hello ${lastname} ${firstname} your account has been successfully deleted`
 	};
 
 	sgMail.send(msg);
 }
 
+const sendToOne = (Email, firstname, lastname)=>{
+	let msg = {
+	  to: Email,
+	  from: 'vetiva@gmail.com',
+	  subject: "DYNAMIC SUBJECT",
+	  text: 'DYNAMICALLY GENERATED CONTENT'
+	};
 
-const sendBulkEmail = (receiversEmail, firstname, lastname, password)=>{
-	const receiverBulkEmail = receiversEmail.map(email => ({
-	    to: [{ email }],
-	    substitutions: emailTemplate.substitutions
-	}));
-
-	const request = sg.emptyRequest({
-	    method: 'POST',
-	    path: '/v3/mail/send',
-	    body: {
-	        personalizations,
-	        from: {
-	            email: 'vetiva@gmail.com',
-	            name: 'Dorotea from AWW'
-	        },
-	        template_id: emailTemplate.template_id,
-	        categories: emailTemplate.categories
-	    }
-	});
+	sgMail.send(msg);
 }
 
+const sendToMultiple = (Email, firstname, lastname)=>{
+	const msg = {
+	  to: [Email],
+	  from: 'sender@example.org',
+	  subject: 'Hello world',
+	  text: 'Hello plain world!',
+	  html: '<p>Hello HTML world!</p>',
+	};
+	sgMail.sendMultiple(msg);
+}
 
 
 const sendUpdatePasswordEmail = (Email, firstname, lastname, password)=>{
@@ -64,6 +63,7 @@ const sendWelcomePasswordEmail = (Email, firstname, lastname, password)=>{
 module.exports = {
 	sendWelcomePasswordEmail,
 	deleteAccountEmail,
-	sendBulkEmail,
-	sendUpdatePasswordEmail
+	sendUpdatePasswordEmail,
+	sendToOne,
+	sendToMultiple
 }
