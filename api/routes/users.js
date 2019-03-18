@@ -53,7 +53,7 @@ checkFileType = (file, callback) => {
 router.post("/upload", (req, res, next) => {
     upload(req, res, err => {
       if (err) {
-        console.log(err);
+        res.send(err);
       } else {
         res.send(req.file);
       }
@@ -102,6 +102,28 @@ router.post("/:companyname/users",authenticateUser,(req, res, next) => {
         user.save().then(doc=>{
           res.status(201).send(doc);
         })
+      })
+
+    });
+})
+
+
+//create new user
+router.get("/:companyname/users",authenticateUser,(req, res, next) => {
+    let companyName = req.params.companyName;
+    let email = req.body.email;
+
+    Company.find({name:companyName}).then(company=>{
+      if(!company){
+        return res.status(400).send("Error No company was selected")
+      }
+
+      let companyID = company._id;
+      User.find({email, employee_number}).then(doc=>{
+        if(doc.length > 0){
+          return res.status(400).send("This user already exists in this company");
+        }
+
       })
 
     });
@@ -170,7 +192,7 @@ router.patch('/user/forgetpassword', (req,res)=>{
                     })
                 }
             else {
-                console.log('ERROR: Could not log in');
+                res.status(400).send("Error could not login")
             }
          })
     }) 
@@ -180,10 +202,9 @@ router.patch('/user/forgetpassword', (req,res)=>{
 router.delete('/user/logout',authenticateUser, (req, res)=>{
     req.user.removeToken(req.token).then(()=>{
 
-      res.status(200).send();
+      res.status(200).send("Logout successfull");
     }, ()=>{
-      console.log()
-      res.status(400).send();
+      res.status(400).send(`Error Logout not successfull ${e}`);
     })
 
     });
