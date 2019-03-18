@@ -5,8 +5,9 @@ let authenticate = (req, res, next) => {
         
         Admin.findByToken(token).then((admin) => { // model method to find admin by token
         if(!admin) { // reject the promise if no admin is found
-            return Promise.reject();
+            // return Promise.reject();
             // you can redirect the user to the login page!
+            console.log("token user not found")
         }
         req.admin = admin;
         req.token = token;

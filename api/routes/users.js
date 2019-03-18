@@ -62,7 +62,7 @@ router.post("/upload", (req, res, next) => {
 
 
 //create new user
-router.post("/:companyName/users",authenticateUser,(req, res, next) => {
+router.post("/:companyname/users",authenticateUser,(req, res, next) => {
     let companyName = req.params.companyName;
     let email = req.body.email;
     let employee_number = req.body.employee_number;
@@ -449,14 +449,18 @@ router.post('/notification',authenticateUser, (req, res)=>{
             return res.status(404).send("error no user found");
         }
 
-        new Notifcations({
-            ...req.body,
-            sender:req.admin._id,
-            receiver:[doc._id]
-        }).save().then(doc=>{
+        let sentMessage = new Notifcations({
+                ...req.body,
+                sender:req.admin._id,
+                receiver:[doc._id]
+            });
+
+        sendToOne(doc.email, doc.firstname, doc.lastname); // send this notification by email also
+
+        sentMessage.save().then(doc=>{
             res.status(201).send(doc);
         }).catch(e=>{
-            res.status(400).send("Error with the route");
+            res.status(400).send(`${e} Error with the route`);
         });
 
         // res.send(doc);

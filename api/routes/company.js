@@ -90,7 +90,28 @@ router.get('/companymember/:name',authenticate, (req,res)=>{
 });
 
 
-// GET Route to get all company staffs
+// get company users by id
+router.get('/companystaff/:id', authenticate, (req,res)=>{
+    let id = req.params.name;
+    Company.findOne({id})
+        .then(doc=>{
+            doc
+            .populate({
+                path: 'staffs'
+            })
+            .execPopulate()
+            .then(company=>{
+                if(!company){
+                    return res.status(404).send("No scheme member for this company")
+                }
+                res.send(company.staffs);
+            });
+        })
+
+})
+
+
+// GET Route to get get company by id
 router.get('/company/:id',authenticate, (req,res)=>{
     let id = req.params.id;
 

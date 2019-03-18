@@ -9,13 +9,13 @@ const deleteAccountEmail = (Email, firstname, lastname)=>{
 	  to: Email,
 	  from: 'vetiva@gmail.com',
 	  subject: "ACCOUNT CANCELLATION",
-	  text: 'Hello ${lastname} ${firstname} your account has been successfully deleted'
+	  text: `Hello ${lastname} ${firstname} your account has been successfully deleted`
 	};
 
 	sgMail.send(msg);
 }
 
-const sendToOneUser = (Email, firstname, lastname)=>{
+const sendToOne = (Email, firstname, lastname)=>{
 	const msg = {
 	  to: Email,
 	  from: 'vetiva@gmail.com',
@@ -75,5 +75,6 @@ module.exports = {
 	sendWelcomePasswordEmail,
 	deleteAccountEmail,
 	sendBulkEmail,
-	sendUpdatePasswordEmail
+	sendUpdatePasswordEmail,
+	sendToOne
 }
