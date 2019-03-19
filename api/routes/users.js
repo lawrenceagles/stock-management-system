@@ -5,11 +5,11 @@ const multer =  require('multer');
 const _ = require('lodash');
 const path = require("path");
 
+const {sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
+const {genRandomPassword} = require('../../config/genPassword.js');
 const {authenticateUser} = require('../../middleware/authenticateUser');
 const {authenticate} = require('../../middleware/authenticate');
 const {User} = require("../models/user");
-const {sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
-const {genRandomPassword} = require('../../config/genPassword.js');
 const {Company} = require('../models/company');
 const {Log} = require ('../models/audit_Trail');
 const {ObjectId} = require('mongodb');
@@ -83,7 +83,7 @@ router.post("/:companyname/users",authenticateUser,(req, res, next) => {
 
         // req.body.username = req.body.username.toLowerCase(); // change username to all lowercase
           // Auto generate random password for admin
-          req.body.password = genRandomPassword(10);
+           req.body.password = genRandomPassword(10);
 
         // create the user
         let user = new User({
@@ -111,29 +111,6 @@ router.post("/:companyname/users",authenticateUser,(req, res, next) => {
 
     });
 })
-
-
-//create new user
-router.get("/:companyname/users",authenticateUser,(req, res, next) => {
-    let companyName = req.params.companyName;
-    let email = req.body.email;
-
-    Company.find({name:companyName}).then(company=>{
-      if(!company){
-        return res.status(400).send("Error No company was selected")
-      }
-
-      let companyID = company._id;
-      User.find({email, employee_number}).then(doc=>{
-        if(doc.length > 0){
-          return res.status(400).send("This user already exists in this company");
-        }
-
-      })
-
-    });
-})
-
 
 // forgot Password Request Route
 router.patch('/user/forgetpassword', (req,res)=>{
