@@ -8,6 +8,8 @@ const path = require("path");
 const {authenticateUser} = require('../../middleware/authenticateUser');
 const {authenticate} = require('../../middleware/authenticate');
 const {User} = require("../models/user");
+const {sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
+const {genRandomPassword} = require('../../config/genPassword.js');
 const {Company} = require('../models/company');
 const {Log} = require ('../models/audit_Trail');
 const {ObjectId} = require('mongodb');
@@ -63,11 +65,12 @@ router.post("/upload", (req, res, next) => {
 
 //create new user
 router.post("/:companyname/users",authenticateUser,(req, res, next) => {
-    let companyName = req.params.companyName;
+    let companyname = req.params.companyname;
+    console.log(companyname)
     let email = req.body.email;
     let employee_number = req.body.employee_number;
 
-    Company.findOne({name:companyName}).then(company=>{
+    Company.findOne({name:companyname}).then(company=>{
       if(!company){
         return res.status(400).send("Error No company was selected")
       }
@@ -78,9 +81,9 @@ router.post("/:companyname/users",authenticateUser,(req, res, next) => {
           return res.status(400).send("This user already exists in this company");
         }
 
-        req.body.username = req.body.username.toLowerCase(); // change username to all lowercase
+        // req.body.username = req.body.username.toLowerCase(); // change username to all lowercase
           // Auto generate random password for admin
-          body.password = genRandomPassword(10);
+          req.body.password = genRandomPassword(10);
 
         // create the user
         let user = new User({
