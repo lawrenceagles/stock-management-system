@@ -19,7 +19,8 @@ const companySchema = new Schema({
     },
     totalSchemeMembers: {
         type: Number,
-        required: true
+        required: true,
+        default: 0
     },
     totalSharesAllotedToScheme: {
         type: Number,

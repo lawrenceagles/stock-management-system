@@ -156,7 +156,8 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
         log.save();
 
         user.save().then(doc=>{
-          res.status(201).send(doc);
+          company.totalSchemeMembers += 1; // increase company total scheme members by 1
+          return res.status(201).send(doc);
         })
       })
 
