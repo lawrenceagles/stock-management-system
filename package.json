@@ -5,9 +5,12 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app"
+    "start": "node app",
+    "server": "node app",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run client\" \"npm run server\""
   },
-  "engines":{
+  "engines": {
     "node": "10.15.3"
   },
   "repository": {
@@ -24,6 +27,8 @@
     "@sendgrid/mail": "^6.3.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
+    "concurrently": "^4.1.0",
+    "cors": "^2.8.5",
     "express": "^4.16.4",
     "jsonwebtoken": "^8.5.0",
     "lodash": "^4.17.11",
