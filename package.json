@@ -6,9 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app",
-    "server": "node app",
-    "client": "npm start --prefix client",
-    "dev": "concurrently \"npm run client\" \"npm run server\""
   },
   "engines": {
     "node": "10.15.3"
