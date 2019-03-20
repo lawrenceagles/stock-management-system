@@ -64,18 +64,67 @@ router.post("/upload", (req, res, next) => {
 
 
 //create new user
-router.post("/:companyname/users",authenticateUser,(req, res, next) => {
-    let companyname = req.params.companyname;
-    console.log(companyname)
+// router.post("/:companyname/users",authenticateUser,(req, res, next) => {
+//     let companyname = req.params.companyname;
+//     console.log(companyname)
+//     let email = req.body.email;
+//     let employee_number = req.body.employee_number;
+
+//     Company.findOne({name:companyname}).then(company=>{
+//       if(!company){
+//         return res.status(400).send("Error No company was selected")
+//       }
+
+//       let companyID = company._id;
+//       User.find({email, employee_number}).then(doc=>{
+//         if(doc.length > 0){
+//           return res.status(400).send("This user already exists in this company");
+//         }
+
+//         // req.body.username = req.body.username.toLowerCase(); // change username to all lowercase
+//           // Auto generate random password for admin
+//            req.body.password = genRandomPassword(10);
+
+//         // create the user
+//         let user = new User({
+//           ...req.body,
+//           company: companyID
+//         });
+
+//         // send welcome email containing password
+//       sendWelcomePasswordEmail(req.body.email,req.body.firstname,req.body.lastname,req.body.password);
+
+//         // log audit trail
+//         let log = new Log({
+//             createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
+//             action: `created a new user`,
+//             user: `${user.firstName} ${user.lastName}`,
+//             company: `${user.Company_Name}`             
+//         });
+
+//         log.save();
+
+//         user.save().then(doc=>{
+//           res.status(201).send(doc);
+//         })
+//       })
+
+//     });
+// })
+
+
+//create new user
+router.post("/:companyid/users",authenticateUser,(req, res, next) => {
+    let id = req.params.companyid
+    console.log(id);
     let email = req.body.email;
     let employee_number = req.body.employee_number;
 
-    Company.findOne({name:companyname}).then(company=>{
+    Company.findById(id).then(company=>{
       if(!company){
-        return res.status(400).send("Error No company was selected")
+        return res.status(404).send("Error No company was selected. Check your company name")
       }
 
-      let companyID = company._id;
       User.find({email, employee_number}).then(doc=>{
         if(doc.length > 0){
           return res.status(400).send("This user already exists in this company");
@@ -88,7 +137,7 @@ router.post("/:companyname/users",authenticateUser,(req, res, next) => {
         // create the user
         let user = new User({
           ...req.body,
-          company: companyID
+          company: id
         });
 
         // send welcome email containing password
