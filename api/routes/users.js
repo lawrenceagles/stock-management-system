@@ -116,14 +116,15 @@ router.post("/upload", (req, res, next) => {
 //create new user
 router.post("/:companyid/users",authenticateUser,(req, res, next) => {
     let id = req.params.companyid
-    console.log(id);
     let email = req.body.email;
     let employee_number = req.body.employee_number;
 
     Company.findById(id).then(company=>{
       if(!company){
-        return res.status(404).send("Error No company was selected. Check your company name")
+        return res.status(404).send("Error No company was selected. Wrong company ID")
       }
+
+      let schemeRules = company.schemeRules;
 
       User.find({email, employee_number}).then(doc=>{
         if(doc.length > 0){
@@ -137,7 +138,8 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
         // create the user
         let user = new User({
           ...req.body,
-          company: id
+          company: id,
+          Company_Schemerules: schemeRules
         });
 
         // send welcome email containing password

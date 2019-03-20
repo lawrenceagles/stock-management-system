@@ -187,6 +187,12 @@ router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
 
 router.patch('/company/:id',authenticate,(req,res)=>{               //update
     const id = req.params.id;
+    
+    // validate the company id
+    if(!ObjectId.isValid(id)){
+        return res.status(400).send("Error invalid ObjectId");
+    }
+
         Company.findOneAndUpdate({_id:id}, {$set:req.body}, {new: true}).then(doc=>{
             // check if doc was foun and updated
             if(!doc){
