@@ -89,7 +89,7 @@ AdminSchema.virtual('receivedNotifications', {
 // this function overwrites the toJSON function. It is called implicitly
 AdminSchema.methods.toJSON = function() {
  let obj = this.toObject();
- let newAdmin = _.pick(obj, ['_id','firstname', 'lastname', 'username', 'email', 'phone', 'role', 'password']);
+ let newAdmin = _.pick(obj, ['_id','firstname', 'lastname', 'username', 'email', 'phone', 'role']);
  return newAdmin;
 }
 
