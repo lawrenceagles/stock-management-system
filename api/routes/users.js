@@ -278,7 +278,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
     })
  })
 
- router.delete('/user/delete/:id',authenticate, (req,res,next)=>{   //delete
+ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
     const id = req.params.id
 
       // Validate the user id
@@ -327,7 +327,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
    
    //send email
       
-   router.put('/user/update/:id',authenticateUser,(req,res)=>{               //update
+   router.put('/user/:id',authenticateUser,(req,res)=>{               //update
     const id = req.params.id;
         // Validate user id
         if(!ObjectId.isValid(id)){
