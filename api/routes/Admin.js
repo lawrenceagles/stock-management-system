@@ -27,11 +27,6 @@ router.post('/profile', upload.single('image'), function (req, res, next) {
 
 });
 
-// REDIRECT ROOT TO DASHBOARD
-// router.get('/' (req, res)=>{
-//     res.render("Welcom to vetiva");
-// })
-
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
     let options =  {
