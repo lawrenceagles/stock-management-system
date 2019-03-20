@@ -83,7 +83,6 @@ router.post('/admin',authenticate, (req, res) => {
     body.password = genRandomPassword(10);
 
     let admin = new Admin(body);
-    console.log(body.password);
 
     // send welcome email containing password
     sendWelcomePasswordEmail(body.email,body.firstname,body.lastname,body.password);
