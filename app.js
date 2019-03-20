@@ -1,13 +1,13 @@
-require('./config/config');
+// require('./config/config');
 const express = require('express');
 const bodyParser = require('body-parser');
 const route = require('./api/routes/Admin');
 const userRoute = require('./api/routes/users');
 const companyRoute = require('./api/routes/company');
-const db = require('./config/db/db')
+// const db = require('./config/db/db')
 const router = express.Router();
 const Host = 'localhost';
-const Port = process.env.PORT;
+const Port = 3004;
 
 const {mongoose} = require('./config/db/mongoose');
 
