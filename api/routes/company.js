@@ -9,7 +9,7 @@ const {Log} = require ('../models/audit_Trail');
 
 // Company Onboarding Route
 router.post('/company/registration',authenticate,(req,res,next)=>{
-    req.body.name = req.body.name.toLowerCase(); // change company name to lower case
+    // req.body.name = req.body.name.toLowerCase(); // change company name to lower case
     
     Company.find({name:req.body.name},(err,doc)=>{
     if(doc.length){
@@ -66,6 +66,18 @@ router.get('/company/list',authenticate,(req,res,next)=>{
             if(err) { res.status(500).json(err); return; };
             res.status(200).json(doc);
         })   
+})
+
+router.get('/allcompany',authenticate,(req,res,next)=>{ 
+    
+    Company.find({}).then(docs=>{
+        if(!docs){
+            return res.status(404).send("No company found. Please onboard companies");
+        }
+
+        return res.send(docs);
+    })
+          
 })
 
 
