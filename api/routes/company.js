@@ -102,18 +102,6 @@ router.get('/companymember/:name',authenticate, (req,res)=>{
 });
 
 
-// GET Route to get all company staffs
-// router.get('/company/:name/user/:id',authenticate, (req,res)=>{
-//     let name = req.params.name;
-//     let userID = req.params.id;
-    
-//     console.log(name)
-//     console.log(userID)
-//     console.log(req.params);
-
-// });
-
-
 // get company users by id
 router.get('/companystaff/:id', authenticate, (req,res)=>{
     let id = req.params.name;
@@ -191,13 +179,13 @@ router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
             })
         .catch(err=>{
             res.status(404).json({
-                error:` delete request failed${err}`
+                error:`delete request failed${err}`
             })
         })
     })
 })
 
-router.patch('/company/:id',authenticate,(req,res)=>{               //update
+router.patch('/company/:id',authenticate,(req,res)=>{//update
     const id = req.params.id;
     
     // validate the company id
@@ -236,11 +224,6 @@ router.patch('/company/:id',authenticate,(req,res)=>{               //update
        }).catch((e)=>{
             res.status(400).send(`${e}`, "Error update error");
         });
-})
-
-router.get('/companyusersemail/:id', (req,res)=>{
-    let id = req.params.id;
-
 })
 
 module.exports = router;

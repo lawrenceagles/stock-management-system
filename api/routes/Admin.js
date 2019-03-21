@@ -69,8 +69,6 @@ router.get('/admin/role/:role',  (req, res)=>{
 router.post('/admin',authenticate, (req, res) => {
     // pick out fields to set and from req.body
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role', 'password']);
-    body.username = body.username.toLowerCase(); // change user name to lowercase
-
     Admin.findByEmail(body.email).then(doc=>{ // handle already registered admin
         if(doc){
             return Promise.reject();

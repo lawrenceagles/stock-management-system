@@ -8,7 +8,7 @@ const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
     employee_number: {
-        type: Number,
+        type: String,
         unique: true,
         maxlength:150,
         required: [true, 'Employee Number is required']
@@ -27,8 +27,7 @@ const userSchema = new Schema({
     },
     otherNames: {
         type: String,
-        maxlength:120,
-        required: [true, 'User Last Name is required']
+        maxlength:120
     },
     email: {
         type: String,
@@ -75,12 +74,25 @@ const userSchema = new Schema({
         type: String,
         required: [true, 'This field is required']
     },
+    dateOfHire:{
+        type: Date,
+        required: true
+    },
+    status:{
+        type: Boolean,
+        required: [true, 'Please indicate the user status']
+    },
     bankDetails:{
             bankName: {
                 type: String,
                 trim: true,
                 required: [true, 'Bank name is required'],
                 maxlength:300,
+            },
+            bankBranch: {
+                type: String,
+                trim: true,
+                required: [true, 'Bank branch is required']
             },
             accountName: {
                 type: String,
@@ -91,8 +103,12 @@ const userSchema = new Schema({
             accountNumber: {
                 type: Number,
                 trim: true,
-                maxlength:300,
+                maxlength:10,
                 required: [true, 'Account number is required']
+            },
+            accountType: {
+                type: String,
+                required: [true, 'Account type is required']
             }
         },
     next_of_kin_information: {
@@ -109,12 +125,6 @@ const userSchema = new Schema({
             required:true,
             maxlength:120
         },
-        // NextOfKinState: {
-        //     type: String,
-        //     uppercase: true,
-        //     required: true,
-        //     maxlength:100
-        // },
         NextOfKinPhone: {
             type: Number,
             trim: true,
@@ -151,14 +161,12 @@ const userSchema = new Schema({
     },
     make_buy_request:{
         type:Boolean,
-        maxlength:500,
-        required:[false,'This field is required']
+        maxlength:500
     },
     
     make_sell_request:{
         type:Boolean,
-        maxlength:120,
-        required:[false,'This field is required']
+        maxlength:120
     },
     number_of_vested_shares: {
         type: Number,
@@ -171,6 +179,14 @@ const userSchema = new Schema({
         maxlength:120,
         required: [true, 'This field is required']
     },
+    forfieted_Shares:{
+        type: Number,
+        required: [true, 'Please specify the forfieted shares put 0 if none.']
+    },
+    vested_as_at:{
+        type: Object
+    },
+
     allocation_date: {
         type: Date,
         required: [true, 'This field is required']

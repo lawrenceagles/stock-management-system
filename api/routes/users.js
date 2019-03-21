@@ -157,6 +157,7 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
 
         user.save().then(doc=>{
           company.totalSchemeMembers += 1; // increase company total scheme members by 1
+          company.save();
           return res.status(201).send(doc);
         })
       })
@@ -291,46 +292,36 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
       User.findOneAndDelete({_id:id})
        .then(doc=>{
+        if(!doc){
+          return res.status(404).send("User not found");
+        }
 
-         let log = new Log({
+        let companyID = doc.company;
+
+          let log = new Log({
               createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
               action: `deleted a user`,
               user: `${doc.firstName} ${doc.lastName}`,
               company: `${doc.Company_Name}`
           });
 
-          log.save();
+          Company.findById(companyID).then(company=>{
+            company.totalSchemeMembers -= 1; // decrease company total scheme members by 1
+            company.save();
+          }).catch(e=>{
+            res.status(400).send(`${e} could not delete user from company scheme memeber. Check Totalschememembers for this company ${company.name}; to make sure`)
+          })
 
-           deleteAccountEmail(doc.email, doc.firstname, doc.lastname); // send accound cancellation email to admin
-
-          res.status(200).json({
-              message:"User deleted"
-            })
-           .then(id=>{
-               find({_id:id},(err,doc)=>{
-                   if (err){
-                       res.status(404).json({
-                        message:`Delete failed${err}`
-                       })
-                   }
-                   else{
-                       res.status(200).json({
-                           message:`Document has been deleted`
-                         })
-                       }       
-                   })
-               })
-           .catch(err=>{
-               res.status(404).json({
-                   error:`something went wrong${err}`
-               })
-           })
+          log.save(); // save audit log
+          deleteAccountEmail(doc.email, doc.firstname, doc.lastname); // send accound cancellation email to admin
+          return res.send("User is deleted");
+       }).catch(e=>{
+        return res.status(400).send(`${e} Error something went wrong user not deleted`);
        })
    })
    
-   //send email
-      
-   router.put('/user/:id',authenticateUser,(req,res)=>{               //update
+  //send email
+  router.put('/user/:id',authenticateUser,(req,res)=>{               //update
     const id = req.params.id;
         // Validate user id
         if(!ObjectId.isValid(id)){
