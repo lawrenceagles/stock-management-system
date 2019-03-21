@@ -156,7 +156,10 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
         log.save();
 
         user.save().then(doc=>{
-          company.totalSchemeMembers += 1; // increase company total scheme members by 1
+          // increase company total scheme members by 1
+          company.totalSchemeMembers += 1; 
+          // update total shares alloted by company to scheme members dynamically
+          company.totalSharesAllotedToSchemeMembers -= req.body.number_of_allocated_shares;
           company.save();
           return res.status(201).send(doc);
         })
@@ -306,7 +309,10 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
           });
 
           Company.findById(companyID).then(company=>{
-            company.totalSchemeMembers -= 1; // decrease company total scheme members by 1
+            // decrease company total scheme members by 1
+            company.totalSchemeMembers -= 1; 
+            // update total shares alloted by company to scheme members dynamically
+            company.totalSharesAllotedToSchemeMembers += req.body.number_of_allocated_shares;
             company.save();
           }).catch(e=>{
             res.status(400).send(`${e} could not delete user from company scheme memeber. Check Totalschememembers for this company ${company.name}; to make sure`)

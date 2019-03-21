@@ -54,7 +54,6 @@ const userSchema = new Schema({
       },
       otherPhoneNumber:{
         type: String,
-        required: [true, 'User phone number is required'],
         maxlength:100,
       },
       password: {
@@ -116,7 +115,6 @@ const userSchema = new Schema({
             type: String,
             trim: true,
             required: [true, 'User email required'],
-            unique:false,
             maxlength:200
         },
         NextOfKinlastName:{
@@ -145,14 +143,12 @@ const userSchema = new Schema({
         required: [true, 'This field is required']
     },
     dividend_received: {
-        type: Array,
-        maxlength:120,
-        required: [true, 'This field is required']
+        type: Object,
+        default: {date:Date.now, value:0}
     },
     number_of_shares_collaterised: {
         type: Number,
-        maxlength:120,
-        required: [true, 'This field is required']
+        default: 0
     },
     number_of_allocated_shares: {
         type: Number,
@@ -170,21 +166,20 @@ const userSchema = new Schema({
     },
     number_of_vested_shares: {
         type: Number,
-        default: 0,
-        maxlength:120,
-        required: [true, 'This field is required']
+        default: 0
     },
     number_of_shares_sold: {
         type: Number,
         maxlength:120,
-        required: [true, 'This field is required']
+        default: 0
     },
     forfieted_Shares:{
         type: Number,
-        required: [true, 'Please specify the forfieted shares put 0 if none.']
+        default: 0
     },
     vested_as_at:{
-        type: Object
+        type: Array,
+        default: [{date:Date.now, amount:0}]
     },
 
     allocation_date: {
