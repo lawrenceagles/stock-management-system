@@ -124,8 +124,6 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
         return res.status(404).send("Error No company was selected. Wrong company ID")
       }
 
-      let schemeRules = company.schemeRules;
-
       User.find({email, employee_number}).then(doc=>{
         if(doc.length > 0){
           return res.status(400).send("This user already exists in this company");
@@ -139,7 +137,7 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
         let user = new User({
           ...req.body,
           company: id,
-          Company_Schemerules: schemeRules
+          Company_Schemerules: company.schemeRules // set company scheme rules for this user
         });
 
         // send welcome email containing password
@@ -155,13 +153,25 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
 
         log.save();
 
-        user.save().then(doc=>{
+        user.save().then(user=>{ // Return the user doc and update user-company data relationship
+
           // increase company total scheme members by 1
-          company.totalSchemeMembers += 1; 
+          company.totalSchemeMembers += 1;
           // update total shares alloted by company to scheme members dynamically
-          company.totalSharesAllotedToSchemeMembers -= req.body.number_of_allocated_shares;
-          company.save();
-          return res.status(201).send(doc);
+          if(user.status){
+            // updated total shares allocated to scheme members
+            company.totalSharesAllocatedToSchemeMembers += user.number_of_allocated_shares;
+            // update total unallocated shares
+            company.totalUnallocatedShares = company.totalSharesAllocatedToScheme - company.totalSharesAllotedToSchemeMembers;
+          }else{
+            // update total allocated shares to unconfirmed scheme members
+            company.totalSharesOfUnconfirmedSchemeMembers = company.totalSharesAllocatedToScheme - company.totalSharesAllotedToSchemeMembers;
+            // update total unallocated shares
+            company.totalUnallocatedShares += user.company.totalSharesOfUnconfirmedSchemeMembers;
+          }
+          
+          company.save(); // save to store data
+          return res.status(201).send(user);
         })
       })
 
@@ -294,32 +304,35 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
       }
 
       User.findOneAndDelete({_id:id})
-       .then(doc=>{
-        if(!doc){
+       .then(user=>{
+        if(!user){
           return res.status(404).send("User not found");
         }
 
-        let companyID = doc.company;
+        let companyID = user.company;
 
           let log = new Log({
               createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
               action: `deleted a user`,
-              user: `${doc.firstName} ${doc.lastName}`,
-              company: `${doc.Company_Name}`
+              user: `${user.firstName} ${user.lastName}`,
+              company: `${user.Company_Name}`
           });
 
           Company.findById(companyID).then(company=>{
             // decrease company total scheme members by 1
             company.totalSchemeMembers -= 1; 
-            // update total shares alloted by company to scheme members dynamically
-            company.totalSharesAllotedToSchemeMembers += req.body.number_of_allocated_shares;
-            company.save();
+            // update total shares allocated by company to scheme members dynamically
+            company.totalSharesAllocatedToSchemeMembers += user.number_of_allocated_shares;
+            // update total shares forfieted by user
+            company.totalSharesForfieted = user.number_of_allocated_shares - user.number_of_vested_shares
+            company.save(); // save to store new data
+
           }).catch(e=>{
             res.status(400).send(`${e} could not delete user from company scheme memeber. Check Totalschememembers for this company ${company.name}; to make sure`)
           })
 
           log.save(); // save audit log
-          deleteAccountEmail(doc.email, doc.firstname, doc.lastname); // send accound cancellation email to admin
+          deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
           return res.send("User is deleted");
        }).catch(e=>{
         return res.status(400).send(`${e} Error something went wrong user not deleted`);

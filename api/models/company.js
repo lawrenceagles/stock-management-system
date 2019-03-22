@@ -29,11 +29,11 @@ const companySchema = new Schema({
         required: true,
         default: 0
     },
-    totalSharesAllotedToScheme: {
+    totalSharesAllocatedToScheme: {
         type: Number,
         required: true
     },
-    totalSharesAllotedToSchemeMembers: {
+    totalSharesAllocatedToSchemeMembers: {
         type: Number,
         default: 0,
         required: true
@@ -44,6 +44,10 @@ const companySchema = new Schema({
         required: true
     },
     totalSharesForfieted: {
+        type: Number,
+        default: 0
+    },
+    totalSharesOfUnconfirmedSchemeMembers: {
         type: Number,
         default: 0
     },
