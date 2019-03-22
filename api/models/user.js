@@ -77,6 +77,10 @@ const userSchema = new Schema({
         type: Date,
         required: true
     },
+    group:{
+        type: Array,
+        required: [true, 'Please enter the staff group']
+    },
     status:{
         type: Boolean,
         required: [true, 'Please indicate the user status']
@@ -170,10 +174,21 @@ const userSchema = new Schema({
     },
     number_of_shares_sold: {
         type: Number,
-        maxlength:120,
+        default: 0
+    },
+    number_of_shares_bought:{
+        type: Number,
         default: 0
     },
     forfieted_Shares:{
+        type: Number,
+        default: 0
+    },
+    outstanding_bought: {
+        type: Number,
+        default: 0
+    },
+    outstanding_sold:{
         type: Number,
         default: 0
     },

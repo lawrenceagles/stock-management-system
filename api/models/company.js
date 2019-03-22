@@ -17,6 +17,10 @@ const companySchema = new Schema({
         enum: ['public', 'private'],
         required: true
     },
+    schemeBatch:{
+        type: Array,
+        default: ['Batch A']
+    },
     totalSchemeMembers: {
         type: Number,
         required: true,
