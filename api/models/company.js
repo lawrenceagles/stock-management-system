@@ -113,10 +113,6 @@ const companySchema = new Schema({
         type:String,
         maxlength:190
     },
-    paymentPeriod:{
-        type:String,
-        required:true
-    },
     schemeRules: {
         type: String,
         required: true
