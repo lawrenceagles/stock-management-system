@@ -32,28 +32,30 @@ const companySchema = new Schema({
     },
     totalSharesAllotedToSchemeMembers: {
         type: Number,
+        default: 0,
         required: true
     },
     totalUnallocatedShares: {
         type: Number,
+        default: 0,
         required: true
     },
     totalSharesForfieted: {
         type: Number,
-        required: true
+        default: 0
     },
     totalSharesRepurchased:{
         type: Number,
-        required: true
+        default: 0
     },
     totalDividentDeclared: {
         type: Number,
         required: true
     },
-    vestingDate:{
-    type:String,
-    required:true
-},
+    vestingSchedule:{
+        type:String,
+        required:true
+    },
     dateOfAllocation: {
         type: Date,
         required: true
