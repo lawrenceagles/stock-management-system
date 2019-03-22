@@ -21,6 +21,9 @@ const companySchema = new Schema({
         type: Array,
         default: ['Batch A']
     },
+    sharePrice:{
+        type: Number
+    },
     totalSchemeMembers: {
         type: Number,
         required: true,
@@ -59,12 +62,6 @@ const companySchema = new Schema({
     dateOfAllocation: {
         type: Date,
         required: true
-    },
-    level:{
-        type:String,
-        required:true,
-        default:null,
-        maxlength:200
     },
     dividendTypeShare: {
         type: String,
