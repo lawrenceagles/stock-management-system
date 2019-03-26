@@ -11,6 +11,8 @@ const {genRandomPassword} = require('../../config/genPassword.js');
 const {authenticateUser} = require('../../middleware/authenticateUser');
 const {authenticate} = require('../../middleware/authenticate');
 const {User} = require("../models/user");
+const {Admin} = require("../models/admin.js");
+const {Notifcations} = require('../models/notifications');
 const {Company} = require('../models/company');
 const {Log} = require ('../models/audit_Trail');
 const {ObjectId} = require('mongodb');
@@ -432,12 +434,12 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
             return res.status(404).send();
         }
 
-        if(req.password !== doc.password){
-            let password = doc.password;
-            let saltRounds = 10;
-            let hash = bcrypt.hashSync(password, saltRounds);
-            doc.password = hash;
-        }
+        // if(req.password !== doc.password){
+        //     let password = doc.password;
+        //     let saltRounds = 10;
+        //     let hash = bcrypt.hashSync(password, saltRounds);
+        //     doc.password = hash;
+        // }
 
         doc.save();
 
@@ -474,34 +476,39 @@ router.get('/notification',authenticateUser, (req,res)=>{
 })
 
 // POST ROUTE SEND NOTIFICATION FOR user
-router.post('/notification',authenticateUser, (req, res)=>{
-    let receiverEmail = req.body.email;
-    req.body.onSenderModel = 'Admin'; // set the refPath 
-    req.body.onReceiverModel = 'User';
+router.post('/user/notification/:id',authenticateUser, (req, res)=>{
+    let id = req.params.id;
+    let receiverEmail;
+    req.body.onSenderModel = 'User'; // set the refPath 
+    req.body.onReceiverModel = 'Admin';
 
-    User.findOne({email:receiverEmail}).then(doc=>{
-
-        if(!doc){
+    Admin.find({}).then(adminArray=>{
+        if(!adminArray){
             return res.status(404).send("error no user found");
         }
 
-        let sentMessage = new Notifcations({
-                ...req.body,
-                sender:req.admin._id,
-                receiver:[doc._id]
-            });
+        User.findById(id).then(user=>{
+          receiverEmail =  _.map(adminArray, 'id');
+          console.log(receiverEmail);
 
-        sendToOne(doc.email, doc.firstname, doc.lastname); // send this notification by email also
+          let sentMessage = new Notifcations({
+              ...req.body,
+              sender:user._id,
+              receiver:receiverEmail
+          });
 
-        sentMessage.save().then(doc=>{
-            res.status(201).send(doc);
-        }).catch(e=>{
-            res.status(400).send(`${e} Error with the route`);
-        });
+          // sendToOne(doc.email, doc.firstname, doc.lastname); // send this notification by email also
+
+          sentMessage.save().then(doc=>{
+              res.status(201).send(doc);
+          }).catch(e=>{
+              res.status(400).send(`${e}`);
+          });
+        })
 
         // res.send(doc);
     }).catch(e=>{
-        res.status(404).send("Error no receiver like this in database");
+        res.status(404).send(`${e}`);
     });
 })
 
