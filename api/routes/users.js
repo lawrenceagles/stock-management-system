@@ -272,7 +272,12 @@ router.patch('/user/forgetpassword', (req,res)=>{
                     return user.generateToken()
                     .then((token)=> {
                       return res.header('x-auth', token).send({
-                          user
+                          _id: user._id,
+                          email: user.email,
+                          company: user.company,
+                          Company_Schemerules: user.Company_Schemerules,
+                          tokens: user.tokens,
+                          status: user.status
                       });
                   })
                     .catch(err=>{
