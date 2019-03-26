@@ -65,7 +65,7 @@ router.post("/upload", (req, res, next) => {
 
 
 // find all the company members by id.
-router.get("/:companyid/users",authenticateUser,(req, res, next) => {
+router.get("/:companyid/users",authenticate,(req, res, next) => {
     let companyID = req.params.companyid;
 
     // confirm that object ID is valid
@@ -87,7 +87,7 @@ router.get("/:companyid/users",authenticateUser,(req, res, next) => {
 })
 
 // find one company members by username
-router.get("/:companyid/companystaff",authenticateUser,(req, res, next) => {
+router.get("/:companyid/companystaff",authenticate,(req, res, next) => {
     let companyID = req.params.companyid; // get company id from url
     let username = req.query.username; // get username from search form
 
@@ -110,7 +110,7 @@ router.get("/:companyid/companystaff",authenticateUser,(req, res, next) => {
 
 
 //create new user
-router.post("/:companyid/users",authenticateUser,(req, res, next) => {
+router.post("/:companyid/users",authenticate,(req, res, next) => {
     let id = req.params.companyid
     let email = req.body.email;
     let employee_number = req.body.employee_number;
@@ -310,7 +310,7 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
     });
 
 //read user info
- router.get('/users',authenticateUser,(req,res,next)=>{ 
+ router.get('/users',authenticate,(req,res,next)=>{ 
     const sort = {}
     let pageOptions = {
         page: req.query.page || 0,
