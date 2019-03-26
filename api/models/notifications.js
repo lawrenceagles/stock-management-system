@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const notificationSchema = new Schema([{
+const notificationSchema = new Schema({
 	message: {
 		type: String,
 		required: true
@@ -31,8 +31,7 @@ const notificationSchema = new Schema([{
   		type: Date,
   		default: Date.now
   	}
-}]
-);
+});
 
 const Notifcations = mongoose.model('Notifcations', notificationSchema);
 module.exports = {Notifcations};

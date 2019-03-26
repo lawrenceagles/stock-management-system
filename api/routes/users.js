@@ -181,7 +181,8 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
           })
           
           company.save(); // save to store data
-          return res.status(201).send({user});
+          let body = _.pick(user, ['firstname', 'lastname', 'email','Company_Schemerules','company','status','tokens']);
+          return res.status(201).send(body);
         }).catch(e=>{
           res.status(400).send(`There was an error: ${e}`)
         });
@@ -328,7 +329,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
 
      User.findById(id).then((doc)=> {
-        // if admin is not found return error 404 otherwise send the admin.
+        // if user is not found return error 404 otherwise send the admin.
         doc ? res.send(doc) : res.status(404).send();
     }).catch((e)=>{
         res.status(400).send();

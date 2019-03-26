@@ -234,13 +234,13 @@ userSchema.virtual('receivedNotifications', {
 });
 
 
-// convert mongoose Model to Object and pick needed properties
-// this function overwrites the toJSON function. It is called implicitly
-userSchema.methods.toJSON = function() {
- let obj = this.toObject();
- let user = _.pick(obj, ['_id','firstname', 'lastname', 'username', 'email', 'company', 'Company_Schemerules', 'tokens', 'status']);
- return user;
-}
+// // convert mongoose Model to Object and pick needed properties
+// // this function overwrites the toJSON function. It is called implicitly
+// userSchema.methods.toJSON = function() {
+//  let obj = this.toObject();
+//  let user = _.pick(obj, ['_id','firstname', 'lastname', 'username', 'email', 'company', 'Company_Schemerules', 'tokens', 'status']);
+//  return user;
+// }
 
 userSchema.pre('save',function(next){
     var user = this;
