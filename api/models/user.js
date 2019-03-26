@@ -57,6 +57,10 @@ const userSchema = new Schema({
         type: String,
         maxlength:100,
       },
+      username: {
+        type: String,
+        maxlength: 100
+      },
       password: {
         type: String,
         required: [true, 'User password is required'],

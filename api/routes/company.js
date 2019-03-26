@@ -81,7 +81,7 @@ router.get('/allcompany',authenticate,(req,res,next)=>{
 })
 
 
-// GET Route to get all company staffs
+// GET Route to get one company staff
 router.get('/companymember/:name',authenticate, (req,res)=>{
     let name = req.params.name;
     Company.findOne({name})

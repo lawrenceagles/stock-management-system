@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const multer =  require('multer');
 const _ = require('lodash');
 const path = require("path");
+const bcrypt = require('bcryptjs');
 
 const {sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
 const {genRandomPassword} = require('../../config/genPassword.js');
@@ -159,7 +160,6 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
           let userBatch = user.batch;
 
           companyBatch.map(cb=>{
-            let companyBatchName = cb.name;
             let companyBatchAmount = cb.totalShares;
             let companyBatchUnallocated = cb.totalUnallocatedShares;
 
@@ -181,7 +181,11 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
               }
 
             });
-          })
+          });
+
+          // could simply work since it is the sum of all companyBatchAmount (outside the loop)
+          // company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
+
           
           company.save(); // save to store data
           let body = _.pick(user, ['firstname', 'lastname', 'email','Company_Schemerules','company','status','tokens']);
@@ -414,7 +418,6 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
    })
    
   //Update user information
-
   router.patch('/user/:id',authenticate, (req, res) => {
     // get the user id
     let id = req.params.id;
@@ -439,15 +442,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
         doc.save();
 
         User.findById(id).then(doc=>{
-          let log = new Log({
-              createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
-              action: `updated a user`,
-              user: `${user.firstName} ${user.lastName}`,
-              company: `${user.Company_Name}`
-          });
-
-          log.save();
-          confirmUser(); // call the confirm user to update necessary shares.
+          // confirmUser(); // call the confirm user to update necessary shares.
           return res.send(doc);
         })
         
