@@ -233,15 +233,6 @@ userSchema.virtual('receivedNotifications', {
   foreignField: 'receiver'
 });
 
-
-// // convert mongoose Model to Object and pick needed properties
-// // this function overwrites the toJSON function. It is called implicitly
-// userSchema.methods.toJSON = function() {
-//  let obj = this.toObject();
-//  let user = _.pick(obj, ['_id','firstname', 'lastname', 'username', 'email', 'company', 'Company_Schemerules', 'tokens', 'status']);
-//  return user;
-// }
-
 userSchema.pre('save',function(next){
     var user = this;
     if (user.isModified('password')){
@@ -380,7 +371,7 @@ userSchema.methods.userConfirmation = function(){
           if(user.status){ // run this if the user is a confirmed staff of the company
             // updated total shares allocated to scheme members
             companyBatchAmount += item.allocatedShares;
-            company.totalSharesAllocatedToSchemeMembers += companyBatchAmount;
+            company.totalSharesAllocatedToSchemeMembers += item.allocatedShares;
             // update total unallocated shares
             company.totalUnallocatedShares = company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers;
           }else{

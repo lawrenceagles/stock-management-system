@@ -24,6 +24,10 @@ const companySchema = new Schema({
         totalShares:{
             type: Number,
             default: 0
+        },
+        totalUnallocatedShares:{
+            type:Number,
+            default: 0
         }
     }],
     sharePrice:{

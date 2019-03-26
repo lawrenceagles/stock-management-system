@@ -161,17 +161,20 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
           companyBatch.map(cb=>{
             let companyBatchName = cb.name;
             let companyBatchAmount = cb.totalShares;
+            let companyBatchUnallocated = cb.totalUnallocatedShares;
 
             userBatch.forEach(function(item){
 
               if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
                 companyBatchAmount += item.allocatedShares;
-                company.totalSharesAllocatedToSchemeMembers += companyBatchAmount;
+                company.totalSharesAllocatedToSchemeMembers += item.allocatedShares;
+                companyBatchUnallocated = companyBatchAmount - item.allocatedShares;
                 // update total unallocated shares
                 company.totalUnallocatedShares = company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers;
               }else{ // run this if the user is an unconfirmed staff of the company
                 // update total allocated shares to unconfirmed scheme members
+                companyBatchAmount += item.allocatedShares;
                 company.totalSharesOfUnconfirmedSchemeMembers += item.allocatedShares;
                 // update total unallocated shares
                 company.totalUnallocatedShares += company.totalSharesOfUnconfirmedSchemeMembers;
@@ -367,29 +370,27 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
           Company.findById(companyID).then(company=>{
             // decrease company total scheme members by 1
             company.totalSchemeMembers -= 1; 
-            // update total shares allocated by company to scheme members dynamically
-            company.totalSharesAllocatedToSchemeMembers += user.number_of_allocated_shares;
-            // update total shares forfieted by user
-            company.totalSharesForfieted = user.number_of_allocated_shares - user.number_of_vested_shares
-            // company.save(); // save to store new data
 
             let companyBatch = company.schemeBatch;
             let userBatch = user.batch;
 
             companyBatch.map(cb=>{
-              let companyBatchName = cb.name;
               let companyBatchAmount = cb.totalShares;
+              let companyBatchUnallocated = cb.totalUnallocatedShares;
 
               userBatch.forEach(function(item){
 
                 if(user.status){ // run this if the user is a confirmed staff of the company
                   // updated total shares allocated to scheme members
-                  companyBatchAmount += item.allocatedShares;
-                  company.totalSharesAllocatedToSchemeMembers += companyBatchAmount;
+                  companyBatchAmount -= item.allocatedShares;
+                  companyBatchUnallocated += item.allocatedShares;
+                  company.totalSharesAllocatedToSchemeMembers -= item.allocatedShares;
                   // update total unallocated shares
                   company.totalUnallocatedShares = company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers;
                 }else{ // run this if the user is an unconfirmed staff of the company
                   // update total allocated shares to unconfirmed scheme members
+                  companyBatchAmount -= item.allocatedShares;
+                  companyBatchUnallocated += item.allocatedShares;
                   company.totalSharesOfUnconfirmedSchemeMembers += item.allocatedShares;
                   // update total unallocated shares
                   company.totalUnallocatedShares += company.totalSharesOfUnconfirmedSchemeMembers;
