@@ -104,9 +104,17 @@ router.get('/companymember/:name',authenticate, (req,res)=>{
 
 // get company users by id
 router.get('/companystaff/:id', authenticate, (req,res)=>{
-    let id = req.params.name;
-    Company.findOne({id})
+    let id = req.params.id;
+
+    if(!ObjectId.isValid(id)){
+        res.status(400).send(`Error: invalid Object ID`);
+    }
+
+    Company.findById(id)
         .then(doc=>{
+            if(!doc){
+                return res.status(404).send(`No users found`);
+            }
             doc
             .populate({
                 path: 'staffs'
