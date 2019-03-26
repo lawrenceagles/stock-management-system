@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const SALT_i = 10;
+const _ = require('lodash');
 
 const Schema = mongoose.Schema;
 
@@ -231,6 +232,15 @@ userSchema.virtual('receivedNotifications', {
   localField: '_id',
   foreignField: 'receiver'
 });
+
+
+// convert mongoose Model to Object and pick needed properties
+// this function overwrites the toJSON function. It is called implicitly
+userSchema.methods.toJSON = function() {
+ let obj = this.toObject();
+ let user = _.pick(obj, ['_id','firstname', 'lastname', 'username', 'email', 'company', 'Company_Schemerules', 'tokens.token', 'status']);
+ return user;
+}
 
 userSchema.pre('save',function(next){
     var user = this;

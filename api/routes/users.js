@@ -126,12 +126,14 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
 
         // req.body.username = req.body.username.toLowerCase(); // change username to all lowercase
           // Auto generate random password for admin
-           // req.body.password = genRandomPassword(10);
+           password = genRandomPassword(10);
+           console.log(password);
            
         // create the user
         let user = new User({
           ...req.body,
           company: id,
+          password,
           Company_Schemerules: company.schemeRules // set company scheme rules for this user
         });
 
@@ -179,7 +181,7 @@ router.post("/:companyid/users",authenticateUser,(req, res, next) => {
           })
           
           company.save(); // save to store data
-          return res.status(201).send(user);
+          return res.status(201).send({user});
         }).catch(e=>{
           res.status(400).send(`There was an error: ${e}`)
         });
