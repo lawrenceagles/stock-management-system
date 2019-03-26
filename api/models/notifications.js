@@ -2,12 +2,7 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const notificationSchema = new Schema({
-	title: {
-		type: String,
-		required: true,
-		default: "You have received a new message"
-	},
+const notificationSchema = new Schema([{
 	message: {
 		type: String,
 		required: true
@@ -31,11 +26,13 @@ const notificationSchema = new Schema({
 	    type: String,
 	    required: true,
 	    enum: ['Admin', 'User']
+  	},
+  	createdAt: {
+  		type: Date,
+  		default: Date.now
   	}
-},
-{
-	timestamps:true
-});
+}]
+);
 
 const Notifcations = mongoose.model('Notifcations', notificationSchema);
 module.exports = {Notifcations};

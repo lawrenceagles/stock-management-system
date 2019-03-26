@@ -79,7 +79,6 @@ router.post('/admin',authenticate, (req, res) => {
 
     // Auto generate random password for admin
     body.password = genRandomPassword(10);
-
     let admin = new Admin(body);
 
     // send welcome email containing password
@@ -151,7 +150,7 @@ router.post('/admin/login', (req, res) => {
             });
         });
     }).catch((e)=> {
-        res.status(400).send(e,"not working");
+        res.status(400).send(`${e}`);
     })
 });
 
@@ -286,17 +285,7 @@ router.get('/audit', (req, res)=>{
 });
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/notification',authenticate, (req,res)=>{
-    // get the admin id from req.admin._id
-    // Notifcations.find({sender: req.admin._id}).then(doc=>{
-    //     if(!doc){
-    //         return res.status(404).send("Error: No notification found")
-    //     }
-    //     res.send(doc);
-    // }).catch(e=>{
-    //     res.status(400).send("Error: problem with route")
-    // }) 
-    
+router.get('/notification',authenticate, (req,res)=>{    
     const sort = {}
     if (req.query.sortBy) {
         const parts = req.query.sortBy.split(':')
@@ -320,6 +309,8 @@ router.post('/notification',authenticate, (req, res)=>{
     req.body.onSenderModel = 'Admin'; // set the refPath 
     req.body.onReceiverModel = 'User';
 
+    // find user company specific
+
     User.findOne({email:receiverEmail}).then(doc=>{
 
         if(!doc){
@@ -329,12 +320,12 @@ router.post('/notification',authenticate, (req, res)=>{
         let sentMessage = new Notifcations({
                 ...req.body,
                 sender:req.admin._id,
-                receiver:[doc._id]
+                receiver:[...doc._id]
             });
 
-        if(toEmail){// handle send to email
-            sendToOne(doc.email, doc.firstname, doc.lastname);
-        } 
+        // if(toEmail){// handle send to email
+        //     sendToOne(doc.email, doc.firstname, doc.lastname);
+        // } 
 
         sentMessage.save().then(doc=>{
             res.status(201).send(doc);
@@ -344,7 +335,7 @@ router.post('/notification',authenticate, (req, res)=>{
 
         // res.send(doc);
     }).catch(e=>{
-        res.status(404).send("Error no receiver like this in database");
+        res.status(404).send(`${e} Error no receiver like this in database`);
     });
 })
 

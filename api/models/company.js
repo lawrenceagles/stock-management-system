@@ -17,10 +17,15 @@ const companySchema = new Schema({
         enum: ['public', 'private'],
         required: true
     },
-    schemeBatch:{
-        type: Array,
-        default: ['Batch A']
-    },
+    schemeBatch:[{
+        name: {
+            type: String
+        },
+        totalShares:{
+            type: Number,
+            default: 0
+        }
+    }],
     sharePrice:{
         type: Number
     },
@@ -112,10 +117,6 @@ const companySchema = new Schema({
     initialShareSale: {
         type: Number,
         required: true
-    },
-    grade:{
-        type:String,
-        maxlength:190
     },
     schemeRules: {
         type: String,

@@ -61,7 +61,7 @@ const userSchema = new Schema({
         required: [true, 'User password is required'],
         minlength:5,
     },
-    Company_Schemerules:{   //cannot be updated by users
+    Company_Schemerules:{ //cannot be updated by users
         type:String,
         trim: true,
     },
@@ -78,7 +78,7 @@ const userSchema = new Schema({
         required: true
     },
     group:{
-        type: Array,
+        type: String,
         required: [true, 'Please enter the staff group']
     },
     status:{
@@ -141,74 +141,6 @@ const userSchema = new Schema({
         }
         
     },
-    current_value_of_shares: {
-        type: Number,
-        maxlength:120,
-        required: [true, 'This field is required']
-    },
-    dividend_received: {
-        type: Object,
-        default: {date:Date.now, value:0}
-    },
-    number_of_shares_collaterised: {
-        type: Number,
-        default: 0
-    },
-    number_of_allocated_shares: {
-        type: Number,
-        maxlength:120,
-        required: [true, 'This field is required']
-    },
-    make_buy_request:{
-        type:Boolean,
-        maxlength:500
-    },
-    
-    make_sell_request:{
-        type:Boolean,
-        maxlength:120
-    },
-    number_of_vested_shares: {
-        type: Number,
-        default: 0
-    },
-    number_of_shares_sold: {
-        type: Number,
-        default: 0
-    },
-    number_of_shares_bought:{
-        type: Number,
-        default: 0
-    },
-    forfieted_Shares:{
-        type: Number,
-        default: 0
-    },
-    outstanding_bought: {
-        type: Number,
-        default: 0
-    },
-    outstanding_sold:{
-        type: Number,
-        default: 0
-    },
-    vested_as_at:{
-        type: Array,
-        default: [{date:Date.now, amount:0}]
-    },
-
-    allocation_date: {
-        type: Date,
-        required: [true, 'This field is required']
-    },
-    // corresponding_vesting_date: {
-    //     type: Date,
-    //     required: [true, 'This field is required']
-    // },
-    // corresponding_date_of_sale: {
-    //     type: Date,
-    //     required: [true, 'This field is required']
-    // },
     role:{
         type: String,
         default: "user"
@@ -218,6 +150,64 @@ const userSchema = new Schema({
         required: true,
         ref: 'Company'
     },
+    batch:[{
+        name:{
+            type: String,
+            required: [true, 'Please enter a batch name']
+        },  
+        currentShareValue: {
+            type: Number,
+            required: [true, 'This field is required']
+        },
+        dividend: {
+            type: Object
+        },
+        shareCollaterised: {
+            type: Number
+        },
+        allocatedShares: {
+            type: Number,
+            required: [true, 'This field is required']
+        },
+        canBuy:{
+            type:Boolean
+        },
+        canSell:{
+            type:Boolean
+        },
+        vestedShares: {
+            type: Number
+        },
+        sharesSold: {
+            type: Number
+        },
+        sharesBought:{
+            type: Number
+        },
+        sharesForfieted:{
+            type: Number,
+            default: 0
+        },
+        outstandingBought: {
+            type: Number
+        },
+        outstandingSold:{
+            type: Number,
+            default: 0
+        },
+        vested_as_at:[{
+            date: {
+                type: Date
+            },
+            amountOfShareVested:{
+                type: Number
+            }
+        }],
+        allocationDate: {
+            type: Date,
+            required: [true, 'This field is required']
+        }
+    }],
     tokens: [{
         access: {
           type: String,
@@ -281,6 +271,30 @@ userSchema.methods.generateToken = function() {
     });
 }
 
+userSchema.methods.batchRegistration = function(batchObject) {
+    let user = this;
+    userBatch = user.batch;
+
+    try {
+        // validate for batch name
+        userBatch.map(companyBatch=>{
+            if (companyBatch.name === batchObject.name){
+                return "A batch with that name is already in existence";
+            }
+        });
+
+        [...userBatch, batchObject]; // append new batch to batch
+
+    }catch(e) {
+        return Promise.reject(`${e}`);
+    }
+    
+    // return userBatch; // return new userBatch
+    return user.save().then(() => {
+        return user;
+    });
+}
+
 userSchema.statics.findByToken = function(token) {
     let User = this;
     let decoded;
@@ -337,6 +351,35 @@ userSchema.statics.findByEmail = function(email) {
             return resolve(admin);
         }
     });
+}
+
+
+userSchema.methods.userConfirmation = function(){
+    let user = this;
+
+    let company = user.company;
+    let companyBatch = company.schemeBatch;
+    let userBatch = user.batch;
+
+      companyBatch.map(cb=>{
+        let companyBatchName = cb.name;
+        let companyBatchAmount = cb.totalShares;
+
+        userBatch.forEach(function(item){
+
+          if(user.status){ // run this if the user is a confirmed staff of the company
+            // updated total shares allocated to scheme members
+            companyBatchAmount += item.allocatedShares;
+            company.totalSharesAllocatedToSchemeMembers += companyBatchAmount;
+            // update total unallocated shares
+            company.totalUnallocatedShares = company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers;
+          }else{
+            return "Error the user is not confirmed";
+          }
+        });
+      })
+      
+      company.save(); // save to store data
 }
 
 const User = mongoose.model('User', userSchema);
