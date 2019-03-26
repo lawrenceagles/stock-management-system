@@ -338,4 +338,42 @@ router.post('/notification',authenticate, (req, res)=>{
     });
 })
 
+
+// POST ROUTE SEND NOTIFICATION FROM ADMIN TO MANY USER
+router.post('/notification/:companyid',authenticate, (req, res)=>{
+    let receiverEmail;
+    req.body.onSenderModel = 'Admin'; // set the refPath 
+    req.body.onReceiverModel = 'User';
+
+    // find user company specific
+    Company.findById(id).then(company=>{
+        if(!ObjectId.isValid(id)){
+            return res.send(`Invalid company ID`);
+        }
+
+        if(!company){
+            return res.status(404).send("No company found");
+        }
+
+        company.find({}).then(usersArr=>{
+            receiverID =  _.map(usersArr, 'id');
+            let sentMessage = new Notifcations({
+                ...req.body,
+                sender:req.admin._id,
+                receiver: receiverID
+            });
+        })
+
+        sentMessage.save().then(doc=>{
+            res.status(201).send(doc);
+        }).catch(e=>{
+            res.status(400).send(`${e} Error with the route`);
+        });
+
+        // res.send(doc);
+    }).catch(e=>{
+        res.status(404).send(`${e} Error no receiver like this in database`);
+    });
+})
+
 module.exports = router;
