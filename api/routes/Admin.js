@@ -303,14 +303,13 @@ router.get('/notification',authenticate, (req,res)=>{
         })
 })
 
-// POST ROUTE SEND NOTIFICATION FOR ADMIN
+// POST ROUTE SEND NOTIFICATION FROM ADMIN TO ONE USER
 router.post('/notification',authenticate, (req, res)=>{
     let receiverEmail = req.body.email;
     req.body.onSenderModel = 'Admin'; // set the refPath 
     req.body.onReceiverModel = 'User';
 
     // find user company specific
-
     User.findOne({email:receiverEmail}).then(doc=>{
 
         if(!doc){
@@ -320,7 +319,7 @@ router.post('/notification',authenticate, (req, res)=>{
         let sentMessage = new Notifcations({
                 ...req.body,
                 sender:req.admin._id,
-                receiver:[...doc._id]
+                receiver: doc._id
             });
 
         // if(toEmail){// handle send to email

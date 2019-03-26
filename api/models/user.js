@@ -238,7 +238,7 @@ userSchema.virtual('receivedNotifications', {
 // this function overwrites the toJSON function. It is called implicitly
 userSchema.methods.toJSON = function() {
  let obj = this.toObject();
- let user = _.pick(obj, ['_id','firstname', 'lastname', 'username', 'email', 'company', 'Company_Schemerules', 'tokens.token', 'status']);
+ let user = _.pick(obj, ['_id','firstname', 'lastname', 'username', 'email', 'company', 'Company_Schemerules', 'tokens', 'status']);
  return user;
 }
 
