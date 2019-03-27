@@ -445,7 +445,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
         User.findById(id).then(doc=>{
           // confirmUser(); // call the confirm user to update necessary shares.
-          return res.send(doc);
+          return res.send("Update Successful");
         })
         
     }).catch((e)=>{
