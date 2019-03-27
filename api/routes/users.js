@@ -420,7 +420,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
    })
    
   //Update user information
-  router.patch('/user/:id',authenticate, (req, res) => {
+  router.patch('/user/:id',authenticateUser, (req, res) => {
     // get the user id
     let id = req.params.id;
     // validate the id
@@ -478,7 +478,7 @@ router.get('/notification',authenticateUser, (req,res)=>{
 // POST ROUTE SEND NOTIFICATION FOR user
 router.post('/user/notification/:id',authenticateUser, (req, res)=>{
     let id = req.params.id;
-    let receiverEmail;
+    let receivers;
     req.body.onSenderModel = 'User'; // set the refPath 
     req.body.onReceiverModel = 'Admin';
 
@@ -488,13 +488,12 @@ router.post('/user/notification/:id',authenticateUser, (req, res)=>{
         }
 
         User.findById(id).then(user=>{
-          receiverEmail =  _.map(adminArray, 'id');
-          console.log(receiverEmail);
+          receivers =  _.map(adminArray, 'id');
 
           let sentMessage = new Notifcations({
               ...req.body,
               sender:user._id,
-              receiver:receiverEmail
+              receiver:receivers
           });
 
           // sendToOne(doc.email, doc.firstname, doc.lastname); // send this notification by email also

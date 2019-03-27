@@ -322,10 +322,6 @@ router.post('/notification',authenticate, (req, res)=>{
                 receiver: doc._id
             });
 
-        // if(toEmail){// handle send to email
-        //     sendToOne(doc.email, doc.firstname, doc.lastname);
-        // } 
-
         sentMessage.save().then(doc=>{
             res.status(201).send(doc);
         }).catch(e=>{
