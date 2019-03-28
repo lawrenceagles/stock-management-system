@@ -60,7 +60,9 @@ const AdminSchema = new Schema({
       trim: true,
       enum: role
     },
-    image: String,
+    avatar:{
+        type: Buffer
+    },
     tokens: [{
         access: {
           type: String,

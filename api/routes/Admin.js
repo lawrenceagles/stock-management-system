@@ -31,14 +31,14 @@ const upload = multer.diskStorage({
 
 
 // route to upload an image
-router.post('/upload/profile/image',authenticateUser,(req,res)=>{
+router.post('/upload/profile/image',authenticate,(req,res)=>{
   let buffer = sharp(req.file.buffer)
     .resize({width: 400, height: 400})
     .png()
     .toBuffer()
     .then(sharpImage=>{
-      req.user.avatar = sharpImage; // set user avater to sharp Image
-      req.user.save().then(image=>{ // save user avatar
+      req.admin.avatar = sharpImage; // set admin avater to sharp Image
+      req.admin.save().then(image=>{ // save admin avatar
       res.send("Image Successfully Uploaded");
       }).catch(e=>{
         res.status(400).send(`${e}`);
@@ -50,9 +50,9 @@ router.post('/upload/profile/image',authenticateUser,(req,res)=>{
 
 
 // route to upload an image
-router.delete('/upload/profile/image',authenticateUser,(req,res)=>{
-  req.user.avatar = undefined;
-    req.user.save().then(doc=>{
+router.delete('/upload/profile/image',authenticate,(req,res)=>{
+  req.admin.avatar = undefined;
+    req.admin.save().then(doc=>{
       res.send("Image Successfully Deleted");
     }).catch(e=>{
       res.status(400).send(`${e}`);
@@ -60,14 +60,14 @@ router.delete('/upload/profile/image',authenticateUser,(req,res)=>{
 });
 
 
-router.get('/user/profile/image',authenticateUser,(req,res)=>{
-  let req.user._Id = id;
-  User.findById(id).then(user=>{
-    if(!user || !user.avatar){
+router.get('/admin/profile/image',authenticate,(req,res)=>{
+  let id = req.admin._id;
+  admin.findById(id).then(admin=>{
+    if(!admin || !admin.avatar){
       throw new Error;
     }
     res.set('Content-Type', 'image/png');
-    res.send(user.avatar); // send the user avatar.    
+    res.send(admin.avatar); // send the admin avatar.    
   }).catch(e=>{
     res.status(404).send(`${e}`);
   })
@@ -129,7 +129,6 @@ router.post('/admin',authenticate, (req, res) => {
 
     // Auto generate random password for admin
     body.password = genRandomPassword(10);
-    console.log(body.password);
     let admin = new Admin(body);
 
     // send welcome email containing password
@@ -188,9 +187,9 @@ router.post('/admin/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
     Admin.findByCredentials(body.email, body.password).then((admin)=> { 
 
-        if(admin.tokens.length > 0){
-            return res.send("You are already Logged in");
-        }
+        // if(admin.tokens.length > 0){
+        //     return res.send("You are already Logged in");
+        // }
 
         return admin.generateToken().then((token)=> {
             return res.header('x-auth', token).send({
@@ -336,7 +335,7 @@ router.get('/audit', (req, res)=>{
 });
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/notification',authenticate, (req,res)=>{    
+router.get('/received/notification',authenticate, (req,res)=>{    
     const sort = {}
     if (req.query.sortBy) {
         const parts = req.query.sortBy.split(':')
@@ -345,13 +344,32 @@ router.get('/notification',authenticate, (req,res)=>{
     
     let admin = req.admin;
         admin.populate({
-            path: 'sentNotifications',
-            sort
-        })
-        .execPopulate()
-        .then(doc=>{
-            res.send(admin.sentNotifications);
-        })
+        path: 'receivedNotifications',
+        sort
+    })
+    .execPopulate()
+    .then(doc=>{
+        res.send(admin.receivedNotifications);
+    })
+})
+
+// GET ROUTE VIEW ALL NOTIFICATIONS
+router.get('/sent/notification',authenticate, (req,res)=>{    
+    const sort = {}
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    }
+    
+    let admin = req.admin;
+    admin.populate({
+        path: 'sentNotifications',
+        sort
+    })
+    .execPopulate()
+    .then(doc=>{
+        res.send(admin.sentNotifications);
+    })
 })
 
 // POST ROUTE SEND NOTIFICATION FROM ADMIN TO ONE USER

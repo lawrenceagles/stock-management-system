@@ -7,7 +7,7 @@ const _ = require('lodash');
 const path = require("path");
 const bcrypt = require('bcryptjs');
 
-const {sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
+const {sendUserWelcomePasswordEmail,sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
 const {genRandomPassword} = require('../../config/genPassword.js');
 const {authenticateUser} = require('../../middleware/authenticateUser');
 const {authenticate} = require('../../middleware/authenticate');
@@ -67,7 +67,7 @@ router.delete('/upload/profile/image',authenticateUser,(req,res)=>{
 
 
 router.get('/user/profile/image',authenticateUser,(req,res)=>{
-  let req.user._Id = id;
+  let id = req.user._Id;
   User.findById(id).then(user=>{
     if(!user || !user.avatar){
       throw new Error;
@@ -136,26 +136,20 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
         return res.status(404).send("Error No company was selected. Wrong company ID")
       }
 
-      User.find({email, employee_number}).then(doc=>{
-        if(doc.length > 0){
-          return res.status(400).send("This user already exists in this company");
-        }
+      User.findOne({employee_number}).then(doc=>{
+        // if(doc){
+        //   return res.status(400).send("This user already exists in this company");
+        // }
 
-        // req.body.username = req.body.username.toLowerCase(); // change username to all lowercase
           // Auto generate random password for admin
-           password = genRandomPassword(10);
-           console.log(password);
+           req.body.password = genRandomPassword(10);
            
         // create the user
         let user = new User({
           ...req.body,
           company: id,
-          password,
           Company_Schemerules: company.schemeRules // set company scheme rules for this user
         });
-
-        // send welcome email containing password
-      sendWelcomePasswordEmail(req.body.email,req.body.firstname,req.body.lastname,req.body.password);
 
         // log audit trail
         let log = new Log({
@@ -169,6 +163,8 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 
         user.save().then(user=>{ // Return the user doc and update user-company data relationship
 
+          // send welcome email containing password
+          sendUserWelcomePasswordEmail(user.email,user.firstname,user.lastname,req.body.password);
           // increase company total scheme members by 1
           company.totalSchemeMembers += 1;
           // update total shares alloted by company to scheme members dynamically
@@ -183,10 +179,8 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
               if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
                 companyBatchAmount += item.allocatedShares; // dynamically generate total allocated to batch scheme
-                // company.totalSharesAllocatedToSchemeMembers += item.allocatedShares;
               }else{ // run this if the user is an unconfirmed staff of the company
                 // update total allocated shares to unconfirmed scheme members
-                // companyBatchAmount += item.allocatedShares;
                 company.totalSharesOfUnconfirmedSchemeMembers += item.allocatedShares;
               }
 
@@ -194,10 +188,10 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 
           });
 
-          // update total unallocated shares
-          company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
           // could simply work since it is the sum of all companyBatchAmount (outside the loop)
           company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
+          // update total unallocated shares
+          company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
 
           // save updated company data to store database
           company.save();
@@ -217,28 +211,28 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 })
 
 // Register user in new batch
-// router.post('/companybatch/registration/:id', (req,res)=>{
-//   // find user in company
-//   let batchData = req.body;
-//   let id = req.params.id;
+router.post('/companybatch/registration/:id',authenticate,(req,res)=>{
+  // find user in company
+  let batchData = req.body;
+  let id = req.params.id;
 
-//   User.findById(id).then(user=>{ // find user and call batchRegistration function on the user.
-//     user.batchRegistration(batchData);
-//   }).catch(e=>{
-//     res.status(400).send(`There is an ${e}`);
-//   })
+  User.findById(id).then(user=>{ // find user and call batchRegistration function on the user.
+    user.batchRegistration(batchData);
+  }).catch(e=>{
+    res.status(400).send(`There is an ${e}`);
+  })
 
-// })
+})
 
 // // User confirmation Route
-// router.patch('/userComfirmation/:id', (req, res)=>{
-//   let id = req.params.id;
-//   findById(id).then(user=>{
-//     user.userConfirmation().then(doc=>{
-//       return res.status(200).send("User has been confirmed");
-//     });
-//   })
-// })
+router.patch('/userComfirmation/:id',authenticate,(req, res)=>{
+  let id = req.params.id;
+  findById(id).then(user=>{
+    user.userConfirmation().then(doc=>{
+      return res.status(200).send("User has been confirmed");
+    });
+  })
+})
 
 // forgot Password Request Route
 router.patch('/user/forgetpassword', (req,res)=>{
@@ -287,10 +281,11 @@ router.patch('/user/forgetpassword', (req,res)=>{
                 message:"Wrong Password"
                 })   
                 if(isMatch) { 
+
                 //if user log in success, generate a JWT token for the user with a secret key    
-                if(user.tokens.length > 0){
-                    return res.send("You are already Logged in");
-                }    
+                // if(user.tokens.length > 0){
+                //     return res.send("You are already Logged in");
+                // }    
                     return user.generateToken()
                     .then((token)=> {
                       return res.header('x-auth', token).send({
@@ -322,7 +317,7 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
       res.status(400).send(`Error Logout not successfull ${e}`);
     })
 
-    });
+  });
 
 //read user info
  router.get('/users',authenticate,(req,res,next)=>{ 
@@ -400,22 +395,20 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
                 if(user.status){ // run this if the user is a confirmed staff of the company
                   // updated total shares allocated to scheme members
-                  companyBatchAmount += item.allocatedShares; // dynamically generate total allocated to batch scheme
-                  // company.totalSharesAllocatedToSchemeMembers += item.allocatedShares;
+                  companyBatchAmount -= item.allocatedShares; // dynamically generate total allocated to batch scheme
                 }else{ // run this if the user is an unconfirmed staff of the company
                   // update total allocated shares to unconfirmed scheme members
-                  // companyBatchAmount += item.allocatedShares;
-                  company.totalSharesOfUnconfirmedSchemeMembers += item.allocatedShares;
+                  company.totalSharesOfUnconfirmedSchemeMembers -= item.allocatedShares;
                 }
 
               });
 
             });
 
-            // update total unallocated shares
-            company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
             // could simply work since it is the sum of all companyBatchAmount (outside the loop)
             company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
+            // update total unallocated shares
+            company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
             
             company.save(); // save to store data
 
@@ -446,12 +439,12 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
             return res.status(404).send();
         }
 
-        // if(req.password !== doc.password){
-        //     let password = doc.password;
-        //     let saltRounds = 10;
-        //     let hash = bcrypt.hashSync(password, saltRounds);
-        //     doc.password = hash;
-        // }
+        if(req.password !== doc.password){
+            let password = doc.password;
+            let saltRounds = 10;
+            let hash = bcrypt.hashSync(password, saltRounds);
+            doc.password = hash;
+        }
 
         doc.save();
 
@@ -468,7 +461,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/notification',authenticateUser, (req,res)=>{
+router.get('/sent/notification',authenticateUser, (req,res)=>{
     
     const sort = {}
     if (req.query.sortBy) {
@@ -485,11 +478,32 @@ router.get('/notification',authenticateUser, (req,res)=>{
     .then(doc=>{
         res.send(user.sentNotifications);
     })
-})
+});
+
+
+// GET ROUTE VIEW ALL NOTIFICATIONS
+router.get('/received/notification',authenticateUser, (req,res)=>{
+    
+    const sort = {}
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    }
+
+    let user = req.user;
+    user.populate({
+      path: 'receivedNotifications',
+      sort
+    })
+    .execPopulate()
+    .then(doc=>{
+        res.send(user.receivedNotifications);
+    })
+});
 
 // POST ROUTE SEND NOTIFICATION FOR user
-router.post('/user/notification/:id',authenticateUser, (req, res)=>{
-    let id = req.params.id;
+router.post('/user/notification/',authenticateUser, (req, res)=>{
+    let id = req.user._id;
     let receivers;
     req.body.onSenderModel = 'User'; // set the refPath 
     req.body.onReceiverModel = 'Admin';

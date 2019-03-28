@@ -32,6 +32,7 @@ const userSchema = new Schema({
     },
     email: {
         type: String,
+        unique: true,
         required: [true, 'User email required'],
         maxlength:120,
         trim: true,
@@ -192,9 +193,6 @@ const userSchema = new Schema({
         canSell:{
             type:Boolean
         },
-        vestedShares: {
-            type: Number
-        },
         sharesSold: {
             type: Number
         },
@@ -213,17 +211,17 @@ const userSchema = new Schema({
             type: Number,
             default: 0
         },
-        vested_as_at:[{
-            date: {
-                type: Date
-            },
-            amountOfShareVested:{
-                type: Number
-            }
-        }],
         allocationDate: {
             type: Date,
             required: [true, 'This field is required']
+        }
+    }],
+    vestedShares: [{
+        date: {
+            type: Date
+        },
+        amount:{
+            type: Number
         }
     }],
     avatar:{
@@ -335,7 +333,7 @@ userSchema.statics.findByToken = function(token) {
 
 // create a new mongoose method for user login authentication
 userSchema.statics.findByCredentials = function(email, password) {
-    let user = this;
+    let User = this;
     return User.findOne({email}).then((user)=> { // find user by email
         if(!user){  // handle user not found
             return Promise.reject();
@@ -346,7 +344,7 @@ userSchema.statics.findByCredentials = function(email, password) {
                 if(res) {
                     return resolve(user);
                 }else{
-                    return reject();
+                    return reject("Wrong password");
                 }
             })
         });
@@ -364,16 +362,6 @@ userSchema.methods.removeToken = function(token) {
     }
   })
 }
-
-userSchema.statics.findByEmail = function(email) {
-    let Admin = this;
-    return Admin.findOne({email}).then((admin)=> { // find admin by email
-        if(admin){ 
-            return resolve(admin);
-        }
-    });
-}
-
 
 userSchema.methods.userConfirmation = function(){
     let user = this;
