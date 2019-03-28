@@ -120,17 +120,29 @@ const userSchema = new Schema({
             }
         },
     next_of_kin_information: {
-        NextOfKinEmail: {
-            type: String,
-            trim: true,
-            required: [true, 'User email required'],
-            maxlength:200
-        },
         NextOfKinlastName:{
             type: String,
             trim: true,
             required:true,
             maxlength:120
+        },
+        NextOfKinfirstName: {
+            type: String,
+            trim: true,
+            required:true,
+            maxlength:120
+        },
+        NextOfKinOtherName: {
+            type: String,
+            trim: true,
+            required:true,
+            maxlength:120
+        },
+        NextOfKinEmail: {
+            type: String,
+            trim: true,
+            required: [true, 'User email required'],
+            maxlength:200
         },
         NextOfKinPhone: {
             type: Number,
@@ -194,7 +206,8 @@ const userSchema = new Schema({
             default: 0
         },
         outstandingBought: {
-            type: Number
+            type: Number,
+            default:0
         },
         outstandingSold:{
             type: Number,
@@ -213,6 +226,9 @@ const userSchema = new Schema({
             required: [true, 'This field is required']
         }
     }],
+    avatar:{
+        type: Buffer
+    },
     tokens: [{
         access: {
           type: String,
