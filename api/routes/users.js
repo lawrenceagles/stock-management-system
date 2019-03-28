@@ -384,6 +384,24 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
 })
 
 //find one user
+// router.get("/user/:id",authenticateUser,(req,res,next)=>{
+//     let id = req.params.id;
+//     // checks if the object is valid
+//     if(!ObjectId.isValid(id)) {
+//         res.status(400).send(`Error: Please enter a valid Object ID`);
+//     }
+
+
+//      User.findById(id).then((doc)=> {
+//         // if user is not found return error 404 otherwise send the admin.
+//         doc ? res.send(doc) : res.status(404).send();
+//     }).catch((e)=>{
+//         res.status(400).send();
+//     })
+//  })
+
+
+//find one user
 router.get("/user/:id",authenticateUser,(req,res,next)=>{
     let id = req.params.id;
     // checks if the object is valid
@@ -392,13 +410,31 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
     }
 
 
-     User.findById(id).then((doc)=> {
+     User.findById(id).then((user)=> {
         // if user is not found return error 404 otherwise send the admin.
-        doc ? res.send(doc) : res.status(404).send();
+        if(!user){
+          res.status(404).send("User not found");
+        }
+
+        let companyID = user.company; 
+        Company.findById(companyID).then(company=>{
+            res.send({
+                _id: user._id,
+                email: user.email,
+                company: user.company,
+                Company_Schemerules: user.Company_Schemerules,
+                tokens: user.tokens,
+                status: user.status,
+                companyObj: company
+            });
+        }).catch(e=>{
+          res.status(400).send(`${e}`);
+        })
     }).catch((e)=>{
-        res.status(400).send();
+        res.status(400).send(`${e}`);
     })
  })
+
 
  router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
     const id = req.params.id
