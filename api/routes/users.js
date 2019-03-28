@@ -346,11 +346,28 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
     }
 
 
-     User.findById(id).then((doc)=> {
+     User.findById(id).then((user)=> {
         // if user is not found return error 404 otherwise send the admin.
-        doc ? res.send(doc) : res.status(404).send();
+        if(!user){
+          res.status(404).send("User not found");
+        }
+
+        let companyID = user.company; 
+        Company.findById(companyID).then(company=>{
+            res.send({
+                _id: user._id,
+                email: user.email,
+                company: user.company,
+                Company_Schemerules: user.Company_Schemerules,
+                tokens: user.tokens,
+                status: user.status,
+                companyObj: company
+            });
+        }).catch(e=>{
+          res.status(400).send(`${e}`);
+        })
     }).catch((e)=>{
-        res.status(400).send();
+        res.status(400).send(`${e}`);
     })
  })
 
