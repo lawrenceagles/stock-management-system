@@ -471,7 +471,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/notification',authenticateUser, (req,res)=>{
+router.get('/sent/notification',authenticateUser, (req,res)=>{
     
     const sort = {}
     if (req.query.sortBy) {
@@ -488,11 +488,32 @@ router.get('/notification',authenticateUser, (req,res)=>{
     .then(doc=>{
         res.send(user.sentNotifications);
     })
-})
+});
+
+
+// GET ROUTE VIEW ALL NOTIFICATIONS
+router.get('/received/notification',authenticateUser, (req,res)=>{
+    
+    const sort = {}
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    }
+
+    let user = req.user;
+    user.populate({
+      path: 'receivedNotifications',
+      sort
+    })
+    .execPopulate()
+    .then(doc=>{
+        res.send(user.receivedNotifications);
+    })
+});
 
 // POST ROUTE SEND NOTIFICATION FOR user
-router.post('/user/notification/:id',authenticateUser, (req, res)=>{
-    let id = req.params.id;
+router.post('/user/notification/',authenticateUser, (req, res)=>{
+    let id = req.user._id;
     let receivers;
     req.body.onSenderModel = 'User'; // set the refPath 
     req.body.onReceiverModel = 'Admin';

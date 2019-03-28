@@ -285,7 +285,7 @@ router.get('/audit', (req, res)=>{
 });
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/notification',authenticate, (req,res)=>{    
+router.get('/received/notification',authenticate, (req,res)=>{    
     const sort = {}
     if (req.query.sortBy) {
         const parts = req.query.sortBy.split(':')
@@ -294,13 +294,32 @@ router.get('/notification',authenticate, (req,res)=>{
     
     let admin = req.admin;
         admin.populate({
-            path: 'sentNotifications',
-            sort
-        })
-        .execPopulate()
-        .then(doc=>{
-            res.send(admin.sentNotifications);
-        })
+        path: 'receivedNotifications',
+        sort
+    })
+    .execPopulate()
+    .then(doc=>{
+        res.send(admin.receivedNotifications);
+    })
+})
+
+// GET ROUTE VIEW ALL NOTIFICATIONS
+router.get('/sent/notification',authenticate, (req,res)=>{    
+    const sort = {}
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    }
+    
+    let admin = req.admin;
+    admin.populate({
+        path: 'sentNotifications',
+        sort
+    })
+    .execPopulate()
+    .then(doc=>{
+        res.send(admin.sentNotifications);
+    })
 })
 
 // POST ROUTE SEND NOTIFICATION FROM ADMIN TO ONE USER
@@ -371,5 +390,6 @@ router.post('/notification/:companyid',authenticate, (req, res)=>{
         res.status(404).send(`${e} Error no receiver like this in database`);
     });
 })
+
 
 module.exports = router;
