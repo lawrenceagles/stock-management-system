@@ -7,6 +7,15 @@ const notificationSchema = new Schema({
 		type: String,
 		required: true
 	},
+	companyName:{
+		type:String,
+		trim:true,
+		default: "Vetiva"
+	},
+	username:{
+		type:String,
+		trim:true
+	},
 	sender:{
 		type: mongoose.Schema.Types.ObjectId,
 		required: true,

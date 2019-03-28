@@ -327,6 +327,7 @@ router.post('/notification',authenticate, (req, res)=>{
     let receiverEmail = req.body.email;
     req.body.onSenderModel = 'Admin'; // set the refPath 
     req.body.onReceiverModel = 'User';
+    req.body.username = req.admin.username;
 
     // find user company specific
     User.findOne({email:receiverEmail}).then(doc=>{
@@ -334,7 +335,6 @@ router.post('/notification',authenticate, (req, res)=>{
         if(!doc){
             return res.status(404).send("error no user found");
         }
-
         let sentMessage = new Notifcations({
                 ...req.body,
                 sender:req.admin._id,
@@ -359,6 +359,7 @@ router.post('/notification/:companyid',authenticate, (req, res)=>{
     let receiverEmail;
     req.body.onSenderModel = 'Admin'; // set the refPath 
     req.body.onReceiverModel = 'User';
+    req.body.username = req.admin.username;
 
     // find user company specific
     Company.findById(id).then(company=>{
