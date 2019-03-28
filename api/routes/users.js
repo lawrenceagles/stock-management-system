@@ -350,7 +350,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
         let companyID = user.company; 
         Company.findById(companyID).then(company=>{
             res.send({
-                ...user,
+                user,
                 companyname: company.name,
                 companyCanBuy: company.canBuyShares,
                 comapanyCanSell: company.canSellShares,
