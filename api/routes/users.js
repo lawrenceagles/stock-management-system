@@ -136,10 +136,10 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
         return res.status(404).send("Error No company was selected. Wrong company ID")
       }
 
-      User.findOne({employee_number}).then(doc=>{
-        // if(doc){
-        //   return res.status(400).send("This user already exists in this company");
-        // }
+      User.find({employee_number, email}).then(doc=>{
+        if(doc.length > 1){
+          return res.status(400).send("This user already exists in this company");
+        }
 
           // Auto generate random password for admin
            req.body.password = genRandomPassword(10);
@@ -150,6 +150,9 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           company: id,
           Company_Schemerules: company.schemeRules // set company scheme rules for this user
         });
+
+        // send welcome email containing password
+        sendUserWelcomePasswordEmail(user.email,user.firstName,user.lastName,user.password);
 
         // log audit trail
         let log = new Log({
@@ -162,9 +165,6 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
         log.save();
 
         user.save().then(user=>{ // Return the user doc and update user-company data relationship
-
-          // send welcome email containing password
-          sendUserWelcomePasswordEmail(user.email,user.firstname,user.lastname,req.body.password);
           // increase company total scheme members by 1
           company.totalSchemeMembers += 1;
           // update total shares alloted by company to scheme members dynamically
@@ -195,16 +195,15 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 
           // save updated company data to store database
           company.save();
-
           let body = _.pick(user, ['firstname', 'lastname', 'email','Company_Schemerules','company','status','tokens']);
           return res.status(201).send(body);
 
         }).catch(e=>{
-          res.status(400).send(`There was an error: ${e}`)
+          res.status(400).send(`There was an error1: ${e}`)
         });
 
       }).catch(e=>{
-          res.status(400).send(`There was an error: ${e}`)
+          res.status(400).send(`There was an error2: ${e}`)
       })
 
     });

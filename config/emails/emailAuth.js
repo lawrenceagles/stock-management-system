@@ -49,9 +49,9 @@ const sendUpdatePasswordEmail = (Email, firstname, lastname, password)=>{
 	sgMail.send(msg);
 }
 
-const sendWelcomePasswordEmail = (Email, firstname, lastname, password)=>{
+const sendWelcomePasswordEmail = (email, firstname, lastname, password)=>{
 	const msg = {
-	  to: Email,
+	  to: email,
 	  from: 'vetiva@gmail.com',
 	  subject: `WELCOME TO VETIVA SHARE SCHEME MANAGEMENT PROGRAM`,
 	  text: `${lastname} ${firstname}, your account has been successfully created. Kindly login with the password ${password}`
@@ -62,7 +62,7 @@ const sendWelcomePasswordEmail = (Email, firstname, lastname, password)=>{
 
 const sendUserWelcomePasswordEmail = (email, firstname, lastname, password)=>{
 	const msg = {
-	  to: Email,
+	  to: email,
 	  from: 'vetiva@gmail.com',
 	  subject: `WELCOME TO VETIVA SHARE SCHEME MANAGEMENT PROGRAM`,
 	  text: `${lastname} ${firstname}, your account has been successfully created. Kindly login with the password ${password}`
