@@ -539,17 +539,20 @@ router.get('/received/notification',authenticateUser, (req,res)=>{
 router.post('/user/notification/',authenticateUser, (req, res)=>{
     let id = req.user._id;
     let receivers;
+    let user = req.user;
+    let companyID = user.company;
     req.body.onSenderModel = 'User'; // set the refPath 
     req.body.onReceiverModel = 'Admin';
+    req.body.username = req.user.username;
 
     Admin.find({}).then(adminArray=>{
         if(!adminArray){
             return res.status(404).send("error no user found");
         }
 
-        User.findById(id).then(user=>{
+        Company.findById(companyID).then(company=>{
           receivers =  _.map(adminArray, 'id');
-
+          req.body.company = company;
           let sentMessage = new Notifcations({
               ...req.body,
               sender:user._id,
