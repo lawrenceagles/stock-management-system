@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const multer =  require('multer');
+const sharp = require('sharp');
 const _ = require('lodash');
 const path = require("path");
 const bcrypt = require('bcryptjs');
@@ -37,12 +38,20 @@ const upload = multer.diskStorage({
 
 // route to upload an image
 router.post('/upload/profile/image',authenticateUser,(req,res)=>{
-  req.user.avatar = req.file.buffer;
-    req.user.save().then(doc=>{
+  let buffer = sharp(req.file.buffer)
+    .resize({width: 400, height: 400})
+    .png()
+    .toBuffer()
+    .then(sharpImage=>{
+      req.user.avatar = sharpImage; // set user avater to sharp Image
+      req.user.save().then(image=>{ // save user avatar
       res.send("Image Successfully Uploaded");
-    }).catch(e=>{
-      res.status(400).send(`${e}`);
-    })
+      }).catch(e=>{
+        res.status(400).send(`${e}`);
+      });
+  }).catch(e=>{
+    res.status(400).send(`${e}`);
+  })
 });
 
 
@@ -63,6 +72,7 @@ router.get('/user/profile/image',authenticateUser,(req,res)=>{
     if(!user || !user.avatar){
       throw new Error;
     }
+    res.set('Content-Type', 'image/png');
     res.send(user.avatar); // send the user avatar.    
   }).catch(e=>{
     res.status(404).send(`${e}`);
