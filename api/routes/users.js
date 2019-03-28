@@ -112,7 +112,7 @@ router.get("/:companyid/companystaff",authenticate,(req, res, next) => {
 
 
 //create new user
-router.post("/:companyid/users",(req, res, next) => {
+router.post("/:companyid/users",authenticate,(req, res, next) => {
     let id = req.params.companyid
     let email = req.body.email;
     let employee_number = req.body.employee_number;
@@ -143,14 +143,14 @@ router.post("/:companyid/users",(req, res, next) => {
       sendWelcomePasswordEmail(req.body.email,req.body.firstname,req.body.lastname,req.body.password);
 
         // log audit trail
-        // let log = new Log({
-        //     createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
-        //     action: `created a new user`,
-        //     user: `${user.firstName} ${user.lastName}`,
-        //     company: `${user.Company_Name}`             
-        // });
+        let log = new Log({
+            createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
+            action: `created a new user`,
+            user: `${user.firstName} ${user.lastName}`,
+            company: `${user.Company_Name}`             
+        });
 
-        // log.save();
+        log.save();
 
         user.save().then(user=>{ // Return the user doc and update user-company data relationship
 
