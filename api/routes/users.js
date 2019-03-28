@@ -278,23 +278,18 @@ router.patch('/user/forgetpassword', (req,res)=>{
                     return res.send("You are already Logged in");
                 }   
 
-                let companyID = user.company; 
-                Company.findById(companyID).then(company=>{
-                    return user.generateToken()
-                      .then((token)=> {
-                        return res.header('x-auth', token).send({
-                            _id: user._id,
-                            email: user.email,
-                            company: user.company,
-                            Company_Schemerules: user.Company_Schemerules,
-                            tokens: user.tokens,
-                            status: user.status,
-                            companyObj: company
-                        });
-                    })
-                      .catch(err=>{
-                        res.status(400).send(err)
-                      })
+                return user.generateToken()
+                  .then((token)=> {
+                    return res.header('x-auth', token).send({
+                        _id: user._id,
+                        email: user.email,
+                        company: user.company,
+                        Company_Schemerules: user.Company_Schemerules,
+                        tokens: user.tokens,
+                        status: user.status
+                    });
+                  }).catch(err=>{
+                    res.status(400).send(err)
                   })
                 }
             else {
@@ -355,13 +350,12 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
         let companyID = user.company; 
         Company.findById(companyID).then(company=>{
             res.send({
-                _id: user._id,
-                email: user.email,
-                company: user.company,
-                Company_Schemerules: user.Company_Schemerules,
-                tokens: user.tokens,
-                status: user.status,
-                companyObj: company
+                ...user,
+                companyname: company.name,
+                companyCanBuy: company.canBuyShares,
+                comapanyCanSell: company.canSellShares,
+                companyCanCollacterize: company.canCollateriseShares,
+                vestingSchedule: company.vestingSchedule 
             });
         }).catch(e=>{
           res.status(400).send(`${e}`);
