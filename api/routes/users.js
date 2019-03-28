@@ -112,7 +112,7 @@ router.get("/:companyid/companystaff",authenticate,(req, res, next) => {
 
 
 //create new user
-router.post("/:companyid/users",authenticate,(req, res, next) => {
+router.post("/:companyid/users",(req, res, next) => {
     let id = req.params.companyid
     let email = req.body.email;
     let employee_number = req.body.employee_number;
@@ -129,14 +129,13 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 
         // req.body.username = req.body.username.toLowerCase(); // change username to all lowercase
           // Auto generate random password for admin
-           password = genRandomPassword(10);
-           console.log(password);
+           req.body.password = genRandomPassword(10);
+           console.log(req.body.password);
            
         // create the user
         let user = new User({
           ...req.body,
           company: id,
-          password,
           Company_Schemerules: company.schemeRules // set company scheme rules for this user
         });
 
@@ -144,14 +143,14 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
       sendWelcomePasswordEmail(req.body.email,req.body.firstname,req.body.lastname,req.body.password);
 
         // log audit trail
-        let log = new Log({
-            createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
-            action: `created a new user`,
-            user: `${user.firstName} ${user.lastName}`,
-            company: `${user.Company_Name}`             
-        });
+        // let log = new Log({
+        //     createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
+        //     action: `created a new user`,
+        //     user: `${user.firstName} ${user.lastName}`,
+        //     company: `${user.Company_Name}`             
+        // });
 
-        log.save();
+        // log.save();
 
         user.save().then(user=>{ // Return the user doc and update user-company data relationship
 
@@ -277,21 +276,26 @@ router.patch('/user/forgetpassword', (req,res)=>{
                 //if user log in success, generate a JWT token for the user with a secret key    
                 if(user.tokens.length > 0){
                     return res.send("You are already Logged in");
-                }    
+                }   
+
+                let companyID = user.company; 
+                Company.findById(companyID).then(company=>{
                     return user.generateToken()
-                    .then((token)=> {
-                      return res.header('x-auth', token).send({
-                          _id: user._id,
-                          email: user.email,
-                          company: user.company,
-                          Company_Schemerules: user.Company_Schemerules,
-                          tokens: user.tokens,
-                          status: user.status
-                      });
-                  })
-                    .catch(err=>{
-                      res.status(400).send(err)
+                      .then((token)=> {
+                        return res.header('x-auth', token).send({
+                            _id: user._id,
+                            email: user.email,
+                            company: user.company,
+                            Company_Schemerules: user.Company_Schemerules,
+                            tokens: user.tokens,
+                            status: user.status,
+                            companyObj: company
+                        });
                     })
+                      .catch(err=>{
+                        res.status(400).send(err)
+                      })
+                  })
                 }
             else {
                 res.status(400).send("Error could not login")
