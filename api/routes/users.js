@@ -269,46 +269,7 @@ router.patch('/user/forgetpassword', (req,res)=>{
 });
 
  //login
-//  router.post('/user/login',(req,res)=>{
-//     User.findOne({'email':req.body.email},(err,user)=>{
-//         if(!user) return res.status(404).json({
-//              message:`auth failed email not found`
-//          })
-//         user.comparePassword(req.body.password,(isMatch,err)=>{
-//         if(err) throw err;
-//             if(!isMatch) return res.status(400).json({
-//                 message:"Wrong Password"
-//                 })   
-//                 if(isMatch) { 
-
-//                 //if user log in success, generate a JWT token for the user with a secret key    
-//                 // if(user.tokens.length > 0){
-//                 //     return res.send("You are already Logged in");
-//                 // }    
-//                     return user.generateToken()
-//                     .then((token)=> {
-//                       return res.header('x-auth', token).send({
-//                           _id: user._id,
-//                           email: user.email,
-//                           company: user.company,
-//                           Company_Schemerules: user.Company_Schemerules,
-//                           tokens: user.tokens,
-//                           status: user.status
-//                       });
-//                   })
-//                     .catch(err=>{
-//                       res.status(400).send(err)
-//                     })
-//                 }
-//             else {
-//                 res.status(400).send("Error could not login")
-//             }
-//          })
-//     }) 
-// })
-
-
-router.post('/user/login',(req,res)=>{
+ router.post('/user/login',(req,res)=>{
     User.findOne({'email':req.body.email},(err,user)=>{
         if(!user) return res.status(404).json({
              message:`auth failed email not found`
@@ -319,29 +280,25 @@ router.post('/user/login',(req,res)=>{
                 message:"Wrong Password"
                 })   
                 if(isMatch) { 
-                //if user log in success, generate a JWT token for the user with a secret key    
-                if(user.tokens.length > 0){
-                    return res.send("You are already Logged in");
-                }   
 
-                let companyID = user.company; 
-                Company.findById(companyID).then(company=>{
+                //if user log in success, generate a JWT token for the user with a secret key    
+                // if(user.tokens.length > 0){
+                //     return res.send("You are already Logged in");
+                // }    
                     return user.generateToken()
-                      .then((token)=> {
-                        return res.header('x-auth', token).send({
-                            _id: user._id,
-                            email: user.email,
-                            company: user.company,
-                            Company_Schemerules: user.Company_Schemerules,
-                            tokens: user.tokens,
-                            status: user.status,
-                            companyObj: company
-                        });
-                    })
-                      .catch(err=>{
-                        res.status(400).send(err)
-                      })
+                    .then((token)=> {
+                      return res.header('x-auth', token).send({
+                          _id: user._id,
+                          email: user.email,
+                          company: user.company,
+                          Company_Schemerules: user.Company_Schemerules,
+                          tokens: user.tokens,
+                          status: user.status
+                      });
                   })
+                    .catch(err=>{
+                      res.status(400).send(err)
+                    })
                 }
             else {
                 res.status(400).send("Error could not login")
@@ -419,13 +376,12 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
         let companyID = user.company; 
         Company.findById(companyID).then(company=>{
             res.send({
-                _id: user._id,
-                email: user.email,
-                company: user.company,
-                Company_Schemerules: user.Company_Schemerules,
-                tokens: user.tokens,
-                status: user.status,
-                companyObj: company
+                user,
+                companyname: company.name,
+                companyCanBuy: company.canBuyShares,
+                comapanyCanSell: company.canSellShares,
+                companyCanCollacterize: company.canCollateriseShares,
+                vestingSchedule: company.vestingSchedule 
             });
         }).catch(e=>{
           res.status(400).send(`${e}`);
