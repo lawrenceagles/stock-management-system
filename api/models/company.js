@@ -29,6 +29,14 @@ const companySchema = new Schema({
     sharePrice:{
         type: Number
     },
+    currentShareValue: {
+        type: Number,
+        required: [true, 'This field is required']
+    },
+    vestingPeriod: {
+        type: Number,
+        required: [true, 'Please enter a vesting period for the company']
+    }
     totalSchemeMembers: {
         type: Number,
         required: true,
@@ -64,9 +72,13 @@ const companySchema = new Schema({
         type: Number,
         required: true
     },
-    vestingSchedule:{
-        type:String,
-        required:true
+    vesting:{
+        schedule:{
+            type: Number
+        },
+        Date:{
+            type: Date
+        }
     },
     dateOfAllocation: {
         type: Date,

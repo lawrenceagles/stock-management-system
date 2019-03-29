@@ -54,15 +54,15 @@ const userSchema = new Schema({
         required: [true, 'User phone number is required'],
         maxlength:100,
       },
-      otherPhoneNumber:{
+    otherPhoneNumber:{
         type: String,
         maxlength:100,
       },
-      username: {
+    username: {
         type: String,
         maxlength: 100
       },
-      password: {
+    password: {
         type: String,
         required: [true, 'User password is required'],
         minlength:5,
@@ -173,10 +173,6 @@ const userSchema = new Schema({
             type: String,
             required: [true, 'Please enter a batch name']
         },  
-        currentShareValue: {
-            type: Number,
-            required: [true, 'This field is required']
-        },
         dividend: {
             type: Object
         },

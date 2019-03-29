@@ -285,7 +285,25 @@ router.patch('/user/forgetpassword', (req,res)=>{
                 //if user log in success, generate a JWT token for the user with a secret key    
                 // if(user.tokens.length > 0){
                 //     return res.send("You are already Logged in");
-                // }    
+                // }  
+                
+                // run the vesting function
+                var aprilFools = {
+                    month: 3,
+                    date: 1
+                  }
+
+                  function isItAprilFoolDay() {
+                    var now = new Date();
+                    return (now.getMonth() == aprilFools.month && now.getDate() == aprilFools.date);
+                  }
+
+                  if(isItAprilFoolDay()){
+                    // fuck with people
+                  } else {
+                    // there is less fake stuff today
+                  }
+                 
                     return user.generateToken()
                     .then((token)=> {
                       return res.header('x-auth', token).send({
@@ -339,25 +357,7 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
             if(err) { res.status(500).json(err); return; };            
             res.status(200).json(doc);
         })  
-})
-
-//find one user
-// router.get("/user/:id",authenticateUser,(req,res,next)=>{
-//     let id = req.params.id;
-//     // checks if the object is valid
-//     if(!ObjectId.isValid(id)) {
-//         res.status(400).send(`Error: Please enter a valid Object ID`);
-//     }
-
-
-//      User.findById(id).then((doc)=> {
-//         // if user is not found return error 404 otherwise send the admin.
-//         doc ? res.send(doc) : res.status(404).send();
-//     }).catch((e)=>{
-//         res.status(400).send();
-//     })
-//  })
-
+})  
 
 //find one user
 router.get("/user/:id",authenticateUser,(req,res,next)=>{
@@ -423,6 +423,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
             let companyBatch = company.schemeBatch;
             let userBatch = user.batch;
             let companyBatchAmount;
+            let totalUserShares;
 
               companyBatch.forEach(function(batch){
                 companyBatchAmount = batch.totalShares;
@@ -431,9 +432,11 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                 if(user.status){ // run this if the user is a confirmed staff of the company
                   // updated total shares allocated to scheme members
                   companyBatchAmount -= item.allocatedShares; // dynamically generate total allocated to batch scheme
+                  totalUserShares += item.allocatedShares;
                 }else{ // run this if the user is an unconfirmed staff of the company
                   // update total allocated shares to unconfirmed scheme members
                   company.totalSharesOfUnconfirmedSchemeMembers -= item.allocatedShares;
+                  totalUserShares += item.allocatedShares;
                 }
 
               });
@@ -444,7 +447,8 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
             company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
             // update total unallocated shares
             company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
-            
+            // updated forfieted shares
+            company.totalSharesForfieted = totalUserShares - vestedShares;
             company.save(); // save to store data
 
           }).catch(e=>{
