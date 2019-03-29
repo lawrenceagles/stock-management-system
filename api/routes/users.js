@@ -226,11 +226,14 @@ router.post('/companybatch/registration/:id',authenticate,(req,res)=>{
 
 // // User confirmation Route
 router.patch('/userComfirmation/:id',authenticate,(req, res)=>{
-  let id = req.params.id;
+  let id = req.params.id; // get user id
   findById(id).then(user=>{
-    user.userConfirmation().then(doc=>{
-      return res.status(200).send("User has been confirmed");
-    });
+    let companyID = user.company; // get company id
+    Company.findById().then(company=>{
+      user.userConfirmation(company).then(doc=>{
+        return res.status(200).send("User has been confirmed");
+      });
+    })
   })
 })
 

@@ -71,10 +71,6 @@ const userSchema = new Schema({
         type:String,
         trim: true,
     },
-    User_Loan_Request:{
-       type:String,
-       maxlength:120
-    },
     grade_level: {
         type: String,
         required: [true, 'This field is required']
@@ -100,8 +96,7 @@ const userSchema = new Schema({
             },
             bankBranch: {
                 type: String,
-                trim: true,
-                required: [true, 'Bank branch is required']
+                trim: true
             },
             accountName: {
                 type: String,
@@ -116,45 +111,38 @@ const userSchema = new Schema({
                 required: [true, 'Account number is required']
             },
             accountType: {
-                type: String,
-                required: [true, 'Account type is required']
+                type: String
             }
         },
     next_of_kin_information: {
         NextOfKinlastName:{
             type: String,
             trim: true,
-            required:true,
             maxlength:120
         },
         NextOfKinfirstName: {
             type: String,
             trim: true,
-            required:true,
             maxlength:120
         },
         NextOfKinOtherName: {
             type: String,
             trim: true,
-            required:true,
             maxlength:120
         },
         NextOfKinEmail: {
             type: String,
             trim: true,
-            required: [true, 'User email required'],
             maxlength:200
         },
         NextOfKinPhone: {
             type: Number,
             trim: true,
-            required: [true, 'User phone number required'],
             maxlength:120,
           },
         NextOfKinRelationship: {
               type: String,
               trim: true,
-              required: [true, 'This field cannot be empty'],
               maxlength:120,
         }
         
@@ -168,57 +156,57 @@ const userSchema = new Schema({
         required: true,
         ref: 'Company'
     },
+    sharesSold: {
+        type: Number
+        },
+    sharesBought:{
+        type: Number
+        },
+    shareCollaterised: {
+            type: Number
+        },
+    outstanding:{
+            type: Number
+        },
+    dividend:{
+        type:{
+            type: String,
+            enum: ['cash', 'share']
+        },
+        rate:{
+            type: Number
+        },
+        date:{
+            type: Date
+        },
+        amountReceived:{
+            type: Number
+        },
+    },
+    vestedShares:{
+        type: Number
+    },
     batch:[{
         name:{
             type: String,
             required: [true, 'Please enter a batch name']
         },  
-        dividend: {
-            type: Object
-        },
-        shareCollaterised: {
-            type: Number
-        },
         allocatedShares: {
             type: Number,
             required: [true, 'This field is required']
         },
-        canBuy:{
-            type:Boolean
-        },
-        canSell:{
-            type:Boolean
-        },
-        sharesSold: {
-            type: Number
-        },
-        sharesBought:{
-            type: Number
-        },
-        sharesForfieted:{
-            type: Number,
-            default: 0
-        },
-        outstandingBought: {
-            type: Number,
-            default:0
-        },
-        outstandingSold:{
-            type: Number,
-            default: 0
-        },
         allocationDate: {
             type: Date,
             required: [true, 'This field is required']
-        }
-    }],
-    vestedShares: [{
-        date: {
-            type: Date
         },
-        amount:{
-            type: Number
-        }
+        vestedShares: [{
+            nextVestingDate:{
+                type: Date
+            },
+            amount:{
+                type: Number
+            }
+        }],
     }],
     avatar:{
         type: Buffer
@@ -328,24 +316,24 @@ userSchema.statics.findByToken = function(token) {
 
 
 // create a new mongoose method for user login authentication
-userSchema.statics.findByCredentials = function(email, password) {
-    let User = this;
-    return User.findOne({email}).then((user)=> { // find user by email
-        if(!user){  // handle user not found
-            return Promise.reject();
-        }
+// userSchema.statics.findByCredentials = function(email, password) {
+//     let User = this;
+//     return User.findOne({email}).then((user)=> { // find user by email
+//         if(!user){  // handle user not found
+//             return Promise.reject();
+//         }
 
-        return new Promise((resolve, reject)=> {
-            bcrypt.compare(password, user.password, (err, res)=> {
-                if(res) {
-                    return resolve(user);
-                }else{
-                    return reject("Wrong password");
-                }
-            })
-        });
-    });
-}
+//         return new Promise((resolve, reject)=> {
+//             bcrypt.compare(password, user.password, (err, res)=> {
+//                 if(res) {
+//                     return resolve(user);
+//                 }else{
+//                     return reject("Wrong password");
+//                 }
+//             })
+//         });
+//     });
+// }
 
 
 userSchema.methods.removeToken = function(token) {
@@ -359,32 +347,33 @@ userSchema.methods.removeToken = function(token) {
   })
 }
 
-userSchema.methods.userConfirmation = function(){
+userSchema.methods.userConfirmation = function(companyObj){
     let user = this;
+    let company = companyObj;
 
-    let company = user.company;
+    // update total shares alloted by company to scheme members dynamically
     let companyBatch = company.schemeBatch;
     let userBatch = user.batch;
+    let totalRetrivedShares; 
 
-      companyBatch.map(cb=>{
-        let companyBatchName = cb.name;
-        let companyBatchAmount = cb.totalShares;
-
+    companyBatch.forEach(function(batch){
         userBatch.forEach(function(item){
 
-          if(user.status){ // run this if the user is a confirmed staff of the company
-            // updated total shares allocated to scheme members
-            companyBatchAmount += item.allocatedShares;
-            company.totalSharesAllocatedToSchemeMembers += item.allocatedShares;
-            // update total unallocated shares
-            company.totalUnallocatedShares = company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers;
-          }else{
-            return "Error the user is not confirmed";
-          }
+            if(user.status){ // run this if the user is a confirmed staff of the company
+                // updated total shares allocated to scheme members
+                totalRetrivedShares += item.allocatedShares; // dynamically generate total allocated to batch scheme
+            }
         });
-      })
-      
-      company.save(); // save to store data
+
+    });
+
+    // could simply work since it is the sum of all companyBatchAmount (outside the loop) // update total allocated shares to unconfirmed scheme members
+    company.totalSharesAllocatedToSchemeMembers = company.totalSharesAllocatedToSchemeMembers + (company.totalSharesOfUnconfirmedSchemeMembers - totalRetrivedShares);
+    // update total unallocated shares
+    company.totalUnallocatedShares = company.totalUnallocatedShares - totalRetrivedShares;
+
+    // save updated company data to store database
+    company.save();
 }
 
 const User = mongoose.model('User', userSchema);

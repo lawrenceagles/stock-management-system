@@ -18,25 +18,31 @@ const companySchema = new Schema({
         required: true
     },
     schemeBatch:[{
-        name: {
-            type: String
-        },
-        totalShares:{
+        name:{
+            type: String,
+            required: [true, 'Please enter a batch name']
+        },  
+        allocatedShares: {
             type: Number,
-            default: 0
+            required: [true, 'This field is required']
+        },
+        allocationDate: {
+            type: Date,
+            required: [true, 'This field is required']
+        },
+        vesting:{
+        schedule:{
+            type: Number
+        },
+        Date:{
+            type: Date
         }
+    }
     }],
-    sharePrice:{
-        type: Number
-    },
     currentShareValue: {
         type: Number,
         required: [true, 'This field is required']
     },
-    vestingPeriod: {
-        type: Number,
-        required: [true, 'Please enter a vesting period for the company']
-    }
     totalSchemeMembers: {
         type: Number,
         required: true,
@@ -68,46 +74,24 @@ const companySchema = new Schema({
         type: Number,
         default: 0
     },
-    totalDividentDeclared: {
-        type: Number,
-        required: true
-    },
-    vesting:{
-        schedule:{
+    dividend:{
+        type:{
+            type: String,
+            enum: ['cash', 'share']
+        },
+        rate:{
             type: Number
         },
-        Date:{
+        date:{
             type: Date
-        }
-    },
-    dateOfAllocation: {
-        type: Date,
-        required: true
-    },
-    dividendTypeShare: {
-        type: String,
-        required: true
-    },
-    dividendTypeCash: {
-        type: Boolean,
-        required: true
-    },
-    dividendRatePerShares: {
-        type: Number, // is this still needed?
-        required: true,
-        rate: {
-            given: Number,
-            value: Number,
-        }
+        },
+        amount:{
+            type: Number
+        },
     },
     canBuyShares: {
         type: Boolean,
         required: true
-    },
-    bonus:{
-        type:String,
-        default:0,
-        maxlength:200
     },
     canSellShares: {
         type: Boolean,
@@ -117,18 +101,31 @@ const companySchema = new Schema({
         type: Boolean,
         required: true        
     },
-
+    sharesForfieted:{
+        type: Number,
+        default: 0
+    },
+    dividend:{
+            type:{
+                type: String,
+                enum: ['cash', 'share']
+            },
+            rate:{
+                type: Number
+            },
+            date:{
+                type: Date
+            },
+            amount:{
+                type: Number
+            }
+        },
     currentShareValuation: {
         type: Number,
         required: true
     },
     canRepurchase: {
-        type: Boolean,
-        required: true
-    },
-    initialShareSale: {
-        type: Number,
-        required: true
+        type: Boolean
     },
     schemeRules: {
         type: String,
