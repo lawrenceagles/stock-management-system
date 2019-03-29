@@ -285,7 +285,7 @@ router.get('/audit', (req, res)=>{
 });
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/received/notification',authenticate, (req,res)=>{    
+router.get('/admin/received/notification',authenticate, (req,res)=>{    
     const sort = {}
     if (req.query.sortBy) {
         const parts = req.query.sortBy.split(':')
@@ -304,7 +304,7 @@ router.get('/received/notification',authenticate, (req,res)=>{
 })
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/sent/notification',authenticate, (req,res)=>{    
+router.get('/admin/sent/notification',authenticate, (req,res)=>{    
     const sort = {}
     if (req.query.sortBy) {
         const parts = req.query.sortBy.split(':')

@@ -471,7 +471,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/sent/notification',authenticateUser, (req,res)=>{
+router.get('/user/sent/notification',authenticateUser, (req,res)=>{
     
     const sort = {}
     if (req.query.sortBy) {
@@ -492,7 +492,7 @@ router.get('/sent/notification',authenticateUser, (req,res)=>{
 
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/received/notification',authenticateUser, (req,res)=>{
+router.get('/user/received/notification',authenticateUser, (req,res)=>{
     
     const sort = {}
     if (req.query.sortBy) {
