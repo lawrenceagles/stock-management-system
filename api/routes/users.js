@@ -288,13 +288,13 @@ router.patch('/user/forgetpassword', (req,res)=>{
                 // }  
                 
                 // run the vesting function
-                var aprilFools = {
+                let vestingDate = {
                     month: 3,
                     date: 1
                   }
 
                   function isItAprilFoolDay() {
-                    var now = new Date();
+                    let now = new Date();
                     return (now.getMonth() == aprilFools.month && now.getDate() == aprilFools.date);
                   }
 
@@ -500,7 +500,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/sent/notification',authenticateUser, (req,res)=>{
+router.get('/user/sent/notification',authenticateUser, (req,res)=>{
     
     const sort = {}
     if (req.query.sortBy) {
@@ -521,7 +521,7 @@ router.get('/sent/notification',authenticateUser, (req,res)=>{
 
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/received/notification',authenticateUser, (req,res)=>{
+router.get('/user/received/notification',authenticateUser, (req,res)=>{
     
     const sort = {}
     if (req.query.sortBy) {
