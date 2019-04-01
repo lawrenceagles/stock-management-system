@@ -2,11 +2,13 @@ const express = require("express");
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const multer =  require('multer');
+const sharp = require('sharp');
+const moment = require('moment');
 const _ = require('lodash');
 const path = require("path");
 const bcrypt = require('bcryptjs');
 
-const {sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
+const {sendUserWelcomePasswordEmail,sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
 const {genRandomPassword} = require('../../config/genPassword.js');
 const {authenticateUser} = require('../../middleware/authenticateUser');
 const {authenticate} = require('../../middleware/authenticate');
@@ -21,49 +23,62 @@ const {ObjectId} = require('mongodb');
 
 // Set Multer
 // Set Storage Engine
-const storage = multer.diskStorage({
-  destination: "./public/uploads/",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname.toLowerCase());
+const upload = multer.diskStorage({
+  limit:{
+    fileSize: 3000000
+  },
+  fileFilter: (req, file, cb) => {
+    if(!file.originalname.match(/\.(jpg|jpeg|png$/)){
+       return cb(new Error("Please upload a image"));
+    }
+    cb(undefined, true);   
   }
+
 });
 
-// Initialize single Upload Method
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 1000000
-  },
-  fileFilter: (req, file, callback) => {
-    checkFileType(file, callback);
-  }
-}).single("upload");
-// Check File Type Function
-checkFileType = (file, callback) => {
-    // Allowed Extentions
-    const filetypes = /jpeg|jpg|png/;
-    // Check Extentions
-    const extname = filetypes.test(
-      path.extname(file.originalname).toLocaleLowerCase()
-    );
- // Check MIME Types
- const mimetype = filetypes.test(file.mimetype);
 
- if (mimetype && extname) {
-   return callback(null, true);
- } else {
-   callback("Error: Images Only!");
- }
-};
-router.post("/upload", (req, res, next) => {
-    upload(req, res, err => {
-      if (err) {
-        res.send(err);
-      } else {
-        res.send(req.file);
-      }
-    });
-  });  
+// route to upload an image
+router.post('/upload/profile/image',authenticateUser,(req,res)=>{
+  let buffer = sharp(req.file.buffer)
+    .resize({width: 400, height: 400})
+    .png()
+    .toBuffer()
+    .then(sharpImage=>{
+      req.user.avatar = sharpImage; // set user avater to sharp Image
+      req.user.save().then(image=>{ // save user avatar
+      res.send("Image Successfully Uploaded");
+      }).catch(e=>{
+        res.status(400).send(`${e}`);
+      });
+  }).catch(e=>{
+    res.status(400).send(`${e}`);
+  })
+});
+
+
+// route to upload an image
+router.delete('/upload/profile/image',authenticateUser,(req,res)=>{
+  req.user.avatar = undefined;
+    req.user.save().then(doc=>{
+      res.send("Image Successfully Deleted");
+    }).catch(e=>{
+      res.status(400).send(`${e}`);
+    })
+});
+
+
+router.get('/user/profile/image',authenticateUser,(req,res)=>{
+  let id = req.user._Id;
+  User.findById(id).then(user=>{
+    if(!user || !user.avatar){
+      throw new Error;
+    }
+    res.set('Content-Type', 'image/png');
+    res.send(user.avatar); // send the user avatar.    
+  }).catch(e=>{
+    res.status(404).send(`${e}`);
+  })
+});
 
 
 // find all the company members by id.
@@ -122,12 +137,11 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
         return res.status(404).send("Error No company was selected. Wrong company ID")
       }
 
-      User.find({email, employee_number}).then(doc=>{
-        if(doc.length > 0){
+      User.find({employee_number, email}).then(doc=>{
+        if(doc.length > 1){
           return res.status(400).send("This user already exists in this company");
         }
 
-        // req.body.username = req.body.username.toLowerCase(); // change username to all lowercase
           // Auto generate random password for admin
            req.body.password = genRandomPassword(10);
            console.log(req.body.password);
@@ -140,7 +154,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
         });
 
         // send welcome email containing password
-      sendWelcomePasswordEmail(req.body.email,req.body.firstname,req.body.lastname,req.body.password);
+        sendUserWelcomePasswordEmail(user.email,user.firstName,user.lastName,user.password);
 
         // log audit trail
         let log = new Log({
@@ -153,78 +167,76 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
         log.save();
 
         user.save().then(user=>{ // Return the user doc and update user-company data relationship
-
           // increase company total scheme members by 1
           company.totalSchemeMembers += 1;
           // update total shares alloted by company to scheme members dynamically
           let companyBatch = company.schemeBatch;
           let userBatch = user.batch;
+          let companyBatchAmount; 
 
-          companyBatch.map(cb=>{
-            let companyBatchAmount = cb.totalShares;
-            let companyBatchUnallocated = cb.totalUnallocatedShares;
-
+          companyBatch.forEach(function(batch){
+            companyBatchAmount = batch.totalShares;
             userBatch.forEach(function(item){
 
               if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
-                companyBatchAmount += item.allocatedShares;
-                company.totalSharesAllocatedToSchemeMembers += item.allocatedShares;
-                companyBatchUnallocated = companyBatchAmount - item.allocatedShares;
-                // update total unallocated shares
-                company.totalUnallocatedShares = company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers;
+                companyBatchAmount += item.allocatedShares; // dynamically generate total allocated to batch scheme
               }else{ // run this if the user is an unconfirmed staff of the company
                 // update total allocated shares to unconfirmed scheme members
-                companyBatchAmount += item.allocatedShares;
                 company.totalSharesOfUnconfirmedSchemeMembers += item.allocatedShares;
-                // update total unallocated shares
-                company.totalUnallocatedShares += company.totalSharesOfUnconfirmedSchemeMembers;
               }
 
             });
+
           });
 
           // could simply work since it is the sum of all companyBatchAmount (outside the loop)
-          // company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
+          company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
+          // update total unallocated shares
+          company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
 
-          
-          company.save(); // save to store data
+          // save updated company data to store database
+          company.save();
           let body = _.pick(user, ['firstname', 'lastname', 'email','Company_Schemerules','company','status','tokens']);
           return res.status(201).send(body);
+
         }).catch(e=>{
-          res.status(400).send(`There was an error: ${e}`)
+          res.status(400).send(`There was an error1: ${e}`)
         });
 
       }).catch(e=>{
-          res.status(400).send(`There was an error: ${e}`)
+          res.status(400).send(`There was an error2: ${e}`)
       })
 
     });
 })
 
 // Register user in new batch
-// router.post('/companybatch/registration/:id', (req,res)=>{
-//   // find user in company
-//   let batchData = req.body;
-//   let id = req.params.id;
+router.post('/companybatch/registration/:id',authenticate,(req,res)=>{
+  // find user in company
+  let batchData = req.body;
+  let id = req.params.id;
 
-//   User.findById(id).then(user=>{ // find user and call batchRegistration function on the user.
-//     user.batchRegistration(batchData);
-//   }).catch(e=>{
-//     res.status(400).send(`There is an ${e}`);
-//   })
+  User.findById(id).then(user=>{ // find user and call batchRegistration function on the user.
+    user.batchRegistration(batchData);
+  }).catch(e=>{
+    res.status(400).send(`There is an ${e}`);
+  })
 
-// })
+})
 
 // // User confirmation Route
-// router.patch('/userComfirmation/:id', (req, res)=>{
-//   let id = req.params.id;
-//   findById(id).then(user=>{
-//     user.userConfirmation().then(doc=>{
-//       return res.status(200).send("User has been confirmed");
-//     });
-//   })
-// })
+router.patch('/userComfirmation/:id',authenticate,(req, res)=>{
+  let id = req.params.id; // get user id
+  findById(id).then(user=>{
+    let companyID = user.company; // get company id
+    Company.findById().then(company=>{
+      user.userConfirmation(company).then(doc=>{
+        return res.status(200).send("User has been confirmed");
+      });
+    })
+  })
+})
 
 // forgot Password Request Route
 router.patch('/user/forgetpassword', (req,res)=>{
@@ -272,11 +284,7 @@ router.patch('/user/forgetpassword', (req,res)=>{
             if(!isMatch) return res.status(400).json({
                 message:"Wrong Password"
                 })   
-                if(isMatch) { 
-                //if user log in success, generate a JWT token for the user with a secret key    
-                if(user.tokens.length > 0){
-                    return res.send("You are already Logged in");
-                }   
+                if(isMatch) {  
 
                 return user.generateToken()
                   .then((token)=> {
@@ -290,6 +298,37 @@ router.patch('/user/forgetpassword', (req,res)=>{
                     });
                   }).catch(err=>{
                     res.status(400).send(err)
+                // if(user.tokens.length > 0){
+                //     return res.send("You are already Logged in");
+                // }  
+                
+                // run the vesting function
+                let vestingDate = {
+                    month: 3,
+                    date: 1
+                  }
+
+                  function isItAprilFoolDay() {
+                    let now = new Date();
+                    return (now.getMonth() == aprilFools.month && now.getDate() == aprilFools.date);
+                  }
+
+                  if(isItAprilFoolDay()){
+                    // fuck with people
+                  } else {
+                    // there is less fake stuff today
+                  }
+                 
+                    return user.generateToken()
+                    .then((token)=> {
+                      return res.header('x-auth', token).send({
+                          _id: user._id,
+                          email: user.email,
+                          company: user.company,
+                          Company_Schemerules: user.Company_Schemerules,
+                          tokens: user.tokens,
+                          status: user.status
+                      });
                   })
                 }
             else {
@@ -308,7 +347,7 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
       res.status(400).send(`Error Logout not successfull ${e}`);
     })
 
-    });
+  });
 
 //read user info
  router.get('/users',authenticate,(req,res,next)=>{ 
@@ -330,7 +369,7 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
             if(err) { res.status(500).json(err); return; };            
             res.status(200).json(doc);
         })  
-})
+})  
 
 //find one user
 router.get("/user/:id",authenticateUser,(req,res,next)=>{
@@ -365,6 +404,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
     })
  })
 
+
  router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
     const id = req.params.id
 
@@ -394,32 +434,33 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
             let companyBatch = company.schemeBatch;
             let userBatch = user.batch;
+            let companyBatchAmount;
+            let totalUserShares;
 
-            companyBatch.map(cb=>{
-              let companyBatchAmount = cb.totalShares;
-              let companyBatchUnallocated = cb.totalUnallocatedShares;
-
+              companyBatch.forEach(function(batch){
+                companyBatchAmount = batch.totalShares;
               userBatch.forEach(function(item){
 
                 if(user.status){ // run this if the user is a confirmed staff of the company
                   // updated total shares allocated to scheme members
-                  companyBatchAmount -= item.allocatedShares;
-                  companyBatchUnallocated += item.allocatedShares;
-                  company.totalSharesAllocatedToSchemeMembers -= item.allocatedShares;
-                  // update total unallocated shares
-                  company.totalUnallocatedShares = company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers;
+                  companyBatchAmount -= item.allocatedShares; // dynamically generate total allocated to batch scheme
+                  totalUserShares += item.allocatedShares;
                 }else{ // run this if the user is an unconfirmed staff of the company
                   // update total allocated shares to unconfirmed scheme members
-                  companyBatchAmount -= item.allocatedShares;
-                  companyBatchUnallocated += item.allocatedShares;
-                  company.totalSharesOfUnconfirmedSchemeMembers += item.allocatedShares;
-                  // update total unallocated shares
-                  company.totalUnallocatedShares += company.totalSharesOfUnconfirmedSchemeMembers;
+                  company.totalSharesOfUnconfirmedSchemeMembers -= item.allocatedShares;
+                  totalUserShares += item.allocatedShares;
                 }
 
               });
-            })
-            
+
+            });
+
+            // could simply work since it is the sum of all companyBatchAmount (outside the loop)
+            company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
+            // update total unallocated shares
+            company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
+            // updated forfieted shares
+            company.totalSharesForfieted = totalUserShares - vestedShares;
             company.save(); // save to store data
 
           }).catch(e=>{
@@ -449,12 +490,12 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
             return res.status(404).send();
         }
 
-        // if(req.password !== doc.password){
-        //     let password = doc.password;
-        //     let saltRounds = 10;
-        //     let hash = bcrypt.hashSync(password, saltRounds);
-        //     doc.password = hash;
-        // }
+        if(req.password !== doc.password){
+            let password = doc.password;
+            let saltRounds = 10;
+            let hash = bcrypt.hashSync(password, saltRounds);
+            doc.password = hash;
+        }
 
         doc.save();
 

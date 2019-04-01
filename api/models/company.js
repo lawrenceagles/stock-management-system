@@ -17,21 +17,9 @@ const companySchema = new Schema({
         enum: ['public', 'private'],
         required: true
     },
-    schemeBatch:[{
-        name: {
-            type: String
-        },
-        totalShares:{
-            type: Number,
-            default: 0
-        },
-        totalUnallocatedShares:{
-            type:Number,
-            default: 0
-        }
-    }],
-    sharePrice:{
-        type: Number
+    currentShareValue: {
+        type: Number,
+        required: [true, 'This field is required']
     },
     totalSchemeMembers: {
         type: Number,
@@ -64,42 +52,24 @@ const companySchema = new Schema({
         type: Number,
         default: 0
     },
-    totalDividentDeclared: {
-        type: Number,
-        required: true
-    },
-    vestingSchedule:{
-        type:String,
-        required:true
-    },
-    dateOfAllocation: {
-        type: Date,
-        required: true
-    },
-    dividendTypeShare: {
-        type: String,
-        required: true
-    },
-    dividendTypeCash: {
-        type: Boolean,
-        required: true
-    },
-    dividendRatePerShares: {
-        type: Number, // is this still needed?
-        required: true,
-        rate: {
-            given: Number,
-            value: Number,
-        }
+    dividend:{
+        type:{
+            type: String,
+            enum: ['cash', 'share']
+        },
+        rate:{
+            type: Number
+        },
+        date:{
+            type: Date
+        },
+        amount:{
+            type: Number
+        },
     },
     canBuyShares: {
         type: Boolean,
         required: true
-    },
-    bonus:{
-        type:String,
-        default:0,
-        maxlength:200
     },
     canSellShares: {
         type: Boolean,
@@ -109,18 +79,31 @@ const companySchema = new Schema({
         type: Boolean,
         required: true        
     },
-
+    sharesForfieted:{
+        type: Number,
+        default: 0
+    },
+    dividend:[{
+        type:{
+            type: String,
+            enum: ['cash', 'share']
+        },
+        rate:{
+            type: Number
+        },
+        date:{
+            type: Date
+        },
+        amount:{
+            type: Number
+        }
+    }],
     currentShareValuation: {
         type: Number,
         required: true
     },
     canRepurchase: {
-        type: Boolean,
-        required: true
-    },
-    initialShareSale: {
-        type: Number,
-        required: true
+        type: Boolean
     },
     schemeRules: {
         type: String,

@@ -13,19 +13,69 @@ const {authenticate} = require('../../middleware/authenticate');
 const {sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
 const {genRandomPassword} = require('../../config/genPassword.js');
 
-const upload = multer({ dest: 'uploads/' }); // configure multer
 
-
-
-router.post('/profile', upload.single('image'), function (req, res, next) {
-  // req.file is the `avatar` file
-  // req.body will hold the text fields, if there were any
-  if(!req.file){
-    return res.status(204).send({Error: "Upload was not successful!"});
+// Set Multer
+// Set Storage Engine
+const upload = multer.diskStorage({
+  limit:{
+    fileSize: 3000000
+  },
+  fileFilter: (req, file, cb) => {
+    if(!file.originalname.match(/\.(jpg|jpeg|png$/)){
+       return cb(new Error("Please upload a image"));
+    }
+    cb(undefined, true);   
   }
-  res.status(200).send(req.file);
 
 });
+
+
+// route to upload an image
+router.post('/upload/profile/image',authenticate,(req,res)=>{
+  let buffer = sharp(req.file.buffer)
+    .resize({width: 400, height: 400})
+    .png()
+    .toBuffer()
+    .then(sharpImage=>{
+      req.admin.avatar = sharpImage; // set admin avater to sharp Image
+      req.admin.save().then(image=>{ // save admin avatar
+      res.send("Image Successfully Uploaded");
+      }).catch(e=>{
+        res.status(400).send(`${e}`);
+      });
+  }).catch(e=>{
+    res.status(400).send(`${e}`);
+  })
+});
+
+
+// route to upload an image
+router.delete('/upload/profile/image',authenticate,(req,res)=>{
+  req.admin.avatar = undefined;
+    req.admin.save().then(doc=>{
+      res.send("Image Successfully Deleted");
+    }).catch(e=>{
+      res.status(400).send(`${e}`);
+    })
+});
+
+
+router.get('/admin/profile/image',authenticate,(req,res)=>{
+  let id = req.admin._id;
+  admin.findById(id).then(admin=>{
+    if(!admin || !admin.avatar){
+      throw new Error;
+    }
+    res.set('Content-Type', 'image/png');
+    res.send(admin.avatar); // send the admin avatar.    
+  }).catch(e=>{
+    res.status(404).send(`${e}`);
+  })
+});
+
+
+
+
 
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
@@ -137,9 +187,9 @@ router.post('/admin/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
     Admin.findByCredentials(body.email, body.password).then((admin)=> { 
 
-        if(admin.tokens.length > 0){
-            return res.send("You are already Logged in");
-        }
+        // if(admin.tokens.length > 0){
+        //     return res.send("You are already Logged in");
+        // }
 
         return admin.generateToken().then((token)=> {
             return res.header('x-auth', token).send({
