@@ -183,9 +183,6 @@ const userSchema = new Schema({
             type: Number
         },
     },
-    vestedShares:{
-        type: Number
-    },
     batch:[{
         name:{
             type: String,
@@ -206,7 +203,7 @@ const userSchema = new Schema({
             amount:{
                 type: Number
             }
-        }],
+        }]
     }],
     avatar:{
         type: Buffer

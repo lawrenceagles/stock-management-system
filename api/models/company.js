@@ -26,18 +26,22 @@ const companySchema = new Schema({
             type: Number,
             required: [true, 'This field is required']
         },
+        allocationPerUser:{
+            type: Number,
+            required: [true, 'This field is required']
+        },
         allocationDate: {
             type: Date,
             required: [true, 'This field is required']
         },
         vesting:{
-        schedule:{
-            type: Number
-        },
-        Date:{
-            type: Date
+            schedule:{
+                type: Number
+            },
+            Date:{
+                type: Date
+            }
         }
-    }
     }],
     currentShareValue: {
         type: Number,
