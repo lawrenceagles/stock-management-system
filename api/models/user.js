@@ -169,19 +169,12 @@ const userSchema = new Schema({
             type: Number
         },
     dividend:{
-        type:{
-            type: String,
-            enum: ['cash', 'share']
-        },
-        rate:{
-            type: Number
-        },
         date:{
             type: Date
         },
         amountReceived:{
             type: Number
-        },
+        }
     },
     batch:[{
         name:{

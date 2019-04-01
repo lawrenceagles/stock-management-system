@@ -176,6 +176,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 
           companyBatch.forEach(function(batch){
             userBatch.forEach(function(item){
+              [...batch.members, user._id] // add the user id to each batch he registers for
 
               if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
@@ -190,21 +191,22 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           });
 
           // could simply work since it is the sum of all companyBatchAmount (outside the loop)
-          company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
+          company.dividend.type !== "cash" ? company.totalSharesAllocatedToSchemeMembers = companyBatchAmount + user.dividend.amountReceived : company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
           // update total unallocated shares
           company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
 
           // save updated company data to store database
           company.save();
+
           let body = _.pick(user, ['firstname', 'lastname', 'email','Company_Schemerules','company','status','tokens']);
           return res.status(201).send(body);
 
         }).catch(e=>{
-          res.status(400).send(`There was an error1: ${e}`)
+          res.status(400).send(`${e}`)
         });
 
       }).catch(e=>{
-          res.status(400).send(`There was an error2: ${e}`)
+          res.status(400).send(`${e}`)
       })
 
     });
@@ -213,13 +215,18 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 // Register user in new batch
 router.patch('/companybatch/registration/:id',authenticate,(req,res)=>{
   // find user in company
-  let batchData = req.body;
-  let id = req.params.id;
+  const batchData = req.body;
+  const id = req.params.id;
 
   User.findById(id).then(user=>{ // find user and call batchRegistration function on the user.
+    const companyID = user.company;
+    Company.findByToken(companyID).then(company=>{
+      const batchUsers = company.schemeBatch.members;
+      [...batchUsers, user._id] // add this user to this company batch
+    })
     user.batchRegistration(batchData);
   }).catch(e=>{
-    res.status(400).send(`There is an ${e}`);
+    res.status(400).send(`${e}`);
   })
 
 })
@@ -264,11 +271,11 @@ router.patch('/user/forgetpassword', (req,res)=>{
         user.save().then(doc=>{
             res.status(200).send(`new password successfully regenerated.`);
         }).catch(e=>{
-            return res.status().send(`Failed to update password with error ${e}`)
+            return res.status().send(`${e}`)
         })
         
     }).catch(e=>{
-        return res.status(400).send(`Error {e} occured in the update password process. Please try again`);
+        return res.status(400).send(`${e}`);
     })
 });
 
@@ -466,14 +473,14 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
             company.save(); // save to store data
 
           }).catch(e=>{
-            res.status(400).send(`${e} could not delete user from company scheme memeber. Check Totalschememembers for this company ${company.name}; to make sure`)
+            res.status(400).send(`${e}`)
           })
 
           log.save(); // save audit log
           deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
           return res.send("User is deleted");
        }).catch(e=>{
-        return res.status(400).send(`${e} Error something went wrong user not deleted`);
+        return res.status(400).send(`${e}`);
        })
    })
    
@@ -507,7 +514,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
         })
         
     }).catch((e)=>{
-        res.status(400).send(e, "Error update error");
+        res.status(400).send(`${e}`);
     });
     
 });

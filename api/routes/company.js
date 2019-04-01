@@ -47,32 +47,32 @@ router.post('/company/registration',authenticate,(req,res,next)=>{
 
 
 // Create batch for company
-router.post('/company/batch/:id',authenticate,(req,res)=>{
-    const id = req.params.id;
-    let newBatch = new Batch({
-        ...req.body,
-        company: id
-    });
+// router.post('/company/batch/:id',authenticate,(req,res)=>{
+//     const id = req.params.id;
+//     let newBatch = new Batch({
+//         ...req.body,
+//         company: id
+//     });
 
-    Company.findById(id).then(company=>{
-        let log = new Log({
-            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-            action: `created ${newBatch.name}`,
-            company: `${company.name}`
+//     Company.findById(id).then(company=>{
+//         let log = new Log({
+//             createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+//             action: `created ${newBatch.name}`,
+//             company: `${company.name}`
 
-        });
+//         });
 
-        log.save();
+//         log.save();
 
-        newBatch.save().then(batch=>{
-            res.send(batch);
-        }).catch(e=>{
-            res.status(400).send(`${e}`);
-        });
-    }).catch(e=>{
-        res.status(400).send(`${e}`);
-    });
-});
+//         newBatch.save().then(batch=>{
+//             res.send(batch);
+//         }).catch(e=>{
+//             res.status(400).send(`${e}`);
+//         });
+//     }).catch(e=>{
+//         res.status(400).send(`${e}`);
+//     });
+// });
 
 router.get('/company/list',authenticate,(req,res,next)=>{ 
     const sort = {}

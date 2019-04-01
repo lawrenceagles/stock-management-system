@@ -97,6 +97,9 @@ const companySchema = new Schema({
         amount:{
             type: Number
         }
+    },
+    {
+        timestamps: true
     }],
     currentShareValuation: {
         type: Number,
@@ -135,6 +138,10 @@ const companySchema = new Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         }]
+
+    },
+    {
+        timestamps:true
     }]  
 });
 
