@@ -175,7 +175,6 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           let companyBatchAmount; 
 
           companyBatch.forEach(function(batch){
-            companyBatchAmount = batch.totalShares;
             userBatch.forEach(function(item){
 
               if(user.status){ // run this if the user is a confirmed staff of the company
@@ -212,7 +211,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 })
 
 // Register user in new batch
-router.post('/companybatch/registration/:id',authenticate,(req,res)=>{
+router.patch('/companybatch/registration/:id',authenticate,(req,res)=>{
   // find user in company
   let batchData = req.body;
   let id = req.params.id;
@@ -225,7 +224,7 @@ router.post('/companybatch/registration/:id',authenticate,(req,res)=>{
 
 })
 
-// // User confirmation Route
+// User confirmation Route
 router.patch('/userComfirmation/:id',authenticate,(req, res)=>{
   let id = req.params.id; // get user id
   findById(id).then(user=>{
@@ -440,22 +439,18 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
             company.totalSchemeMembers -= 1; 
 
             let companyBatch = company.schemeBatch;
-            let userBatch = user.batch;
             let companyBatchAmount;
             let totalUserShares;
 
               companyBatch.forEach(function(batch){
-                companyBatchAmount = batch.totalShares;
               userBatch.forEach(function(item){
 
                 if(user.status){ // run this if the user is a confirmed staff of the company
                   // updated total shares allocated to scheme members
                   companyBatchAmount -= item.allocatedShares; // dynamically generate total allocated to batch scheme
-                  totalUserShares += item.allocatedShares;
                 }else{ // run this if the user is an unconfirmed staff of the company
                   // update total allocated shares to unconfirmed scheme members
                   company.totalSharesOfUnconfirmedSchemeMembers -= item.allocatedShares;
-                  totalUserShares += item.allocatedShares;
                 }
 
               });
@@ -467,7 +462,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
             // update total unallocated shares
             company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
             // updated forfieted shares
-            company.totalSharesForfieted = totalUserShares - vestedShares;
+            company.totalSharesForfieted = companyBatchAmount - vestedShares;
             company.save(); // save to store data
 
           }).catch(e=>{
@@ -583,7 +578,7 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
               receiver:receivers
           });
 
-          // sendToOne(doc.email, doc.firstname, doc.lastname); // send this notification by email also
+          sendToOne(doc.email, doc.firstname, doc.lastname); // send this notification by email also
 
           sentMessage.save().then(doc=>{
               res.status(201).send(doc);
