@@ -16,6 +16,7 @@ const {User} = require("../models/user");
 const {Admin} = require("../models/admin.js");
 const {Notifcations} = require('../models/notifications');
 const {Company} = require('../models/company');
+const {Batch} = require('../models/batch');
 const {Log} = require ('../models/audit_Trail');
 const {ObjectId} = require('mongodb');
 

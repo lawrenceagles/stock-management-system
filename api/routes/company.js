@@ -47,7 +47,7 @@ router.post('/company/registration',authenticate,(req,res,next)=>{
 
 
 // Create batch for company
-router.post('/company/batch/:id',authenticate, (req,res)=>{
+router.post('/company/batch/:id',authenticate,(req,res)=>{
     const id = req.params.id;
     let newBatch = new Batch({
         ...req.body,
