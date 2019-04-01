@@ -17,32 +17,6 @@ const companySchema = new Schema({
         enum: ['public', 'private'],
         required: true
     },
-    schemeBatch:[{
-        name:{
-            type: String,
-            required: [true, 'Please enter a batch name']
-        },  
-        allocatedShares: {
-            type: Number,
-            required: [true, 'This field is required']
-        },
-        allocationPerUser:{
-            type: Number,
-            required: [true, 'This field is required']
-        },
-        allocationDate: {
-            type: Date,
-            required: [true, 'This field is required']
-        },
-        vesting:{
-            schedule:{
-                type: Number
-            },
-            Date:{
-                type: Date
-            }
-        }
-    }],
     currentShareValue: {
         type: Number,
         required: [true, 'This field is required']
@@ -109,21 +83,21 @@ const companySchema = new Schema({
         type: Number,
         default: 0
     },
-    dividend:{
-            type:{
-                type: String,
-                enum: ['cash', 'share']
-            },
-            rate:{
-                type: Number
-            },
-            date:{
-                type: Date
-            },
-            amount:{
-                type: Number
-            }
+    dividend:{[
+        type:{
+            type: String,
+            enum: ['cash', 'share']
         },
+        rate:{
+            type: Number
+        },
+        date:{
+            type: Date
+        },
+        amount:{
+            type: Number
+        }
+    ]},
     currentShareValuation: {
         type: Number,
         required: true

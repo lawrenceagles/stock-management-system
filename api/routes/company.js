@@ -3,6 +3,7 @@ const router = express.Router();
 
 
 const {Company} = require('../models/company');
+const {Batch} = require ('../models/batch');
 const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
 const {Log} = require ('../models/audit_Trail');
@@ -43,6 +44,30 @@ router.post('/company/registration',authenticate,(req,res,next)=>{
         })
       }
     })
+})
+
+
+// Create batch for company
+route.post('/company/batch/:id',authenticate, (req,res)=>{
+    req.body.company = req.params.id;
+
+    let newBatch = new Batch({...req.body});
+
+     let log = new Log({
+        createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+        action: `created ${newBatch.name}`,
+        company: `${company.name}`
+
+    });
+
+    log.save();
+
+    newBatch.save().then(batch=>{
+        res.send(batch);
+    }).catch(e=>{
+        res.status(400).send(`${e}`);
+    })
+
 })
 
 router.get('/company/list',authenticate,(req,res,next)=>{ 

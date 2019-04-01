@@ -15,10 +15,6 @@ const batchSchema = new Schema({
             type: Date,
             required: [true, 'This field is required']
         },
-        allocationPerUser:{
-            type: Number,
-            required: [true, 'This field is required']
-        },
         vesting:{
             schedule:{
                 type: Number
@@ -38,3 +34,6 @@ const batchSchema = new Schema({
 	        ref: 'User'
         }]
     });
+
+const Batch = mongoose.model('Batch', batchSchema);
+module.exports = {Batch};
