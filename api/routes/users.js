@@ -330,15 +330,30 @@ router.patch('/user/forgetpassword', (req,res)=>{
 })
 
 //logout
-router.delete('/user/logout',authenticateUser, (req, res)=>{
-    req.user.removeToken(req.token).then(()=>{
+// router.delete('/user/logout',authenticateUser, (req, res)=>{
+//     req.user.removeToken(req.token).then(()=>{
 
-      res.status(200).send("Logout successfull");
-    }, ()=>{
-      res.status(400).send(`Error Logout not successfull ${e}`);
+//       res.status(200).send("Logout successfull");
+//     }, ()=>{
+//       res.status(400).send(`Error Logout not successfull ${e}`);
+//     })
+
+//   });
+
+// signout/logout route
+router.delete('/admin/logout', (req, res)=>{
+    let body = _.pick(req.body, ['email', 'password']); // pick req.body data
+    let token = req.header('x-auth'); // grap token from header
+    User.findByCredentials(body.email,body.password).then(user=>{
+    user.removeToken(token).then(()=>{ // delete token from user
+        // send user delete account email
+        deleteAccountEmail(user.email, user.firstName, user.lastName);
+        res.status(200).send("You have successfully logged out");
+      }, ()=>{
+        res.status(400).send("Error logging out");
     })
-
-  });
+    })
+});
 
 //read user info
  router.get('/users',authenticate,(req,res,next)=>{ 

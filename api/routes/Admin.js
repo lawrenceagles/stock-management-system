@@ -205,13 +205,28 @@ router.post('/admin/login', (req, res) => {
 });
 
 // signout/logout route
-router.delete('/admin/logout',authenticate, (req, res)=>{
-  req.admin.removeToken(req.token).then(()=>{
-    deleteAccountEmail(req.admin.email, req.admin.firstname, req.admin.lastname);
-    res.status(200).send("You have successfully logged out");
-  }, ()=>{
-    res.status(400).send("Error logging out");
-  })
+// router.delete('/admin/logout',authenticate, (req, res)=>{
+//   req.admin.removeToken(req.token).then(()=>{
+//     deleteAccountEmail(req.admin.email, req.admin.firstname, req.admin.lastname);
+//     res.status(200).send("You have successfully logged out");
+//   }, ()=>{
+//     res.status(400).send("Error logging out");
+//   })
+// });
+
+// signout/logout route
+router.delete('/admin/logout', (req, res)=>{
+    let body = _.pick(req.body, ['email', 'password']); // pick req.body data
+    let token = req.header('x-auth'); // grap token from header
+    Admin.findByCredentials(body.email,body.password).then(admin=>{
+    admin.removeToken(token).then(()=>{ // delete token from admin
+        // send admin delete account email
+        deleteAccountEmail(admin.email, admin.firstname, admin.lastname);
+        res.status(200).send("You have successfully logged out");
+      }, ()=>{
+        res.status(400).send("Error logging out");
+    })
+    })
 });
 
 
