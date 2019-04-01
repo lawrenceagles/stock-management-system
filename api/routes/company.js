@@ -10,7 +10,6 @@ const {Log} = require ('../models/audit_Trail');
 
 // Company Onboarding Route
 router.post('/company/registration',authenticate,(req,res,next)=>{
-    req.body.name = req.body.name.toLowerCase(); // change company name to lower case
     
     Company.find({name:req.body.name},(err,doc)=>{
     if(doc.length){
@@ -49,26 +48,31 @@ router.post('/company/registration',authenticate,(req,res,next)=>{
 
 // Create batch for company
 router.post('/company/batch/:id',authenticate, (req,res)=>{
-    req.body.company = req.params.id;
-
-    let newBatch = new Batch({...req.body});
-
-     let log = new Log({
-        createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-        action: `created ${newBatch.name}`,
-        company: `${company.name}`
-
+    const id = req.params.id;
+    let newBatch = new Batch({
+        ...req.body,
+        company: id
     });
 
-    log.save();
+    Company.findById(id).then(company=>{
+        let log = new Log({
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+            action: `created ${newBatch.name}`,
+            company: `${company.name}`
 
-    newBatch.save().then(batch=>{
-        res.send(batch);
+        });
+
+        log.save();
+
+        newBatch.save().then(batch=>{
+            res.send(batch);
+        }).catch(e=>{
+            res.status(400).send(`${e}`);
+        });
     }).catch(e=>{
         res.status(400).send(`${e}`);
-    })
-
-})
+    });
+});
 
 router.get('/company/list',authenticate,(req,res,next)=>{ 
     const sort = {}
