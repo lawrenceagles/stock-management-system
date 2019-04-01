@@ -83,7 +83,7 @@ const companySchema = new Schema({
         type: Number,
         default: 0
     },
-    dividend:{[
+    dividend:[{
         type:{
             type: String,
             enum: ['cash', 'share']
@@ -97,7 +97,7 @@ const companySchema = new Schema({
         amount:{
             type: Number
         }
-    ]},
+    }],
     currentShareValuation: {
         type: Number,
         required: true
