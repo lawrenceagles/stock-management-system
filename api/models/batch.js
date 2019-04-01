@@ -19,8 +19,11 @@ const batchSchema = new Schema({
             schedule:{
                 type: Number
             },
-            Date:{
+            vestingDate:{
                 type: Date
+            },
+            period: {
+                type: Number
             }
         },
         company:{

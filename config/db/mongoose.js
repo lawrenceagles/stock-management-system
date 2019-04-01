@@ -4,7 +4,7 @@ mongoose.Promise = global.Promise;
 
 // connect mongoose with DB  process.env.MONGODB_URI || 'mongodb://localhost/Todoapp'
 // mongoose.connect(process.env.MONGODB_URI || 'mongodb://lawrenceagles:lawrence1@ds153637.mlab.com:53637/vetiva');
-mongoose.connect("mongodb://lawrenceagles:lawrence1@ds153637.mlab.com:53637/vetiva", {
+mongoose.connect("mongodb://localhost/vetiva", {
   useCreateIndex: true,
   useNewUrlParser: true
 });

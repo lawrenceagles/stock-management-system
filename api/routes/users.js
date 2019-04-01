@@ -284,20 +284,9 @@ router.patch('/user/forgetpassword', (req,res)=>{
             if(!isMatch) return res.status(400).json({
                 message:"Wrong Password"
                 })   
-                if(isMatch) {  
+                if(isMatch) { 
 
-                return user.generateToken()
-                  .then((token)=> {
-                    return res.header('x-auth', token).send({
-                        _id: user._id,
-                        email: user.email,
-                        company: user.company,
-                        Company_Schemerules: user.Company_Schemerules,
-                        tokens: user.tokens,
-                        status: user.status
-                    });
-                  }).catch(err=>{
-                    res.status(400).send(err)
+                //if user log in success, generate a JWT token for the user with a secret key    
                 // if(user.tokens.length > 0){
                 //     return res.send("You are already Logged in");
                 // }  
@@ -330,6 +319,9 @@ router.patch('/user/forgetpassword', (req,res)=>{
                           status: user.status
                       });
                   })
+                    .catch(err=>{
+                      res.status(400).send(err)
+                    })
                 }
             else {
                 res.status(400).send("Error could not login")

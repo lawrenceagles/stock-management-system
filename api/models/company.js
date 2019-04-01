@@ -98,10 +98,6 @@ const companySchema = new Schema({
             type: Number
         }
     }],
-    currentShareValuation: {
-        type: Number,
-        required: true
-    },
     canRepurchase: {
         type: Boolean
     },
