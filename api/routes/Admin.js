@@ -142,7 +142,7 @@ router.post('/admin',authenticate,(req, res) => {
     admin.save().then(doc=>{
         // send welcome email containing password
         sendWelcomePasswordEmail(body.email,body.firstname,body.lastname,body.password);
-        res.send(doc);
+        res.status(201).send(doc);
     });
 });
 

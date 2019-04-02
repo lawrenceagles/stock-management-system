@@ -77,8 +77,7 @@ const companySchema = new Schema({
     },
     schemeBatch:[{
          name:{
-            type: String,
-            unique: true
+            type: String
         },  
         allocatedShares: {
             type: Number
