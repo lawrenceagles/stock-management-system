@@ -174,7 +174,8 @@ const userSchema = new Schema({
             default: Date.now
         },
         amountReceived:{
-            type: Number
+            type: Number,
+            default: 300
         }
     },
     batch:[{
