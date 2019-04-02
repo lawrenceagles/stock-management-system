@@ -214,7 +214,7 @@ router.delete('/admin/logout', (req, res)=>{
     let token = req.header('x-auth'); // grap token from header
     Admin.findOne({email}).then(admin=>{
     if(!admin){
-        return res.status(404).send({message:"Incorrect email"})
+        return res.status(404).send("Incorrect email")
     }
 
     admin.removeToken(token).then(()=>{ // delete token from admin

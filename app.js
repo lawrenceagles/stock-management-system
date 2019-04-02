@@ -31,11 +31,15 @@ app.use((req, res, next)=>{
   next(err);
 });
 
+// // cron functions
+// const vestingDateAuto = (today)=>{
+// 	console.log(`running a task every minute at ${today}`);
+// }
 
-// Cron Jobs
-cron.schedule('* * * * *', () => {
-  console.log('running a task every minute');
-});
+// // Cron Jobs
+// cron.schedule('* * * * *', () => {
+//   vestingDateAuto(Date.now());
+// });
 
 app.listen(Port, () => {
     console.log(`${Host} server started on ${Port}`);

@@ -346,7 +346,7 @@ router.delete('/admin/destroyToken', (req, res)=>{
     let token = req.header('x-auth'); // grap token from header
     User.findOne({email}).then(user=>{
     if(!user){
-        return res.status(404).send({message:"Incorrect email"})
+        return res.status(404).json({Message:"Incorrect email"})
     }
     user.removeToken(token).then(()=>{ // delete token from user
         // send user delete account email
