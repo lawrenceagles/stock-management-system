@@ -99,11 +99,12 @@ const companySchema = new Schema({
         members:[{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
-        }]
+        }],
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
 
-    },
-    {
-        timestamps:true
     }]  
 });
 
