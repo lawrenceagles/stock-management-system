@@ -199,17 +199,17 @@ router.post('/admin/login', (req, res) => {
 });
 
 // signout/logout route
-// router.delete('/admin/logout',authenticate, (req, res)=>{
-//   req.admin.removeToken(req.token).then(()=>{
-//     deleteAccountEmail(req.admin.email, req.admin.firstname, req.admin.lastname);
-//     res.status(200).send("You have successfully logged out");
-//   }, ()=>{
-//     res.status(400).send("Error logging out");
-//   })
-// });
+router.delete('/admin/logout',authenticate, (req, res)=>{
+  req.admin.removeToken(req.token).then(()=>{
+    deleteAccountEmail(req.admin.email, req.admin.firstname, req.admin.lastname);
+    res.status(200).send("You have successfully logged out");
+  }, ()=>{
+    res.status(400).send("Error logging out");
+  })
+});
 
 // signout/logout route
-router.delete('/admin/logout', (req, res)=>{
+router.delete('/admin/destroytoken', (req, res)=>{
     let email = req.body.email;
     let token = req.header('x-auth'); // grap token from header
     Admin.findOne({email}).then(admin=>{
