@@ -74,36 +74,7 @@ const companySchema = new Schema({
     schemeRules: {
         type: String,
         required: true
-    },
-    schemeBatch:[{ 
-        name:{
-            type: String
-        },
-        allocatedShares: {
-            type: Number
-        },
-        allocationDate: {
-            type: Date
-        },
-        vesting:{
-            schedule:{
-                type: Number
-            },
-            dateofvesting:{
-                type: Date
-            },
-            period:{
-                type: Number
-            }
-        },
-        members:[{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        }]
-    },
-    {
-        timestamps: true
-    }]  
+    }  
 });
 
 
