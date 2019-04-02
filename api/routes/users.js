@@ -16,6 +16,7 @@ const {User} = require("../models/user");
 const {Admin} = require("../models/admin.js");
 const {Notifcations} = require('../models/notifications');
 const {Company} = require('../models/company');
+const {Batch} = require('../models/batch');
 const {Log} = require ('../models/audit_Trail');
 const {ObjectId} = require('mongodb');
 
@@ -171,12 +172,14 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           company.totalSchemeMembers += 1;
           // update total shares alloted by company to scheme members dynamically
           let companyBatch = company.schemeBatch;
+          let totalSchemeMembers_Shares = company.totalSharesAllocatedToSchemeMembers;
+          let totalUnallocatedShares = company.totalUnallocatedShares;
           let userBatch = user.batch;
           let companyBatchAmount; 
 
           companyBatch.forEach(function(batch){
-            companyBatchAmount = batch.totalShares;
             userBatch.forEach(function(item){
+              [...batch.members, user._id] // add the user id to each batch he registers for
 
               if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
@@ -191,41 +194,53 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           });
 
           // could simply work since it is the sum of all companyBatchAmount (outside the loop)
-          company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
+          if(company.dividend.type !== "cash" ) {
+            totalSchemeMembers_Shares = companyBatchAmount + user.dividend.amountReceived
+          } else{
+            totalSchemeMembers_Shares = companyBatchAmount;
+          }
+
           // update total unallocated shares
-          company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
+          totalUnallocatedShares = (company.totalSharesAllocatedToScheme - totalSchemeMembers_Shares) + company.totalSharesOfUnconfirmedSchemeMembers;
 
           // save updated company data to store database
           company.save();
+
           let body = _.pick(user, ['firstname', 'lastname', 'email','Company_Schemerules','company','status','tokens']);
           return res.status(201).send(body);
 
         }).catch(e=>{
-          res.status(400).send(`There was an error1: ${e}`)
+          res.status(400).send(`${e}`)
         });
 
       }).catch(e=>{
-          res.status(400).send(`There was an error2: ${e}`)
+          res.status(400).send(`${e}`)
       })
 
     });
 })
 
 // Register user in new batch
-router.post('/companybatch/registration/:id',authenticate,(req,res)=>{
+router.patch('/companybatch/registration/:id',authenticate,(req,res)=>{
   // find user in company
-  let batchData = req.body;
-  let id = req.params.id;
+  const batchData = req.body;
+  const id = req.params.id;
 
   User.findById(id).then(user=>{ // find user and call batchRegistration function on the user.
+    const companyID = user.company;
+    Company.findByToken(companyID).then(company=>{
+      const batchUsers = company.schemeBatch.members;
+      [...batchUsers, user._id] // add this user to this company batch
+      
+    })
     user.batchRegistration(batchData);
   }).catch(e=>{
-    res.status(400).send(`There is an ${e}`);
+    res.status(400).send(`${e}`);
   })
 
 })
 
-// // User confirmation Route
+// User confirmation Route
 router.patch('/userComfirmation/:id',authenticate,(req, res)=>{
   let id = req.params.id; // get user id
   findById(id).then(user=>{
@@ -265,11 +280,11 @@ router.patch('/user/forgetpassword', (req,res)=>{
         user.save().then(doc=>{
             res.status(200).send(`new password successfully regenerated.`);
         }).catch(e=>{
-            return res.status().send(`Failed to update password with error ${e}`)
+            return res.status().send(`${e}`)
         })
         
     }).catch(e=>{
-        return res.status(400).send(`Error {e} occured in the update password process. Please try again`);
+        return res.status(400).send(`${e}`);
     })
 });
 
@@ -290,23 +305,6 @@ router.patch('/user/forgetpassword', (req,res)=>{
                 // if(user.tokens.length > 0){
                 //     return res.send("You are already Logged in");
                 // }  
-                
-                // run the vesting function
-                let vestingDate = {
-                    month: 3,
-                    date: 1
-                  }
-
-                  function isItAprilFoolDay() {
-                    let now = new Date();
-                    return (now.getMonth() == aprilFools.month && now.getDate() == aprilFools.date);
-                  }
-
-                  if(isItAprilFoolDay()){
-                    // fuck with people
-                  } else {
-                    // there is less fake stuff today
-                  }
                  
                     return user.generateToken()
                     .then((token)=> {
@@ -320,12 +318,14 @@ router.patch('/user/forgetpassword', (req,res)=>{
                       });
                   })
                     .catch(err=>{
-                      res.status(400).send(err)
+                      res.status(400).send({
+                        message:`${err}`
+                      })
                     })
                 }
-            else {
-                res.status(400).send("Error could not login")
-            }
+            // else {
+            //     res.status(400).json({message:"Wrong Password"})
+            // }
          })
     }) 
 })
@@ -340,6 +340,24 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
     })
 
   });
+
+// signout/logout route
+router.delete('/admin/destroyToken', (req, res)=>{
+    let email = req.body.email;
+    let token = req.header('x-auth'); // grap token from header
+    User.findOne({email}).then(user=>{
+    if(!user){
+        return res.status(404).send({message:"Incorrect email"})
+    }
+    user.removeToken(token).then(()=>{ // delete token from user
+        // send user delete account email
+        deleteAccountEmail(user.email, user.firstName, user.lastName);
+        res.status(200).send("You have successfully logged out");
+      }, ()=>{
+        res.status(400).send("Error logging out");
+    })
+    })
+});
 
 //read user info
  router.get('/users',authenticate,(req,res,next)=>{ 
@@ -425,22 +443,18 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
             company.totalSchemeMembers -= 1; 
 
             let companyBatch = company.schemeBatch;
-            let userBatch = user.batch;
             let companyBatchAmount;
             let totalUserShares;
 
               companyBatch.forEach(function(batch){
-                companyBatchAmount = batch.totalShares;
               userBatch.forEach(function(item){
 
                 if(user.status){ // run this if the user is a confirmed staff of the company
                   // updated total shares allocated to scheme members
                   companyBatchAmount -= item.allocatedShares; // dynamically generate total allocated to batch scheme
-                  totalUserShares += item.allocatedShares;
                 }else{ // run this if the user is an unconfirmed staff of the company
                   // update total allocated shares to unconfirmed scheme members
                   company.totalSharesOfUnconfirmedSchemeMembers -= item.allocatedShares;
-                  totalUserShares += item.allocatedShares;
                 }
 
               });
@@ -452,18 +466,18 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
             // update total unallocated shares
             company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
             // updated forfieted shares
-            company.totalSharesForfieted = totalUserShares - vestedShares;
+            company.totalSharesForfieted = companyBatchAmount - vestedShares;
             company.save(); // save to store data
 
           }).catch(e=>{
-            res.status(400).send(`${e} could not delete user from company scheme memeber. Check Totalschememembers for this company ${company.name}; to make sure`)
+            res.status(400).send(`${e}`)
           })
 
           log.save(); // save audit log
           deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
           return res.send("User is deleted");
        }).catch(e=>{
-        return res.status(400).send(`${e} Error something went wrong user not deleted`);
+        return res.status(400).send(`${e}`);
        })
    })
    
@@ -497,7 +511,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
         })
         
     }).catch((e)=>{
-        res.status(400).send(e, "Error update error");
+        res.status(400).send(`${e}`);
     });
     
 });
@@ -568,7 +582,7 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
               receiver:receivers
           });
 
-          // sendToOne(doc.email, doc.firstname, doc.lastname); // send this notification by email also
+          sendToOne(doc.email, doc.firstname, doc.lastname); // send this notification by email also
 
           sentMessage.save().then(doc=>{
               res.status(201).send(doc);

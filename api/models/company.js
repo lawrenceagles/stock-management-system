@@ -83,28 +83,44 @@ const companySchema = new Schema({
         type: Number,
         default: 0
     },
-    dividend:[{
-        type:{
-            type: String,
-            enum: ['cash', 'share']
-        },
-        rate:{
-            type: Number
-        },
-        date:{
-            type: Date
-        },
-        amount:{
-            type: Number
-        }
-    }],
     canRepurchase: {
         type: Boolean
     },
     schemeRules: {
         type: String,
         required: true
-    }    
+    },
+    schemeBatch:[{
+         name:{
+            type: String,
+            unique: true
+        },  
+        allocatedShares: {
+            type: Number
+        },
+        allocationDate: {
+            type: Date
+        },
+        vesting:{
+            schedule:{
+                type: Number
+            },
+            dateofvesting:{
+                type: Date
+            },
+            period:{
+                type: Number
+            }
+        },
+        members:[{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }]
+
+    },
+    {
+        timestamps:true
+    }]  
 });
 
 

@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 const batchSchema = new Schema({
         name:{
             type: String,
+            unique: true,
             required: [true, 'Please enter a batch name']
         },  
         allocatedShares: {
@@ -19,10 +20,7 @@ const batchSchema = new Schema({
             schedule:{
                 type: Number
             },
-            vestingDate:{
-                type: Date
-            },
-            period: {
+            period:{
                 type: Number
             }
         },
@@ -33,7 +31,6 @@ const batchSchema = new Schema({
         },
         members:[{
         	type: mongoose.Schema.Types.ObjectId,
-	        required: true,
 	        ref: 'User'
         }]
     });

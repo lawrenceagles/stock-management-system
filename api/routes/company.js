@@ -3,14 +3,15 @@ const router = express.Router();
 
 
 const {Company} = require('../models/company');
+const {User} = require('../models/user');
 const {Batch} = require ('../models/batch');
+const {Dividend} = require('../models/dividend');
 const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
 const {Log} = require ('../models/audit_Trail');
 
 // Company Onboarding Route
 router.post('/company/registration',authenticate,(req,res,next)=>{
-    req.body.name = req.body.name.toLowerCase(); // change company name to lower case
     
     Company.find({name:req.body.name},(err,doc)=>{
     if(doc.length){
@@ -48,27 +49,32 @@ router.post('/company/registration',authenticate,(req,res,next)=>{
 
 
 // Create batch for company
-router.post('/company/batch/:id',authenticate, (req,res)=>{
-    req.body.company = req.params.id;
+// router.post('/company/batch/:id',authenticate,(req,res)=>{
+//     const id = req.params.id;
+//     let newBatch = new Batch({
+//         ...req.body,
+//         company: id
+//     });
 
-    let newBatch = new Batch({...req.body});
+//     Company.findById(id).then(company=>{
+//         let log = new Log({
+//             createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+//             action: `created ${newBatch.name}`,
+//             company: `${company.name}`
 
-     let log = new Log({
-        createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-        action: `created ${newBatch.name}`,
-        company: `${company.name}`
+//         });
 
-    });
+//         log.save();
 
-    log.save();
-
-    newBatch.save().then(batch=>{
-        res.send(batch);
-    }).catch(e=>{
-        res.status(400).send(`${e}`);
-    })
-
-})
+//         newBatch.save().then(batch=>{
+//             res.send(batch);
+//         }).catch(e=>{
+//             res.status(400).send(`${e}`);
+//         });
+//     }).catch(e=>{
+//         res.status(400).send(`${e}`);
+//     });
+// });
 
 router.get('/company/list',authenticate,(req,res,next)=>{ 
     const sort = {}
@@ -218,6 +224,7 @@ router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
     })
 })
 
+// Update company route
 router.patch('/company/:id',authenticate,(req,res)=>{//update
     const id = req.params.id;
     
@@ -257,6 +264,76 @@ router.patch('/company/:id',authenticate,(req,res)=>{//update
        }).catch((e)=>{
             res.status(400).send(`${e}`, "Error update error");
         });
+})
+
+
+// Declare a dividend
+router.post('/company/dividend/:id',authenticate,(req,res)=>{
+    const ID = req.params.id;
+    req.body.company = ID; // set company id from req.params.
+    Company.findById(ID).then(company=>{
+
+        if(!req.body.bonus_Shares && !req.body.rate){
+            return res.status(400).send({Message: "Both rate and bonus Shares cannot be empty"});
+        }
+
+        if(req.body.bonus_Shares !== undefined && req.body.rate !== undefined){
+            return res.status(400).send({Message: "You cannot declare both rate and bonus shares in a dividend"});
+        }
+
+        const dividend = new Dividend({...req.body}); // create dividend
+
+        let log = new Log({ // create audit trail
+                action: `$Edited an admin profile`,
+                createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+                user: `${company.name}`
+            });
+
+            log.save(); // save audit trail
+
+        dividend.save().then(dividendDoc=>{
+            if(dividendDoc.bonus_Shares){
+                User.find({company:ID}).then(users=>{
+                    if(users.length === 0){
+                        return res.status(404).send({Message: "No users in this company yet. Please onboard users before declaring dividend"})
+                    }
+                    users.forEach(function(user){ // loop through company users array.
+                        let dividendAmountReceived = user.dividend.amountReceived;
+                        dividendAmountReceived += dividendDoc.bonus_Shares;
+                        user.save();
+                    });
+                    return res.send({Message: "Dividend successfully declared and added to eligible users"})
+                })
+            }else if(dividendDoc.rate){
+                User.find({company:ID}).then(users=>{
+                    if(users.length === 0){
+                        return res.status(404).send({Message: "No users in this company yet. Please onboard users before declaring dividend"})
+                    }
+                    users.forEach(function(user){
+                        let dividendAmountReceived = user.dividend.amountReceived;
+                        if(dividendAmountReceived < dividendDoc.rate.per){
+                            dividendAmountReceived += 0;
+                        }
+
+                        let bonus_Shares = (dividendAmountReceived / dividendDoc.rate.per) * dividendDoc.rate.value;
+                        dividendAmountReceived += bonus_Shares;
+                        user.save();
+                        console.log(user)
+
+                    });
+
+                    res.send({Message: "Dividend successfully declared and added to eligible users by rate"});
+                })
+
+            }
+
+        }).catch(e=>{
+           res.status(400).send({Message:`${e}`}); 
+        })
+
+    }).catch(e=>{
+        res.status(400).send({Message:`${e}`});
+    })
 })
 
 module.exports = router;
