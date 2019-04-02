@@ -75,10 +75,10 @@ const companySchema = new Schema({
         type: String,
         required: true
     },
-    schemeBatch:[{
-         name:{
+    schemeBatch:[{ 
+        name:{
             type: String
-        },  
+        },
         allocatedShares: {
             type: Number
         },
@@ -99,12 +99,10 @@ const companySchema = new Schema({
         members:[{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
-        }],
-        createdAt: {
-            type: Date,
-            default: Date.now
-        }
-
+        }]
+    },
+    {
+        timestamps: true
     }]  
 });
 

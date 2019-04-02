@@ -318,7 +318,6 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
                         let bonus_Shares = (dividendAmountReceived / dividendDoc.rate.per) * dividendDoc.rate.value;
                         dividendAmountReceived += bonus_Shares;
                         user.save();
-                        console.log(user)
 
                     });
 
