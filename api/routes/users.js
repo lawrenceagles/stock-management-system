@@ -171,6 +171,8 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           company.totalSchemeMembers += 1;
           // update total shares alloted by company to scheme members dynamically
           let companyBatch = company.schemeBatch;
+          let totalSchemeMembers_Shares = company.totalSharesAllocatedToSchemeMembers;
+          let totalUnallocatedShares = company.totalUnallocatedShares;
           let userBatch = user.batch;
           let companyBatchAmount; 
 
@@ -191,9 +193,14 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           });
 
           // could simply work since it is the sum of all companyBatchAmount (outside the loop)
-          company.dividend.type !== "cash" ? company.totalSharesAllocatedToSchemeMembers = companyBatchAmount + user.dividend.amountReceived : company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
+          if(company.dividend.type !== "cash" ) {
+            totalSchemeMembers_Shares = companyBatchAmount + user.dividend.amountReceived
+          } else{
+            totalSchemeMembers_Shares = companyBatchAmount;
+          }
+
           // update total unallocated shares
-          company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
+          totalUnallocatedShares = (company.totalSharesAllocatedToScheme - totalSchemeMembers_Shares) + company.totalSharesOfUnconfirmedSchemeMembers;
 
           // save updated company data to store database
           company.save();

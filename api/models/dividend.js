@@ -7,12 +7,27 @@ const dividendSchema = new Schema({
         enum: ['cash', 'share']
     },
     rate:{
-        type: Number
+        value: {
+            type:Number
+        },
+        per: {
+            type: Number
+        }
     },
-    amount:{
-        type: Number
+    bonus_Shares:{
+        type: Number,
+        trim: true
     },
-    {
-        timestamps: true
-    }
+    company: [{
+        type: mongoose.Schema.Types.ObjectId,
+        required: [true, "Please specify a company declaring this dividend"],
+        ref: 'Company'
+    }]
+},
+{
+    timestamps: true
 })
+
+const Dividend = mongoose.model('Dividend', dividendSchema);
+
+module.exports = {Dividend};

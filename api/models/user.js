@@ -170,7 +170,8 @@ const userSchema = new Schema({
         },
     dividend:{
         date:{
-            type: Date
+            type: Date,
+            default: Date.now
         },
         amountReceived:{
             type: Number
