@@ -52,21 +52,6 @@ const companySchema = new Schema({
         type: Number,
         default: 0
     },
-    dividend:{
-        type:{
-            type: String,
-            enum: ['cash', 'share']
-        },
-        rate:{
-            type: Number
-        },
-        date:{
-            type: Date
-        },
-        amount:{
-            type: Number
-        },
-    },
     canBuyShares: {
         type: Boolean,
         required: true
