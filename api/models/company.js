@@ -83,10 +83,6 @@ const companySchema = new Schema({
         type: Number,
         default: 0
     },
-    currentShareValuation: {
-        type: Number,
-        required: true
-    },
     canRepurchase: {
         type: Boolean
     },
@@ -94,10 +90,7 @@ const companySchema = new Schema({
         type: String,
         required: true
     },
-    schemeBatch:[{
-         name:{
-            type: String
-        },  
+    schemeBatch:[{ 
         allocatedShares: {
             type: Number
         },
@@ -115,15 +108,13 @@ const companySchema = new Schema({
                 type: Number
             }
         },
-        // members:[{
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: 'User'
-        // }],
-        createdAt:{
-            type: Date,
-            default: Date.now
-        }
-
+        members:[{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }]
+    },
+    {
+        timestamps: true
     }]  
 });
 
