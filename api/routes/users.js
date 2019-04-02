@@ -170,41 +170,6 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
         user.save().then(user=>{ // Return the user doc and update user-company data relationship
           // increase company total scheme members by 1
           company.totalSchemeMembers += 1;
-          // update total shares alloted by company to scheme members dynamically
-          let companyBatch = company.schemeBatch;
-          let totalSchemeMembers_Shares = company.totalSharesAllocatedToSchemeMembers;
-          let totalUnallocatedShares = company.totalUnallocatedShares;
-          let userBatch = user.batch;
-          let companyBatchAmount; 
-
-          companyBatch.forEach(function(batch){
-            userBatch.forEach(function(item){
-              [...batch.members, user._id] // add the user id to each batch he registers for
-
-              if(user.status){ // run this if the user is a confirmed staff of the company
-                // updated total shares allocated to scheme members
-                companyBatchAmount += item.allocatedShares; // dynamically generate total allocated to batch scheme
-              }else{ // run this if the user is an unconfirmed staff of the company
-                // update total allocated shares to unconfirmed scheme members
-                company.totalSharesOfUnconfirmedSchemeMembers += item.allocatedShares;
-              }
-
-            });
-
-          });
-
-          // could simply work since it is the sum of all companyBatchAmount (outside the loop)
-          if(company.dividend.type !== "cash" ) {
-            totalSchemeMembers_Shares = companyBatchAmount + user.dividend.amountReceived
-          } else{
-            totalSchemeMembers_Shares = companyBatchAmount;
-          }
-
-          // update total unallocated shares
-          totalUnallocatedShares = (company.totalSharesAllocatedToScheme - totalSchemeMembers_Shares) + company.totalSharesOfUnconfirmedSchemeMembers;
-
-          // save updated company data to store database
-          company.save();
 
           let body = _.pick(user, ['firstname', 'lastname', 'email','Company_Schemerules','company','status','tokens']);
           return res.status(201).send(body);
@@ -220,25 +185,35 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
     });
 })
 
-// Register user in new batch
-router.patch('/companybatch/registration/:id',authenticate,(req,res)=>{
-  // find user in company
-  const batchData = req.body;
-  const id = req.params.id;
-
-  User.findById(id).then(user=>{ // find user and call batchRegistration function on the user.
-    const companyID = user.company;
-    Company.findByToken(companyID).then(company=>{
-      const batchUsers = company.schemeBatch.members;
-      [...batchUsers, user._id] // add this user to this company batch
-      
-    })
-    user.batchRegistration(batchData);
+// Add user to batch
+router.patch("/company/user/id", (req,res)=>{
+  const ID = req.params.id;
+  User.findById(ID).then(batch=>{
+    co
   }).catch(e=>{
-    res.status(400).send(`${e}`);
+    res.status(400).json({Message:`${e}`});
   })
-
 })
+
+// Register user in new batch
+// router.patch('/companybatch/registration/:id',authenticate,(req,res)=>{
+//   // find user in company
+//   const batchData = req.body;
+//   const id = req.params.id;
+
+//   User.findById(id).then(user=>{ // find user and call batchRegistration function on the user.
+//     const companyID = user.company;
+//     Company.findByToken(companyID).then(company=>{
+//       const batchUsers = company.schemeBatch.members;
+//       [...batchUsers, user._id] // add this user to this company batch
+      
+//     })
+//     user.batchRegistration(batchData);
+//   }).catch(e=>{
+//     res.status(400).send(`${e}`);
+//   })
+
+// })
 
 // User confirmation Route
 router.patch('/userComfirmation/:id',authenticate,(req, res)=>{

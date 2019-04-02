@@ -74,7 +74,11 @@ const companySchema = new Schema({
     schemeRules: {
         type: String,
         required: true
-    }  
+    },
+    Batch:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Batch'
+    }]  
 });
 
 
