@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cron = require('node-cron');
 const bodyParser = require('body-parser');
 const route = require('./api/routes/Admin');
 const userRoute = require('./api/routes/users');
@@ -30,6 +31,15 @@ app.use((req, res, next)=>{
   next(err);
 });
 
+// // cron functions
+// const vestingDateAuto = (today)=>{
+// 	console.log(`running a task every minute at ${today}`);
+// }
+
+// // Cron Jobs
+// cron.schedule('* * * * *', () => {
+//   vestingDateAuto(Date.now());
+// });
 
 app.listen(Port, () => {
     console.log(`${Host} server started on ${Port}`);

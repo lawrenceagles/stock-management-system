@@ -274,11 +274,11 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
     Company.findById(ID).then(company=>{
 
         if(!req.body.bonus_Shares && !req.body.rate){
-            return res.status(400).send({Message: "Both rate and bonus Shares cannot be empty"});
+            return res.status(400).json({Message: "Both rate and bonus Shares cannot be empty"});
         }
 
         if(req.body.bonus_Shares !== undefined && req.body.rate !== undefined){
-            return res.status(400).send({Message: "You cannot declare both rate and bonus shares in a dividend"});
+            return res.status(400).json({Message: "You cannot declare both rate and bonus shares in a dividend"});
         }
 
         const dividend = new Dividend({...req.body}); // create dividend
@@ -295,19 +295,19 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
             if(dividendDoc.bonus_Shares){
                 User.find({company:ID}).then(users=>{
                     if(users.length === 0){
-                        return res.status(404).send({Message: "No users in this company yet. Please onboard users before declaring dividend"})
+                        return res.status(404).json({Message: "No users in this company yet. Please onboard users before declaring dividend"})
                     }
                     users.forEach(function(user){ // loop through company users array.
                         let dividendAmountReceived = user.dividend.amountReceived;
                         dividendAmountReceived += dividendDoc.bonus_Shares;
                         user.save();
                     });
-                    return res.send({Message: "Dividend successfully declared and added to eligible users"})
+                    return res.json({Message: "Dividend successfully declared and added to eligible users"})
                 })
             }else if(dividendDoc.rate){
                 User.find({company:ID}).then(users=>{
                     if(users.length === 0){
-                        return res.status(404).send({Message: "No users in this company yet. Please onboard users before declaring dividend"})
+                        return res.status(404).json({Message: "No users in this company yet. Please onboard users before declaring dividend"})
                     }
                     users.forEach(function(user){
                         let dividendAmountReceived = user.dividend.amountReceived;
@@ -322,17 +322,17 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
 
                     });
 
-                    res.send({Message: "Dividend successfully declared and added to eligible users by rate"});
+                    res.json({Message: "Dividend successfully declared and added to eligible users by rate"});
                 })
 
             }
 
         }).catch(e=>{
-           res.status(400).send({Message:`${e}`}); 
+           res.status(400).json({Message:`${e}`}); 
         })
 
     }).catch(e=>{
-        res.status(400).send({Message:`${e}`});
+        res.status(400).json({Message:`${e}`});
     })
 })
 
