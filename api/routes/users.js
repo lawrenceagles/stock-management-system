@@ -223,6 +223,7 @@ router.patch('/companybatch/registration/:id',authenticate,(req,res)=>{
     Company.findByToken(companyID).then(company=>{
       const batchUsers = company.schemeBatch.members;
       [...batchUsers, user._id] // add this user to this company batch
+      
     })
     user.batchRegistration(batchData);
   }).catch(e=>{
@@ -296,23 +297,6 @@ router.patch('/user/forgetpassword', (req,res)=>{
                 // if(user.tokens.length > 0){
                 //     return res.send("You are already Logged in");
                 // }  
-                
-                // run the vesting function
-                let vestingDate = {
-                    month: 3,
-                    date: 1
-                  }
-
-                  function isItAprilFoolDay() {
-                    let now = new Date();
-                    return (now.getMonth() == aprilFools.month && now.getDate() == aprilFools.date);
-                  }
-
-                  if(isItAprilFoolDay()){
-                    // fuck with people
-                  } else {
-                    // there is less fake stuff today
-                  }
                  
                     return user.generateToken()
                     .then((token)=> {
@@ -326,32 +310,37 @@ router.patch('/user/forgetpassword', (req,res)=>{
                       });
                   })
                     .catch(err=>{
-                      res.status(400).send(err)
+                      res.status(400).send({
+                        message:`${err}`
+                      })
                     })
                 }
-            else {
-                res.status(400).send("Error could not login")
-            }
+            // else {
+            //     res.status(400).json({message:"Wrong Password"})
+            // }
          })
     }) 
 })
 
 //logout
-// router.delete('/user/logout',authenticateUser, (req, res)=>{
-//     req.user.removeToken(req.token).then(()=>{
+router.delete('/user/logout',authenticateUser, (req, res)=>{
+    req.user.removeToken(req.token).then(()=>{
 
-//       res.status(200).send("Logout successfull");
-//     }, ()=>{
-//       res.status(400).send(`Error Logout not successfull ${e}`);
-//     })
+      res.status(200).send("Logout successfull");
+    }, ()=>{
+      res.status(400).send(`Error Logout not successfull ${e}`);
+    })
 
-//   });
+  });
 
 // signout/logout route
-router.delete('/admin/logout', (req, res)=>{
-    let body = _.pick(req.body, ['email', 'password']); // pick req.body data
+router.delete('/admin/destroyToken', (req, res)=>{
+    let email = req.body.email;
     let token = req.header('x-auth'); // grap token from header
-    User.findByCredentials(body.email,body.password).then(user=>{
+    User.findOne({email}).then(user=>{
+    if(!user){
+        return res.status(404).send({message:"Incorrect email"})
+    }
     user.removeToken(token).then(()=>{ // delete token from user
         // send user delete account email
         deleteAccountEmail(user.email, user.firstName, user.lastName);

@@ -99,7 +99,7 @@ router.get('/admin',authenticate,(req, res) => {
 );
 
 // SORT find by role
-router.get('/admin/role/:role',  (req, res)=>{
+router.get('/admin/role/:role',authenticate,(req, res)=>{
     let role = req.params.role
     Admin.find({role}).then(docs=>{
 
@@ -116,7 +116,7 @@ router.get('/admin/role/:role',  (req, res)=>{
 })
 
 // POST Route onboard admin
-router.post('/admin',authenticate, (req, res) => {
+router.post('/admin',authenticate,(req, res) => {
     // pick out fields to set and from req.body
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role', 'password']);
     Admin.findByEmail(body.email).then(doc=>{ // handle already registered admin
@@ -131,9 +131,6 @@ router.post('/admin',authenticate, (req, res) => {
     body.password = genRandomPassword(10);
     let admin = new Admin(body);
 
-    // send welcome email containing password
-    sendWelcomePasswordEmail(body.email,body.firstname,body.lastname,body.password);
-
     let log = new Log({
         action: `Created a new admin`,
         createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
@@ -143,6 +140,8 @@ router.post('/admin',authenticate, (req, res) => {
     log.save();
 
     admin.save().then(doc=>{
+        // send welcome email containing password
+        sendWelcomePasswordEmail(body.email,body.firstname,body.lastname,body.password);
         res.send(doc);
     });
 });
@@ -186,11 +185,6 @@ router.patch('/admin/forgetpassword', (req,res)=>{
 router.post('/admin/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
     Admin.findByCredentials(body.email, body.password).then((admin)=> { 
-
-        // if(admin.tokens.length > 0){
-        //     return res.send("You are already Logged in");
-        // }
-
         return admin.generateToken().then((token)=> {
             return res.header('x-auth', token).send({
                 id: admin._id,
@@ -216,9 +210,13 @@ router.post('/admin/login', (req, res) => {
 
 // signout/logout route
 router.delete('/admin/logout', (req, res)=>{
-    let body = _.pick(req.body, ['email', 'password']); // pick req.body data
+    let email = req.body.email;
     let token = req.header('x-auth'); // grap token from header
-    Admin.findByCredentials(body.email,body.password).then(admin=>{
+    Admin.findOne({email}).then(admin=>{
+    if(!admin){
+        return res.status(404).send({message:"Incorrect email"})
+    }
+
     admin.removeToken(token).then(()=>{ // delete token from admin
         // send admin delete account email
         deleteAccountEmail(admin.email, admin.firstname, admin.lastname);
