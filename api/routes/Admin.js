@@ -150,12 +150,7 @@ router.post('/admin',authenticate,(req, res) => {
 router.patch('/admin/forgetpassword', (req,res)=>{
     Admin.findOne({email:req.body.email}).then(admin=>{
         if(!admin){// handle if the user with that email is not found
-            return res.status(404).send("Error this admin does not exists in our database");
-        }
-
-        // handle user is logged in
-        if(admin.tokens.length > 0){
-            return res.status(400).send("Error you have to be logged out to make this request");
+            return res.status(404).json({Message: "Email does not exist"});
         }
 
         // generate a new secure random password for the client
@@ -173,7 +168,7 @@ router.patch('/admin/forgetpassword', (req,res)=>{
         admin.save().then(doc=>{
             res.status(200).send(`new password successfully regenerated.`);
         }).catch(e=>{
-            return res.status().send(`Failed to update password with error ${e}`)
+            return res.status().json({Message:`Failed to update password with error ${e}`})
         })
         
     }).catch(e=>{
@@ -304,7 +299,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
     Admin.findByIdAndDelete(id).then((doc)=>{
 
         if(!doc){ // if doc is not found return error 404.
-            return res.status(404).send("This user is not in the database");
+            return res.status(404).json({Message:`This user is not in the database`});
         }
 
         let log = new Log({

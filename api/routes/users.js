@@ -130,6 +130,11 @@ router.get("/:companyid/companystaff",authenticate,(req, res, next) => {
 //create new user
 router.post("/:companyid/users",authenticate,(req, res, next) => {
     let id = req.params.companyid
+    // validate the company id
+    if(!ObjectId.isValid(id)){
+        return res.status(400).json({Message:"Error invalid ObjectId"});
+    }
+    
     let email = req.body.email;
     let employee_number = req.body.employee_number;
 
@@ -188,6 +193,11 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 // Route to show all the batch in a company
 router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
   const ID = req.params.companyid;
+  // validate the company id
+  if(!ObjectId.isValid(id)){
+      return res.status(400).json({Message:"Error invalid ObjectId"});
+  }
+
   Batch.find({company:ID}).then(batches=>{
     const finalData = batches.map(batch=>{
       const data = {
@@ -203,6 +213,11 @@ router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
 // Add user to batch
 router.patch("/company/batch/user/:id", (req,res)=>{
   const ID = req.params.id;
+  // validate the company id
+  if(!ObjectId.isValid(id)){
+      return res.status(400).json({Message:"Error invalid ObjectId"});
+  }
+
   User.findById(ID).then(user=>{ // get user to add to batch by id;
     user.batch = user.batch.concat([req.body]); // add batch data to user
       user.save().then(user=>{
@@ -238,6 +253,11 @@ router.patch("/company/batch/user/:id", (req,res)=>{
 // User confirmation Route
 router.patch('/userComfirmation/:id',authenticate,(req, res)=>{
   let id = req.params.id; // get user id
+  // validate the company id
+  if(!ObjectId.isValid(id)){
+      return res.status(400).json({Message:"Error invalid ObjectId"});
+  }
+
   findById(id).then(user=>{
     let companyID = user.company; // get company id
     Company.findById().then(company=>{

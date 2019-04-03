@@ -156,9 +156,14 @@ router.get('/company/:id',authenticate, (req,res)=>{
 
 });
 
-  //delete a company
+//delete a company
 router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
  const id = req.params.id
+	// validate the company id
+	if(!ObjectId.isValid(id)){
+		return res.status(400).json({Message:"Error invalid ObjectId"});
+	}
+
    Company.findOneAndDelete({_id:id})
     .then(response=>{
        res.status(200).json({
@@ -201,10 +206,10 @@ router.patch('/company/:id',authenticate,(req,res)=>{//update
     
     // validate the company id
     if(!ObjectId.isValid(id)){
-        return res.status(400).send("Error invalid ObjectId");
+        return res.status(400).json({Message:"Error invalid ObjectId"});
     }
 
-        Company.findOneAndUpdate({_id:id}, {$set:req.body}, {new: true}).then(doc=>{
+        Company.findOneAndUpdate({_id:id}, {$set:req.body}, {new: true, runValidators: true}).then(doc=>{
             // check if doc was foun and updated
             if(!doc){
                 res.status(404).send();
@@ -241,6 +246,11 @@ router.patch('/company/:id',authenticate,(req,res)=>{//update
 // Declare a dividend
 router.post('/company/dividend/:id',authenticate,(req,res)=>{
     const ID = req.params.id;
+    // validate the company id
+    if(!ObjectId.isValid(id)){
+        return res.status(400).json({Message:"Error invalid ObjectId"});
+    }
+
     req.body.company = ID; // set company id from req.params.
     Company.findById(ID).then(company=>{
 
@@ -321,6 +331,11 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
 // Delete a dividend
 router.delete('/company/dividend/:id',authenticate,(req,res)=>{
     const ID = req.params.id;
+    // validate the company id
+    if(!ObjectId.isValid(id)){
+        return res.status(400).json({Message:"Error invalid ObjectId"});
+    }
+
     req.body.company = ID; // set company id from req.params.
     Company.findById(ID).then(company=>{
 
@@ -380,9 +395,32 @@ router.delete('/company/dividend/:id',authenticate,(req,res)=>{
     })
 })
 
+// display all dividend
+router.get('/company/dividend/:id', (req,res)=>{
+	const ID = req.params.id;
+	// validate the company id
+    if(!ObjectId.isValid(id)){
+        return res.status(400).json({Message:"Error invalid ObjectId"});
+    }
+
+	Dividend.find({company:ID}).then(dividends=>{
+		if(dividends.length < 1){
+			return res.status(404).json({Message:"This company has not declared any dividend"});
+		}
+		res.send(dividends);
+	}).catch(e=>{
+		res.status(400).json({Message:`${e}`});
+	})
+})
+
 // create a batch
 router.post('/company/batch/:id',authenticate,(req,res)=>{
 	const ID = req.params.id;
+	// validate the company id
+    if(!ObjectId.isValid(id)){
+        return res.status(400).json({Message:"Error invalid ObjectId"});
+    }
+
 	Company.findById(ID).then(company=>{
 		req.body.company = company._id; // pass the company id to req.body to link the batch
 		let newBatch = new Batch({...req.body})
@@ -403,6 +441,34 @@ router.post('/company/batch/:id',authenticate,(req,res)=>{
         	res.status(400).json({Message: `${e}`});
         })
 
+
+	}).catch(e=>{
+		res.status(400).json({Message: `${e}`});
+	})
+})
+
+// edit a batch
+router.patch('/company/batch/:id',authenticate,(req,res)=>{
+	const ID = req.params.id;
+
+	// validate the company id
+	if(!ObjectId.isValid(id)){
+	    return res.status(400).json({Message:"Error invalid ObjectId"});
+	}
+
+	Company.findById(ID).then(company=>{
+		// pass the company id to req.body to link the batch
+		Batch.findOneAndUpdate({company:ID}, {$set:req.body}, {new:true, runValidators: true}).then(batch=>{
+
+			let log = new Log({ // create the audit log
+                action: `Created ${newBatch.name}`,
+                createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+                user: `${company.name}`
+            });
+
+            log.save(); // save the audit log
+            res.send("Batch Updated Successfully");
+		})
 
 	}).catch(e=>{
 		res.status(400).json({Message: `${e}`});
