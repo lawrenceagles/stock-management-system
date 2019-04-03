@@ -302,7 +302,12 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
                         dividendAmountReceived += dividendDoc.bonus_Shares;
                         user.save();
                     });
+
+                    if(company.dividend.type !== "cash" ) {// add dividend to total shares allocated to scheme members
+						company.totalSharesAllocatedToSchemeMembers += user.dividend.amountReceived;
+					}
                     return res.json({Message: "Dividend successfully declared and added to eligible users"})
+                  
                 })
             }else if(dividendDoc.rate){
                 User.find({company:ID}).then(users=>{
@@ -321,6 +326,9 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
 
                     });
 
+                    if(company.dividend.type !== "cash" ) {// add dividend to total shares allocated to scheme members
+						company.totalSharesAllocatedToSchemeMembers += user.dividend.amountReceived;
+					}
                     res.json({Message: "Dividend successfully declared and added to eligible users by rate"});
                 })
 
@@ -336,52 +344,57 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
 })
 
 // Delete a dividend
-router.post('/delete/dividend/:id',authenticate,(req,res)=>{
-    const dividendID = req.params.id;
-    req.body.company = dividendID; // set company dividendID from req.params.
-    Dividend.findOneAndDelete(dividendID).then(dividendDoc=>{
-    	
-        let log = new Log({ // create audit trail
-                action: `$Deleted a dividend`,
+router.delete('/company/dividend/:id',authenticate,(req,res)=>{
+    const ID = req.params.id;
+    req.body.company = ID; // set company id from req.params.
+    Company.findById(ID).then(company=>{
+
+ 		Dividend.findOneAndDelete(dividend=>{
+ 			let log = new Log({ // create audit trail
+                action: `Deleted batch ${dividend.name}`,
                 createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
                 user: `${company.name}`
             });
 
-            log.save(); // save audit trail
-
             if(dividendDoc.bonus_Shares){
                 User.find({company:ID}).then(users=>{
-                    if(users.length === 0){
-                        return res.status(404).json({Message: "No users in this company yet. Please onboard users before declaring dividend"})
+                    if(users.length > 0){
+                        users.forEach(function(user){ // loop through company users array.
+	                        let dividendAmountReceived = user.dividend.amountReceived;
+	                        dividendAmountReceived += dividendDoc.bonus_Shares;
+	                        user.save();
+	                    });
                     }
-                    users.forEach(function(user){ // loop through company users array.
-                        let dividendAmountReceived = user.dividend.amountReceived;
-                        dividendAmountReceived += dividendDoc.bonus_Shares;
-                        user.save();
-                    });
+
+                    if(company.dividend.type !== "cash" ) {// add dividend to total shares allocated to scheme members
+						company.totalSharesAllocatedToSchemeMembers -= user.dividend.amountReceived;
+					}
                     return res.json({Message: "Dividend successfully declared and added to eligible users"})
+                  
                 })
             }else if(dividendDoc.rate){
                 User.find({company:ID}).then(users=>{
-                    if(users.length === 0){
-                        return res.status(404).json({Message: "No users in this company yet. Please onboard users before declaring dividend"})
+                    if(users.length > 0){
+                        users.forEach(function(user){
+	                        let dividendAmountReceived = user.dividend.amountReceived;
+
+	                        let bonus_Shares = (dividendAmountReceived / dividendDoc.rate.per) * dividendDoc.rate.value;
+	                        dividendAmountReceived -= bonus_Shares;
+	                        user.save();
+
+	                    });
                     }
-                    users.forEach(function(user){
-                        let dividendAmountReceived = user.dividend.amountReceived;
-                        if(dividendAmountReceived < dividendDoc.rate.per){
-                            dividendAmountReceived += 0;
-                        }
 
-                        let bonus_Shares = (dividendAmountReceived / dividendDoc.rate.per) * dividendDoc.rate.value;
-                        dividendAmountReceived += bonus_Shares;
-                        user.save();
-
-                    });
-
+                    if(company.dividend.type !== "cash" ) {// add dividend to total shares allocated to scheme members
+						company.totalSharesAllocatedToSchemeMembers -= user.dividend.amountReceived;
+					}
                     res.json({Message: "Dividend successfully declared and added to eligible users by rate"});
                 })
 
             }
+
+            log.save(); // save audit trail
+ 		})
 
     }).catch(e=>{
         res.status(400).json({Message:`${e}`});

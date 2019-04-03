@@ -214,11 +214,17 @@ router.patch("/company/batch/user/:id", (req,res)=>{
                 addToBatch = batch;
              }
           })
-
           Batch.findById(addToBatch).then(batch=>{ // find the company batch by id
             batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
 
-            console.log(user.batch);
+            if(user.status){ // run this if the user is a confirmed staff of the company
+                // updated total shares allocated to scheme members
+                batch.allocatedShares += user.batch.allocatedShares; // dynamically generate total allocated to batch scheme
+              }else{ // run this if the user is an unconfirmed staff of the company
+                // update total allocated shares to unconfirmed scheme members
+                company.totalSharesOfUnconfirmedSchemeMembers += user.batch.allocatedShares;;
+            }
+
           })
       });
     });
