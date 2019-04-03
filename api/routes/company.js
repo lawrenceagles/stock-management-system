@@ -417,7 +417,7 @@ router.get('/company/dividend/:id', (req,res)=>{
 router.post('/company/batch/:id',authenticate,(req,res)=>{
 	const ID = req.params.id;
 	// validate the company id
-    if(!ObjectId.isValid(id)){
+    if(!ObjectId.isValid(ID)){
         return res.status(400).json({Message:"Error invalid ObjectId"});
     }
 
