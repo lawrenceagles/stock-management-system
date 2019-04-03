@@ -251,7 +251,7 @@ router.patch("/company/batch/user/:id", (req,res)=>{
 })
 
 // get all the batch a user belongs to
-// router.get("/user/batch/id", (req,res)=>{
+// router.get("/user/batch/:id", (req,res)=>{
 //   let id = req.params.id; // get user id
 //   // validate the company id
 //   if(!ObjectId.isValid(id)){
@@ -276,7 +276,7 @@ router.patch("/company/batch/user/:id", (req,res)=>{
 
 
 // get all the dividends a user belongs to
-router.get("/user/dividend/id", (req,res)=>{
+router.get("/user/dividend/:id", (req,res)=>{
   let id = req.params.id; // get user id
   // validate the company id
   if(!ObjectId.isValid(id)){
@@ -285,8 +285,12 @@ router.get("/user/dividend/id", (req,res)=>{
 
   // find user
   User.findById(id).then(user=>{
-    const companyID = user.company;
+    console.log(user);
+    let companyID = user.company;
     Dividend.find({comany:companyID}).then(dividends=>{
+      if(dividends.length < 1){
+        return res.status(404).json({Message:"No dividends have been given to this user"});
+      }
       res.send(dividends);
     }).catch(e=>{
       return res.status(400).json({Message: `${e}`});
