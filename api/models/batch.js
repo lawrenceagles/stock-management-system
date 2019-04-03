@@ -18,7 +18,7 @@ const batchSchema = new Schema({
         },
         vesting:{
             schedule:{
-                type: Number
+                type: String
             },
             period:{
                 type: Number
