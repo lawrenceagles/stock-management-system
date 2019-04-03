@@ -18,14 +18,15 @@ const dividendSchema = new Schema({
         type: Number,
         trim: true
     },
+    dateDeclared:{
+        type: Date,
+        default: Date.now
+    },
     company: [{
         type: mongoose.Schema.Types.ObjectId,
         required: [true, "Please specify a company declaring this dividend"],
         ref: 'Company'
     }]
-},
-{
-    timestamps: true
 })
 
 const Dividend = mongoose.model('Dividend', dividendSchema);

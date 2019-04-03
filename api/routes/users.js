@@ -224,6 +224,8 @@ router.patch("/company/batch/user/:id", (req,res)=>{
                 // update total allocated shares to unconfirmed scheme members
                 company.totalSharesOfUnconfirmedSchemeMembers += user.batch.allocatedShares;;
             }
+            batch.save();
+            company.save();
 
           })
       });
@@ -419,7 +421,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
       User.findOneAndDelete({_id:id})
        .then(user=>{
         if(!user){
-          return res.status(404).send("User not found");
+          return res.status(404).json({Message:"User not found"});
         }
 
         let companyID = user.company;
@@ -435,40 +437,40 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
             // decrease company total scheme members by 1
             company.totalSchemeMembers -= 1; 
 
-            let companyBatch = company.schemeBatch;
-            let companyBatchAmount;
-            let totalUserShares;
-
-              companyBatch.forEach(function(batch){
-              userBatch.forEach(function(item){
-
-                if(user.status){ // run this if the user is a confirmed staff of the company
-                  // updated total shares allocated to scheme members
-                  companyBatchAmount -= item.allocatedShares; // dynamically generate total allocated to batch scheme
-                }else{ // run this if the user is an unconfirmed staff of the company
-                  // update total allocated shares to unconfirmed scheme members
-                  company.totalSharesOfUnconfirmedSchemeMembers -= item.allocatedShares;
-                }
-
+            //  find all the batch in user company
+            company.find({_id:user.company}).then(batches=>{
+              batches.forEach(function(batch){
+                console.log(batch);
               });
+            })
+            //  delete user id in each batch
+            //  do calculation
+            //  save batch
+            //  save user
 
-            });
 
-            // could simply work since it is the sum of all companyBatchAmount (outside the loop)
-            company.totalSharesAllocatedToSchemeMembers = companyBatchAmount;
-            // update total unallocated shares
-            company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
-            // updated forfieted shares
-            company.totalSharesForfieted = companyBatchAmount - vestedShares;
-            company.save(); // save to store data
+
+            // if(user.status){ // run this if the user is a confirmed staff of the company
+            //       // updated total shares allocated to scheme members
+            //     companyBatchAmount -= item.allocatedShares; // dynamically generate total allocated to batch scheme
+            // }else{ // run this if the user is an unconfirmed staff of the company
+            //   // update total allocated shares to unconfirmed scheme members
+            //   company.totalSharesOfUnconfirmedSchemeMembers -= item.allocatedShares;
+            // }
+
+            // // update total unallocated shares
+            // company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
+            // // updated forfieted shares
+            // company.totalSharesForfieted = company.totalSharesAllocatedToSchemeMembers - vestedShares;
+            // company.save(); // save to store data
 
           }).catch(e=>{
             res.status(400).send(`${e}`)
           })
 
-          log.save(); // save audit log
-          deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
-          return res.send("User is deleted");
+          // log.save(); // save audit log
+          // deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
+          // return res.send("User is deleted");
        }).catch(e=>{
         return res.status(400).send(`${e}`);
        })
