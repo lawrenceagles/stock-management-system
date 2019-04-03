@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-
-const User = require('./user');
-
 const Schema = mongoose.Schema;
 
 const companySchema = new Schema({
@@ -75,7 +72,7 @@ const companySchema = new Schema({
         type: String,
         required: true
     },
-    Batch:[{
+    batch:[{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Batch'
     }]  

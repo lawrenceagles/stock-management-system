@@ -189,7 +189,10 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 router.patch("/company/user/id", (req,res)=>{
   const ID = req.params.id;
   User.findById(ID).then(batch=>{
-    co
+    const companyID = user.company;
+    Company.findById(companyID).then(company=>{
+      
+    })
   }).catch(e=>{
     res.status(400).json({Message:`${e}`});
   })

@@ -390,7 +390,7 @@ router.post('/delete/dividend/:id',authenticate,(req,res)=>{
 
 // create a batch
 router.post('/company/batch/:id',authenticate,(req,res)=>{
-	const ID = req.params.ID;
+	const ID = req.params.id;
 	Company.findById(ID).then(company=>{
 		req.body.company = company._id; // pass the company id to req.body to link the batch
 		let newBatch = new Batch({...req.body})
@@ -403,7 +403,6 @@ router.post('/company/batch/:id',authenticate,(req,res)=>{
 
         log.save(); // save the audit log
         newBatch.save().then(batch=>{
-        	[...company.batch, batch._id] // concat batch id to the list of batch ids created by the company
         	res.status(201).send(batch);
         }).catch(e=>{
         	res.status(400).json({Message: `${e}`});
