@@ -403,6 +403,9 @@ router.post('/company/batch/:id',authenticate,(req,res)=>{
 
         log.save(); // save the audit log
         newBatch.save().then(batch=>{
+        	let batchID = batch._id;
+        	company.batch = company.batch.concat([batchID]); 
+        	company.save();
         	res.status(201).send(batch);
         }).catch(e=>{
         	res.status(400).json({Message: `${e}`});

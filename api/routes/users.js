@@ -186,12 +186,14 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 })
 
 // Add user to batch
-router.patch("/company/user/id", (req,res)=>{
+router.patch("/company/batch/user/:id", (req,res)=>{
   const ID = req.params.id;
-  User.findById(ID).then(batch=>{
+  User.findById(ID).then(user=>{
     const companyID = user.company;
     Company.findById(companyID).then(company=>{
-      
+      let addToBatch = company.batch.filter(batch=>{
+        return batch = req.body.batch._id;
+      })      
     })
   }).catch(e=>{
     res.status(400).json({Message:`${e}`});
