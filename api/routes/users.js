@@ -39,7 +39,7 @@ const upload = multer.diskStorage({
 
 
 // route to upload an image
-router.post('/upload/profile/image',authenticateUser,(req,res)=>{
+router.post('/upload/user/profile/image',authenticateUser,(req,res)=>{
   let buffer = sharp(req.file.buffer)
     .resize({width: 400, height: 400})
     .png()
@@ -58,7 +58,7 @@ router.post('/upload/profile/image',authenticateUser,(req,res)=>{
 
 
 // route to upload an image
-router.delete('/upload/profile/image',authenticateUser,(req,res)=>{
+router.delete('/upload/user/profile/image',authenticateUser,(req,res)=>{
   req.user.avatar = undefined;
     req.user.save().then(doc=>{
       res.send("Image Successfully Deleted");
@@ -185,19 +185,46 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
     });
 })
 
+// Route to show all the batch in a company
+router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
+  const ID = req.params.companyid;
+  Batch.find({company:ID}).then(batches=>{
+    const finalData = batches.map(batch=>{
+      const data = {
+        name:batch.name,
+        id:batch._id
+      }
+      return data;
+    })
+    res.send(finalData);
+  })
+})
+
 // Add user to batch
 router.patch("/company/batch/user/:id", (req,res)=>{
   const ID = req.params.id;
-  User.findById(ID).then(user=>{
-    const companyID = user.company;
-    Company.findById(companyID).then(company=>{
-      let addToBatch = company.batch.filter(batch=>{
-        return batch = req.body.batch._id;
-      })      
-    })
+  User.findById(ID).then(user=>{ // get user to add to batch by id;
+    user.batch = user.batch.concat([req.body]); // add batch data to user
+      user.save().then(user=>{
+        const companyID = user.company;
+        Company.findById(companyID).then(company=>{ // find the user company by id
+          let addToBatch;
+          company.batch.map(batch=>{
+             if(batch == req.body.batchID){
+                addToBatch = batch;
+             }
+          })
+
+          Batch.findById(addToBatch).then(batch=>{ // find the company batch by id
+            batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
+
+            console.log(user.batch);
+          })
+      });
+    });
   }).catch(e=>{
     res.status(400).json({Message:`${e}`});
-  })
+  });
 })
 
 // Register user in new batch
