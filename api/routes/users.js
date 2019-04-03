@@ -471,12 +471,11 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
             if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
-                companyBatchAmount -= item.allocatedShares; // dynamically generate total allocated to batch scheme
-            }else{ // run this if the user is an unconfirmed staff of the company
-              // update total allocated shares to unconfirmed scheme members
-              company.totalSharesOfUnconfirmedSchemeMembers -= item.allocatedShares;
+                batch.allocatedShares += user.batch.allocatedShares; // dynamically generate total allocated to batch scheme
+              }else{ // run this if the user is an unconfirmed staff of the company
+                // update total allocated shares to unconfirmed scheme members
+                company.totalSharesOfUnconfirmedSchemeMembers += user.batch.allocatedShares;;
             }
-
             // update total unallocated shares
             company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
             // updated forfieted shares
