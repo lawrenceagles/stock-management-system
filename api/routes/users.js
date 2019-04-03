@@ -233,26 +233,6 @@ router.patch("/company/batch/user/:id", (req,res)=>{
   });
 })
 
-// Register user in new batch
-// router.patch('/companybatch/registration/:id',authenticate,(req,res)=>{
-//   // find user in company
-//   const batchData = req.body;
-//   const id = req.params.id;
-
-//   User.findById(id).then(user=>{ // find user and call batchRegistration function on the user.
-//     const companyID = user.company;
-//     Company.findByToken(companyID).then(company=>{
-//       const batchUsers = company.schemeBatch.members;
-//       [...batchUsers, user._id] // add this user to this company batch
-      
-//     })
-//     user.batchRegistration(batchData);
-//   }).catch(e=>{
-//     res.status(400).send(`${e}`);
-//   })
-
-// })
-
 // User confirmation Route
 router.patch('/userComfirmation/:id',authenticate,(req, res)=>{
   let id = req.params.id; // get user id

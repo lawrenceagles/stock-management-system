@@ -47,35 +47,6 @@ router.post('/company/registration',authenticate,(req,res,next)=>{
     })
 })
 
-
-// Create batch for company
-// router.post('/company/batch/:id',authenticate,(req,res)=>{
-//     const id = req.params.id;
-//     let newBatch = new Batch({
-//         ...req.body,
-//         company: id
-//     });
-
-//     Company.findById(id).then(company=>{
-//         let log = new Log({
-//             createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-//             action: `created ${newBatch.name}`,
-//             company: `${company.name}`
-
-//         });
-
-//         log.save();
-
-//         newBatch.save().then(batch=>{
-//             res.send(batch);
-//         }).catch(e=>{
-//             res.status(400).send(`${e}`);
-//         });
-//     }).catch(e=>{
-//         res.status(400).send(`${e}`);
-//     });
-// });
-
 router.get('/company/list',authenticate,(req,res,next)=>{ 
     const sort = {}
 
@@ -306,6 +277,8 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
                     if(company.dividend.type !== "cash" ) {// add dividend to total shares allocated to scheme members
 						company.totalSharesAllocatedToSchemeMembers += user.dividend.amountReceived;
 					}
+					// save updated company data to store database
+			        company.save();
                     return res.json({Message: "Dividend successfully declared and added to eligible users"})
                   
                 })
@@ -329,6 +302,8 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
                     if(company.dividend.type !== "cash" ) {// add dividend to total shares allocated to scheme members
 						company.totalSharesAllocatedToSchemeMembers += user.dividend.amountReceived;
 					}
+					// save updated company data to store database
+			        company.save();
                     res.json({Message: "Dividend successfully declared and added to eligible users by rate"});
                 })
 
@@ -369,6 +344,8 @@ router.delete('/company/dividend/:id',authenticate,(req,res)=>{
                     if(company.dividend.type !== "cash" ) {// add dividend to total shares allocated to scheme members
 						company.totalSharesAllocatedToSchemeMembers -= user.dividend.amountReceived;
 					}
+					// save updated company data to store database
+			        company.save();
                     return res.json({Message: "Dividend successfully declared and added to eligible users"})
                   
                 })
@@ -388,6 +365,8 @@ router.delete('/company/dividend/:id',authenticate,(req,res)=>{
                     if(company.dividend.type !== "cash" ) {// add dividend to total shares allocated to scheme members
 						company.totalSharesAllocatedToSchemeMembers -= user.dividend.amountReceived;
 					}
+					// save updated company data to store database
+			        company.save();
                     res.json({Message: "Dividend successfully declared and added to eligible users by rate"});
                 })
 
@@ -409,9 +388,9 @@ router.post('/company/batch/:id',authenticate,(req,res)=>{
 		let newBatch = new Batch({...req.body})
 
 		let log = new Log({ // create the audit log
-                action: `Created a batch`,
+                action: `Created ${batch.name}`,
                 createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-                user: `${company}`
+                user: `${company.name}`
             });
 
         log.save(); // save the audit log
