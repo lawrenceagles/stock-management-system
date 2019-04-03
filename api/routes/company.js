@@ -388,7 +388,7 @@ router.post('/company/batch/:id',authenticate,(req,res)=>{
 		let newBatch = new Batch({...req.body})
 
 		let log = new Log({ // create the audit log
-                action: `Created ${batch.name}`,
+                action: `Created ${newBatch.name}`,
                 createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
                 user: `${company.name}`
             });
