@@ -110,7 +110,7 @@ router.get("/:companyid/companystaff",authenticate,(req, res, next) => {
     let username = req.query.username; // get username from search form
 
     // confirm that object ID is valid
-    if(!ObjectId.isValid(id)){
+    if(!ObjectId.isValid(companyID)){
       return res.status(400).send(`Error: The Company Object ID is not valid`);
     }
 
@@ -134,7 +134,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
     if(!ObjectId.isValid(id)){
         return res.status(400).json({Message:"Error invalid ObjectId"});
     }
-    
+
     let email = req.body.email;
     let employee_number = req.body.employee_number;
 
@@ -194,7 +194,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
   const ID = req.params.companyid;
   // validate the company id
-  if(!ObjectId.isValid(id)){
+  if(!ObjectId.isValid(ID)){
       return res.status(400).json({Message:"Error invalid ObjectId"});
   }
 
@@ -214,7 +214,7 @@ router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
 router.patch("/company/batch/user/:id", (req,res)=>{
   const ID = req.params.id;
   // validate the company id
-  if(!ObjectId.isValid(id)){
+  if(!ObjectId.isValid(ID)){
       return res.status(400).json({Message:"Error invalid ObjectId"});
   }
 
@@ -454,35 +454,34 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
           });
 
           Company.findById(companyID).then(company=>{
-            // decrease company total scheme members by 1
+            // decrease company total scheme members by 1 and delete user id in each batch
             company.totalSchemeMembers -= 1; 
 
             //  find all the batch in user company
-            company.find({_id:user.company}).then(batches=>{
-              batches.forEach(function(batch){
-                console.log(batch);
-              });
+            Batch.find({company:user.company}).then(batches=>{
+              _.remove(batches, function(b){
+                  return b == user._id;
+              })
+
+              batch.save();
+
+            }).catch(e=>{
+              return res.status(400).json({Message:`${e}`});
             })
-            //  delete user id in each batch
-            //  do calculation
-            //  save batch
-            //  save user
 
+            if(user.status){ // run this if the user is a confirmed staff of the company
+                  // updated total shares allocated to scheme members
+                companyBatchAmount -= item.allocatedShares; // dynamically generate total allocated to batch scheme
+            }else{ // run this if the user is an unconfirmed staff of the company
+              // update total allocated shares to unconfirmed scheme members
+              company.totalSharesOfUnconfirmedSchemeMembers -= item.allocatedShares;
+            }
 
-
-            // if(user.status){ // run this if the user is a confirmed staff of the company
-            //       // updated total shares allocated to scheme members
-            //     companyBatchAmount -= item.allocatedShares; // dynamically generate total allocated to batch scheme
-            // }else{ // run this if the user is an unconfirmed staff of the company
-            //   // update total allocated shares to unconfirmed scheme members
-            //   company.totalSharesOfUnconfirmedSchemeMembers -= item.allocatedShares;
-            // }
-
-            // // update total unallocated shares
-            // company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
-            // // updated forfieted shares
-            // company.totalSharesForfieted = company.totalSharesAllocatedToSchemeMembers - vestedShares;
-            // company.save(); // save to store data
+            // update total unallocated shares
+            company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
+            // updated forfieted shares
+            company.totalSharesForfieted = company.totalSharesAllocatedToSchemeMembers - vestedShares;
+            company.save(); // save to store data
 
           }).catch(e=>{
             res.status(400).send(`${e}`)

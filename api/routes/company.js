@@ -247,7 +247,7 @@ router.patch('/company/:id',authenticate,(req,res)=>{//update
 router.post('/company/dividend/:id',authenticate,(req,res)=>{
     const ID = req.params.id;
     // validate the company id
-    if(!ObjectId.isValid(id)){
+    if(!ObjectId.isValid(ID)){
         return res.status(400).json({Message:"Error invalid ObjectId"});
     }
 
@@ -332,7 +332,7 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
 router.delete('/company/dividend/:id',authenticate,(req,res)=>{
     const ID = req.params.id;
     // validate the company id
-    if(!ObjectId.isValid(id)){
+    if(!ObjectId.isValid(ID)){
         return res.status(400).json({Message:"Error invalid ObjectId"});
     }
 
@@ -399,7 +399,7 @@ router.delete('/company/dividend/:id',authenticate,(req,res)=>{
 router.get('/company/dividend/:id', (req,res)=>{
 	const ID = req.params.id;
 	// validate the company id
-    if(!ObjectId.isValid(id)){
+    if(!ObjectId.isValid(ID)){
         return res.status(400).json({Message:"Error invalid ObjectId"});
     }
 
