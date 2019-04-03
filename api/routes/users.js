@@ -250,6 +250,50 @@ router.patch("/company/batch/user/:id", (req,res)=>{
   });
 })
 
+// get all the batch a user belongs to
+// router.get("/user/batch/id", (req,res)=>{
+//   let id = req.params.id; // get user id
+//   // validate the company id
+//   if(!ObjectId.isValid(id)){
+//       return res.status(400).json({Message:"Error invalid ObjectId"});
+//   }
+
+//   // find user
+//   User.findById(id).then(user=>{
+//     const companyID = user.company;
+//     let userBatches = [];
+//     Batch.find({comany:companyID}).then(batches=>{
+//       userBatches = batches.filter(b=>{
+//         return 
+//       })
+//     })
+//   })
+//   // get user company id
+//   // find user company id
+//   // check in all this company batches where user id is present in member []
+//   // return an array of object of all this batches
+// });
+
+
+// get all the dividends a user belongs to
+router.get("/user/dividend/id", (req,res)=>{
+  let id = req.params.id; // get user id
+  // validate the company id
+  if(!ObjectId.isValid(id)){
+      return res.status(400).json({Message:"Error invalid ObjectId"});
+  }
+
+  // find user
+  User.findById(id).then(user=>{
+    const companyID = user.company;
+    Dividend.find({comany:companyID}).then(dividends=>{
+      res.send(dividends);
+    }).catch(e=>{
+      return res.status(400).json({Message: `${e}`});
+    })
+  })
+});
+
 // User confirmation Route
 router.patch('/userComfirmation/:id',authenticate,(req, res)=>{
   let id = req.params.id; // get user id
@@ -430,7 +474,8 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
  })
 
 
- router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
+// delete a user
+router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
     const id = req.params.id
 
       // Validate the user id
@@ -494,8 +539,8 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
        })
    })
    
-  //Update user information
-  router.patch('/user/:id',authenticateUser, (req, res) => {
+//Update user information
+router.patch('/user/:id',authenticateUser, (req, res) => {
     // get the user id
     let id = req.params.id;
     // validate the id
