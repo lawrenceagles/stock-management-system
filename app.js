@@ -14,6 +14,26 @@ const {mongoose} = require('./config/db/mongoose');
 
 const app = express(); // create express app and store it in the app variable
 app.use(cors());
+
+const multer = require('multer')
+const upload = multer({
+    dest: 'scheme_rules',
+    limits: {
+        fileSize: 3000000
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(pdf|PDF)$/)) {
+            return cb(new Error('Please upload a pdf document'));
+        }
+
+        cb(undefined, true)
+    }
+})
+app.post('/upload', upload.single('upload'), (req, res) => {
+    res.send("Scheme rule uploaded successfully");
+})
+
+
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json()); // enable data to be availbe on req.body and allows us send data as json

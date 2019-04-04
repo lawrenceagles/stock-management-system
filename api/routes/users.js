@@ -39,7 +39,7 @@ const upload = multer.diskStorage({
 
 
 // route to upload an image
-router.post('/upload/user/profile/image',authenticateUser,(req,res)=>{
+router.post('/upload/user/profile/image',authenticateUser,upload.single('avatar'),(req,res)=>{
   let buffer = sharp(req.file.buffer)
     .resize({width: 400, height: 400})
     .png()
