@@ -329,23 +329,24 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
 
 // Delete a dividend
 router.delete('/company/dividend/:id',authenticate,(req,res)=>{
-    const ID = req.params.id;
+    const dividendID = req.params.id;
     // validate the company id
-    if(!ObjectId.isValid(ID)){
+    if(!ObjectId.isValid(dividendID)){
         return res.status(400).json({Message:"Error invalid ObjectId"});
     }
 
-    req.body.company = ID; // set company id from req.params.
-    Company.findById(ID).then(company=>{
+    Dividend.findOneAndDelete({_Id:dividendID}).then(dividend=>{
+		let log = new Log({ // create audit trail
+			action: `Deleted batch ${dividend.name}`,
+			createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+			user: `${company.name}`
+		});
 
- 		Dividend.findOneAndDelete(dividend=>{
- 			let log = new Log({ // create audit trail
-                action: `Deleted batch ${dividend.name}`,
-                createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-                user: `${company.name}`
-            });
+       const companyID = dividend.company;
 
-            if(dividendDoc.bonus_Shares){
+       Company.findById(ID).then(company=>{
+
+ 			if(dividendDoc.bonus_Shares){
                 User.find({company:ID}).then(users=>{
                     if(users.length > 0){
                         users.forEach(function(user){ // loop through company users array.
@@ -387,11 +388,11 @@ router.delete('/company/dividend/:id',authenticate,(req,res)=>{
             }
 
             log.save(); // save audit trail
- 		})
 
-    }).catch(e=>{
-        res.status(400).json({Message:`${e}`});
-    })
+	    }).catch(e=>{
+	        res.status(400).json({Message:`${e}`});
+	    })
+ 	})
 })
 
 // display all dividend

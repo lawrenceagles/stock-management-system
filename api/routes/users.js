@@ -347,7 +347,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 })
 
 // Add user to batch
-router.patch("/company/batch/user/:id", (req,res)=>{
+router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
   const ID = req.params.id;
   // validate the company id
   if(!ObjectId.isValid(ID)){
@@ -387,7 +387,7 @@ router.patch("/company/batch/user/:id", (req,res)=>{
 })
 
 // get all the batch a user belongs to
-router.get("/user/batch/:id", (req,res)=>{
+router.get("/user/batch/:id",authenticate, (req,res)=>{
   let id = req.params.id; // get user id
   // validate the company id
   if(!ObjectId.isValid(id)){
@@ -420,7 +420,7 @@ router.get("/user/batch/:id", (req,res)=>{
 
 
 // get all the dividends a user belongs to
-router.get("/user/dividend/:id", (req,res)=>{
+router.get("/user/dividend/:id",authenticate, (req,res)=>{
   let id = req.params.id; // get user id
   // validate the company id
   if(!ObjectId.isValid(id)){

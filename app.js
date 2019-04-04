@@ -45,7 +45,6 @@ app.use((req, res, next)=>{
 
 // configure multer for file upload
 const upload = multer({
-    dest: 'scheme_rules',
     limits: {
         fileSize: 3000000
     },
@@ -57,9 +56,24 @@ const upload = multer({
         cb(undefined, true)
     }
 })
-app.post('/upload', upload.single('upload'), (req, res) => {
+
+// upload company scheme rules sir
+app.post('/upload/schemerule/:companyid', upload.single('upload'), (req, res) => {
+	const companySchemeRule = req.file.buffer;
+	// Validate ID.
+	if(!Objectid.isValid(id)){
+		return res.status(400).json({Message: "Error invalid object id"});
+	}
+
+	Company.findById(companyid).then(company=>{
+		if(!company){
+			return res.status(404).json({Message: "No company found"});
+		}
+	})	
+
     res.send("Scheme rule uploaded successfully");
 })
+
 
 app.listen(Port, () => {
     console.log(`${Host} server started on ${Port}`);
