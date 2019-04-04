@@ -24,18 +24,18 @@ const {ObjectId} = require('mongodb');
 
 // Set Multer
 // Set Storage Engine
-const upload = multer.diskStorage({
-  limit:{
-    fileSize: 3000000
-  },
-  fileFilter: (req, file, cb) => {
-    if(!file.originalname.match(/\.(jpg|jpeg|png$/)){
-       return cb(new Error("Please upload a image"));
-    }
-    cb(undefined, true);   
-  }
+const upload = multer({
+    limits: {
+        fileSize: 3000000
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+            return cb(new Error('Please upload an image'))
+        }
 
-});
+        cb(undefined, true)
+    }
+})
 
 
 // route to upload an image
