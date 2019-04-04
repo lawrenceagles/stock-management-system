@@ -224,7 +224,7 @@ router.patch('/company/batch/:batchid', (req,res)=>{
       }
 
       res.json({Message: "Update Successful"});
-      
+
     }).catch(e=>{
       res.status(400).json({Message:`${e}`});
     })
@@ -271,28 +271,36 @@ router.patch("/company/batch/user/:id", (req,res)=>{
 })
 
 // get all the batch a user belongs to
-// router.get("/user/batch/:id", (req,res)=>{
-//   let id = req.params.id; // get user id
-//   // validate the company id
-//   if(!ObjectId.isValid(id)){
-//       return res.status(400).json({Message:"Error invalid ObjectId"});
-//   }
+router.get("/user/batch/:id", (req,res)=>{
+  let id = req.params.id; // get user id
+  // validate the company id
+  if(!ObjectId.isValid(id)){
+      return res.status(400).json({Message:"Error invalid ObjectId"});
+  }
 
-//   // find user
-//   User.findById(id).then(user=>{
-//     const companyID = user.company;
-//     let userBatches = [];
-//     Batch.find({comany:companyID}).then(batches=>{
-//       userBatches = batches.filter(b=>{
-//         return 
-//       })
-//     })
-//   })
-//   // get user company id
-//   // find user company id
-//   // check in all this company batches where user id is present in member []
-//   // return an array of object of all this batches
-// });
+  // find user
+  User.findById(id).then(user=>{ // find the user by id
+    if(!user){ // handle user not found
+      return res.status(404).json({Message: "Error user not found."});
+    }
+
+    const companyID = user.company; // grab the user company id
+    let userBatches = [];
+    Batch.find({comany:companyID}).then(batches=>{ // find all the company batches
+      let batchMembers = batches.members;
+      userBatches = batches.filter(batch=>{ // filter through the company batches and return the onces that conatains the user id
+        return batchMembers.includes(id) == true;
+      });
+    }).catch(e=>{
+      res.status(400).json({Message:`${e}`});
+    });
+
+    res.send(userBatches); // return the array of all the batch a user belongs to
+
+  }).catch(e=>{
+    res.status(400).json({Message:`${e}`});
+  });
+});
 
 
 // get all the dividends a user belongs to
