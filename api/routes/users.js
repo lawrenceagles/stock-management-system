@@ -210,6 +210,26 @@ router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
   })
 })
 
+// edit batch
+router.patch('/company/batch/:batchid', (req,res)=>{
+  const batchID = req.params.batchid;
+  if(!Objectid.isValid(batchID)){
+    res.status(400).json({Message:"Error invalid objectId"});
+  }
+
+  Batch.findOneAndUpdate({_id:batchID}, {$set:req.body}, {new:true, runValidators: true})
+    .then(batch=>{
+      if(!batch){
+        res.status(404).json({Message:"Error no batch was found. Update failed"});
+      }
+
+      res.json({Message: "Update Successful"});
+      
+    }).catch(e=>{
+      res.status(400).json({Message:`${e}`});
+    })
+})
+
 // Add user to batch
 router.patch("/company/batch/user/:id", (req,res)=>{
   const ID = req.params.id;
