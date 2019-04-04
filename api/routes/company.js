@@ -275,7 +275,7 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
         dividend.save().then(dividendDoc=>{
             if(dividendDoc.bonus_Shares){
                 User.find({company:ID}).then(users=>{
-                    if(users.length === 0){
+                    if(users.length < 1){
                         return res.status(404).json({Message: "No users in this company yet. Please onboard users before declaring dividend"})
                     }
                     users.forEach(function(user){ // loop through company users array.
@@ -294,7 +294,7 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
                 })
             }else if(dividendDoc.rate){
                 User.find({company:ID}).then(users=>{
-                    if(users.length === 0){
+                    if(users.length < 1){
                         return res.status(404).json({Message: "No users in this company yet. Please onboard users before declaring dividend"})
                     }
                     users.forEach(function(user){
