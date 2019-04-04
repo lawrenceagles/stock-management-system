@@ -81,6 +81,162 @@ router.get('/user/profile/image',authenticateUser,(req,res)=>{
   })
 });
 
+//read user info
+ router.get('/users',authenticate,(req,res,next)=>{ 
+    const sort = {}
+    let pageOptions = {
+        page: req.query.page || 0,
+        limit: req.query.limit || 10
+    }
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    }
+    
+    User.find()
+        .skip(pageOptions.page*pageOptions.limit)
+        .limit(pageOptions.limit)
+        .sort(sort)
+        .exec( (err, doc)=>{
+            if(err) { res.status(500).json(err); return; };            
+            res.status(200).json(doc);
+        })  
+})  
+
+//find one user
+router.get("/user/:id",authenticateUser,(req,res,next)=>{
+    let id = req.params.id;
+    // checks if the object is valid
+    if(!ObjectId.isValid(id)) {
+        res.status(400).send(`Error: Please enter a valid Object ID`);
+    }
+
+
+     User.findById(id).then((user)=> {
+        // if user is not found return error 404 otherwise send the admin.
+        console.log(user);
+        if(!user){
+          res.status(404).send("User not found");
+        }
+
+        let companyID = user.company; 
+        Company.findById(companyID).then(company=>{
+            res.send({
+                user,
+                companyname: company.name,
+                companyCanBuy: company.canBuyShares,
+                comapanyCanSell: company.canSellShares,
+                companyCanCollacterize: company.canCollateriseShares,
+                vestingSchedule: company.vestingSchedule 
+            });
+        }).catch(e=>{
+          res.status(400).send(`${e}`);
+        })
+    }).catch((e)=>{
+        res.status(400).send(`${e}`);
+    })
+ })
+
+
+// delete a user
+router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
+    const id = req.params.id
+
+      // Validate the user id
+      if(!ObjectId.isValid(id)){
+          res.status(400).send();
+      }
+
+      User.findOneAndDelete({_id:id})
+       .then(user=>{
+        if(!user){
+          return res.status(404).json({Message:"User not found"});
+        }
+
+        let companyID = user.company;
+
+          let log = new Log({
+              createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
+              action: `deleted a user`,
+              user: `${user.firstName} ${user.lastName}`,
+              company: `${user.Company_Name}`
+          });
+
+          Company.findById(companyID).then(company=>{
+            // decrease company total scheme members by 1 and delete user id in each batch
+            company.totalSchemeMembers -= 1; 
+
+            //  find all the batch in user company
+            Batch.find({company:user.company}).then(batches=>{
+              _.remove(batches, function(b){
+                  return b == user._id;
+              })
+
+              batch.save();
+
+            }).catch(e=>{
+              return res.status(400).json({Message:`${e}`});
+            })
+
+            if(user.status){ // run this if the user is a confirmed staff of the company
+                // updated total shares allocated to scheme members
+                batch.allocatedShares += user.batch.allocatedShares; // dynamically generate total allocated to batch scheme
+              }else{ // run this if the user is an unconfirmed staff of the company
+                // update total allocated shares to unconfirmed scheme members
+                company.totalSharesOfUnconfirmedSchemeMembers += user.batch.allocatedShares;;
+            }
+            // update total unallocated shares
+            company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
+            // updated forfieted shares
+            company.totalSharesForfieted = company.totalSharesAllocatedToSchemeMembers - vestedShares;
+            company.save(); // save to store data
+
+          }).catch(e=>{
+            res.status(400).send(`${e}`)
+          })
+
+          // log.save(); // save audit log
+          // deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
+          // return res.send("User is deleted");
+       }).catch(e=>{
+        return res.status(400).send(`${e}`);
+       })
+   })
+   
+//Update user information
+router.patch('/user/:id',authenticateUser, (req, res) => {
+    // get the user id
+    let id = req.params.id;
+    // validate the id
+    if(!ObjectId.isValid(id)){
+        res.status(400).send();
+    }
+    // find and update the user by id if it is found, throw error 404 if not
+    User.findOneAndUpdate({_id:id}, {$set:req.body}, {new: true, runValidators: true  }).then((doc)=>{
+        // check if doc was foun and updated
+        if(!doc){
+            return res.status(404).send();
+        }
+
+        if(req.password !== doc.password){
+            let password = doc.password;
+            let saltRounds = 10;
+            let hash = bcrypt.hashSync(password, saltRounds);
+            doc.password = hash;
+        }
+
+        doc.save();
+
+        User.findById(id).then(doc=>{
+          // confirmUser(); // call the confirm user to update necessary shares.
+          return res.send("Update Successful");
+        })
+        
+    }).catch((e)=>{
+        res.status(400).send(`${e}`);
+    });
+    
+});
 
 // find all the company members by id.
 router.get("/:companyid/users",authenticate,(req, res, next) => {
@@ -409,164 +565,6 @@ router.delete('/admin/destroyToken', (req, res)=>{
     })
     })
 });
-
-//read user info
- router.get('/users',authenticate,(req,res,next)=>{ 
-    const sort = {}
-    let pageOptions = {
-        page: req.query.page || 0,
-        limit: req.query.limit || 10
-    }
-    if (req.query.sortBy) {
-        const parts = req.query.sortBy.split(':')
-        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
-    }
-    
-    User.find()
-        .skip(pageOptions.page*pageOptions.limit)
-        .limit(pageOptions.limit)
-        .sort(sort)
-        .exec( (err, doc)=>{
-            if(err) { res.status(500).json(err); return; };            
-            res.status(200).json(doc);
-        })  
-})  
-
-//find one user
-router.get("/single/user/:id",authenticateUser,(req,res,next)=>{
-    let id = req.params.id;
-    // checks if the object is valid
-    if(!ObjectId.isValid(id)) {
-        res.status(400).send(`Error: Please enter a valid Object ID`);
-    }
-
-
-     User.findById(id).then((user)=> {
-        // if user is not found return error 404 otherwise send the admin.
-        console.log(user);
-        if(!user){
-          res.status(404).send("User not found");
-        }
-
-        let companyID = user.company; 
-        Company.findById(companyID).then(company=>{
-            res.send({
-                user,
-                companyname: company.name,
-                companyCanBuy: company.canBuyShares,
-                comapanyCanSell: company.canSellShares,
-                companyCanCollacterize: company.canCollateriseShares,
-                vestingSchedule: company.vestingSchedule 
-            });
-        }).catch(e=>{
-          res.status(400).send(`${e}`);
-        })
-    }).catch((e)=>{
-        res.status(400).send(`${e}`);
-    })
- })
-
-
-// delete a user
-router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
-    const id = req.params.id
-
-      // Validate the user id
-      if(!ObjectId.isValid(id)){
-          res.status(400).send();
-      }
-
-      User.findOneAndDelete({_id:id})
-       .then(user=>{
-        if(!user){
-          return res.status(404).json({Message:"User not found"});
-        }
-
-        let companyID = user.company;
-
-          let log = new Log({
-              createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
-              action: `deleted a user`,
-              user: `${user.firstName} ${user.lastName}`,
-              company: `${user.Company_Name}`
-          });
-
-          Company.findById(companyID).then(company=>{
-            // decrease company total scheme members by 1 and delete user id in each batch
-            company.totalSchemeMembers -= 1; 
-
-            //  find all the batch in user company
-            Batch.find({company:user.company}).then(batches=>{
-              _.remove(batches, function(b){
-                  return b == user._id;
-              })
-
-              batch.save();
-
-            }).catch(e=>{
-              return res.status(400).json({Message:`${e}`});
-            })
-
-            if(user.status){ // run this if the user is a confirmed staff of the company
-                // updated total shares allocated to scheme members
-                batch.allocatedShares += user.batch.allocatedShares; // dynamically generate total allocated to batch scheme
-              }else{ // run this if the user is an unconfirmed staff of the company
-                // update total allocated shares to unconfirmed scheme members
-                company.totalSharesOfUnconfirmedSchemeMembers += user.batch.allocatedShares;;
-            }
-            // update total unallocated shares
-            company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
-            // updated forfieted shares
-            company.totalSharesForfieted = company.totalSharesAllocatedToSchemeMembers - vestedShares;
-            company.save(); // save to store data
-
-          }).catch(e=>{
-            res.status(400).send(`${e}`)
-          })
-
-          // log.save(); // save audit log
-          // deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
-          // return res.send("User is deleted");
-       }).catch(e=>{
-        return res.status(400).send(`${e}`);
-       })
-   })
-   
-//Update user information
-router.patch('/user/:id',authenticateUser, (req, res) => {
-    // get the user id
-    let id = req.params.id;
-    // validate the id
-    if(!ObjectId.isValid(id)){
-        res.status(400).send();
-    }
-    // find and update the user by id if it is found, throw error 404 if not
-    User.findOneAndUpdate({_id:id}, {$set:req.body}, {new: true, runValidators: true  }).then((doc)=>{
-        // check if doc was foun and updated
-        if(!doc){
-            return res.status(404).send();
-        }
-
-        if(req.password !== doc.password){
-            let password = doc.password;
-            let saltRounds = 10;
-            let hash = bcrypt.hashSync(password, saltRounds);
-            doc.password = hash;
-        }
-
-        doc.save();
-
-        User.findById(id).then(doc=>{
-          // confirmUser(); // call the confirm user to update necessary shares.
-          return res.send("Update Successful");
-        })
-        
-    }).catch((e)=>{
-        res.status(400).send(`${e}`);
-    });
-    
-});
-
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
 router.get('/user/sent/notification',authenticateUser, (req,res)=>{
