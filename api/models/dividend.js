@@ -3,8 +3,7 @@ const Schema = mongoose.Schema;
 
 const dividendSchema = new Schema({
     type:{
-        type: String,
-        enum: ['cash', 'share']
+        type: String
     },
     rate:{
         value: {
