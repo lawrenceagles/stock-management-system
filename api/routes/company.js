@@ -475,4 +475,24 @@ router.patch('/company/batch/:id',authenticate,(req,res)=>{
 	})
 })
 
+// Route to show all the batch in a company
+router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
+  const ID = req.params.companyid;
+  // validate the company id
+  if(!ObjectId.isValid(ID)){
+      return res.status(400).json({Message:"Error invalid ObjectId"});
+  }
+
+  Batch.find({company:ID}).then(batches=>{
+    const finalData = batches.map(batch=>{
+      const data = {
+        name:batch.name,
+        id:batch._id
+      }
+      return data;
+    })
+    res.send(finalData);
+  })
+})
+
 module.exports = router;

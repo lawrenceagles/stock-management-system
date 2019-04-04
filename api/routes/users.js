@@ -190,46 +190,6 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
     });
 })
 
-// Route to show all the batch in a company
-router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
-  const ID = req.params.companyid;
-  // validate the company id
-  if(!ObjectId.isValid(ID)){
-      return res.status(400).json({Message:"Error invalid ObjectId"});
-  }
-
-  Batch.find({company:ID}).then(batches=>{
-    const finalData = batches.map(batch=>{
-      const data = {
-        name:batch.name,
-        id:batch._id
-      }
-      return data;
-    })
-    res.send(finalData);
-  })
-})
-
-// edit batch
-router.patch('/company/batch/:batchid', (req,res)=>{
-  const batchID = req.params.batchid;
-  if(!Objectid.isValid(batchID)){
-    res.status(400).json({Message:"Error invalid objectId"});
-  }
-
-  Batch.findOneAndUpdate({_id:batchID}, {$set:req.body}, {new:true, runValidators: true})
-    .then(batch=>{
-      if(!batch){
-        res.status(404).json({Message:"Error no batch was found. Update failed"});
-      }
-
-      res.json({Message: "Update Successful"});
-
-    }).catch(e=>{
-      res.status(400).json({Message:`${e}`});
-    })
-})
-
 // Add user to batch
 router.patch("/company/batch/user/:id", (req,res)=>{
   const ID = req.params.id;
@@ -473,7 +433,7 @@ router.delete('/admin/destroyToken', (req, res)=>{
 })  
 
 //find one user
-router.get("/user/:id",authenticateUser,(req,res,next)=>{
+router.get("/single/user/:id",authenticateUser,(req,res,next)=>{
     let id = req.params.id;
     // checks if the object is valid
     if(!ObjectId.isValid(id)) {
@@ -483,6 +443,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
      User.findById(id).then((user)=> {
         // if user is not found return error 404 otherwise send the admin.
+        console.log(user);
         if(!user){
           res.status(404).send("User not found");
         }
