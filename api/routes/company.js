@@ -62,7 +62,6 @@ router.get('/company/list',authenticate,(req,res,next)=>{
     
     Company.find()
         .skip(pageOptions.page*pageOptions.limit)
-        .limit(pageOptions.limit)
         .sort(sort)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
