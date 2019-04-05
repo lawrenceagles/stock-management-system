@@ -52,7 +52,7 @@ const userSchema = new Schema({
     phone: {
         type: String,
         required: [true, 'User phone number is required'],
-        maxlength:100,
+        minlength:11,
       },
     otherPhoneNumber:{
         type: String,
