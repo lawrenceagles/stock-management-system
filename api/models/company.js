@@ -68,7 +68,7 @@ const companySchema = new Schema({
     canRepurchase: {
         type: Boolean
     },
-    schemeRules: {
+    schemeRule: {
         type: String,
         required: true
     },
