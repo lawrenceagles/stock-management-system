@@ -161,7 +161,7 @@ AdminSchema.statics.findByCredentials = function(email, password) {
                 if(res) {
                     return resolve(admin);
                 }else{
-                    return reject("password bad");
+                    return reject("Error Wrong Password");
                 }
             })
         });

@@ -84,7 +84,7 @@ app.post('/upload/schemerule/:companyid', upload.single('upload'), (req, res) =>
 
 app.get('/upload/schemerule/:companyid', (req,res)=>{
 	const companyID = req.params.companyid;
-
+	
 	// Validate ID.
 	if(!Objectid.isValid(companyID)){
 		return res.status(400).json({Message: "Error invalid object id"});

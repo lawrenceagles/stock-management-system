@@ -120,8 +120,6 @@ router.post('/admin',authenticate,(req, res) => {
             return Promise.reject();
         }
     }).catch((e)=>{
-        console.log(e);
-        console.log(e.message);
         return res.status(400).json({Message:"Admin already exists"});
     })
 
@@ -187,7 +185,7 @@ router.post('/admin/login', (req, res) => {
             });
         });
     }).catch((e)=> {
-        res.status(400).send(`${e}`);
+        res.status(400).json({Message: `${e}`});
     })
 });
 

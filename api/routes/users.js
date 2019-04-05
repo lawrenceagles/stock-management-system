@@ -163,6 +163,16 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
           });
 
           Company.findById(companyID).then(company=>{
+
+            // Validate company id
+            if(!Objectid.isValid(companyID)){
+              return res.json({Message:"Invalid company ID"});
+            }
+
+            if(!company){// handle company not found
+              return res.json({Message:"Company not found"})
+            }
+
             // decrease company total scheme members by 1 and delete user id in each batch
             company.totalSchemeMembers -= 1; 
 
@@ -195,11 +205,11 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
             res.status(400).send(`${e}`)
           })
 
-          // log.save(); // save audit log
-          // deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
-          // return res.send("User is deleted");
+          log.save(); // save audit log
+          deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
+          return res.json({Message: "User is deleted"});
        }).catch(e=>{
-        return res.status(400).send(`${e}`);
+        return res.status(400).json({Message: `${e}`});
        })
    })
    
@@ -220,7 +230,7 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
 
         if(req.password !== doc.password){
             let password = doc.password;
-            let saltRounds = 10;
+            let saltRounds = 12;
             let hash = bcrypt.hashSync(password, saltRounds);
             doc.password = hash;
         }
@@ -366,6 +376,10 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
              }
           })
           Batch.findById(addToBatch).then(batch=>{ // find the company batch by id
+            if(!batch){
+              return res.status(404).json({Message: "No batch found"});
+            }
+            console.log(batch)
             batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
 
             if(user.status){ // run this if the user is a confirmed staff of the company
@@ -382,7 +396,7 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
       });
     });
   }).catch(e=>{
-    res.status(400).json({Message:`${e}`});
+    res.status(400).json({Message:`Error here ${e}`});
   });
 })
 
@@ -478,7 +492,7 @@ router.patch('/user/forgetpassword', (req,res)=>{
         // send email with link to update password.
         sendUpdatePasswordEmail(user.email, user.firstname, user.lastname, randomPassword);
 
-        let hashpassword = bcrypt.hashSync(randomPassword, 10);          
+        let hashpassword = bcrypt.hashSync(randomPassword, 12);          
 
         // update the user password
         user.password = hashpassword;
@@ -496,46 +510,65 @@ router.patch('/user/forgetpassword', (req,res)=>{
 });
 
  //login
- router.post('/user/login',(req,res)=>{
-    User.findOne({'email':req.body.email},(err,user)=>{
-        if(!user) return res.status(404).json({
-             message:`auth failed email not found`
-         })
-        user.comparePassword(req.body.password,(isMatch,err)=>{
-        if(err) throw err;
-            if(!isMatch) return res.status(400).json({
-                message:"Wrong Password"
-                })   
-                if(isMatch) { 
+//  router.post('/user/login',(req,res)=>{
+//     User.findOne({'email':req.body.email},(err,user)=>{
+//         if(!user) return res.status(404).json({
+//              message:`auth failed email not found`
+//          })
+//         user.comparePassword(req.body.password,(isMatch,err)=>{
+//         if(err) throw err;
+//             if(!isMatch) return res.status(400).json({
+//                 message:"Wrong Password"
+//                 })   
+//                 if(isMatch) { 
 
-                //if user log in success, generate a JWT token for the user with a secret key    
-                // if(user.tokens.length > 0){
-                //     return res.send("You are already Logged in");
-                // }  
+//                 //if user log in success, generate a JWT token for the user with a secret key    
+//                 // if(user.tokens.length > 0){
+//                 //     return res.send("You are already Logged in");
+//                 // }  
                  
-                    return user.generateToken()
-                    .then((token)=> {
-                      return res.header('x-auth', token).send({
-                          _id: user._id,
-                          email: user.email,
-                          company: user.company,
-                          Company_Schemerules: user.Company_Schemerules,
-                          tokens: user.tokens,
-                          status: user.status
-                      });
-                  })
-                    .catch(err=>{
-                      res.status(400).send({
-                        message:`${err}`
-                      })
-                    })
-                }
-            // else {
-            //     res.status(400).json({message:"Wrong Password"})
-            // }
-         })
-    }) 
-})
+//                     return user.generateToken()
+//                     .then((token)=> {
+//                       return res.header('x-auth', token).send({
+//                           _id: user._id,
+//                           email: user.email,
+//                           company: user.company,
+//                           Company_Schemerules: user.Company_Schemerules,
+//                           tokens: user.tokens,
+//                           status: user.status
+//                       });
+//                   })
+//                     .catch(err=>{
+//                       res.status(400).send({
+//                         message:`${err}`
+//                       })
+//                     })
+//                 }
+//             // else {
+//             //     res.status(400).json({message:"Wrong Password"})
+//             // }
+//          })
+//     }) 
+// })
+
+ // signin/login route
+router.post('/user/login', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password']);
+    User.findByCredentials(body.email, body.password).then((user)=> { 
+        return user.generateToken().then((token)=> {
+            return res.header('x-auth', token).send({
+                _id: user._id,
+                email: user.email,
+                company: user.company,
+                Company_Schemerules: user.Company_Schemerules,
+                tokens: user.tokens,
+                status: user.status
+            });
+        });
+    }).catch((e)=> {
+        res.status(400).json({Message: `${e}`});
+    })
+});
 
 //logout
 router.delete('/user/logout',authenticateUser, (req, res)=>{

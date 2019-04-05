@@ -337,7 +337,7 @@ router.delete('/company/dividend/:id',authenticate,(req,res)=>{
 
     Dividend.findOneAndDelete({_Id:dividendID}).then(dividend=>{
 		let log = new Log({ // create audit trail
-			action: `Deleted batch ${dividend.name}`,
+			action: `Deleted ${dividend.name}`,
 			createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
 			user: `${company.name}`
 		});
