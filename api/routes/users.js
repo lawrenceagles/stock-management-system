@@ -114,7 +114,6 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
 
      User.findById(id).then((user)=> {
         // if user is not found return error 404 otherwise send the admin.
-        console.log(user);
         if(!user){
           res.status(404).send("User not found");
         }
@@ -190,15 +189,19 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
 
             if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
-                batch.allocatedShares += user.batch.allocatedShares; // dynamically generate total allocated to batch scheme
+                let userBatches = user.batch;
+                userBatches.forEach(function(uBatch){
+                  batch.allocatedShares -= uBatch.allocatedShares; // dynamically generate total allocated to batch scheme
+                })
               }else{ // run this if the user is an unconfirmed staff of the company
                 // update total allocated shares to unconfirmed scheme members
-                company.totalSharesOfUnconfirmedSchemeMembers += user.batch.allocatedShares;;
+                company.totalSharesOfUnconfirmedSchemeMembers -= user.batch.allocatedShares;;
             }
             // update total unallocated shares
             company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
             // updated forfieted shares
             company.totalSharesForfieted = company.totalSharesAllocatedToSchemeMembers - vestedShares;
+            // company.totalSharesRepurchased = vestedShares;
             company.save(); // save to store data
 
           }).catch(e=>{
@@ -380,8 +383,7 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
               return res.status(404).json({Message: "No batch found"});
             }
 
-           if( batch.members.indexOf(user._id) < 0 ){
-            console.log()
+           if( batch.members.indexOf(user._id) >= 0 ){
               return res.status(400).json({Message: "user already added to batch"});
            } 
 
@@ -390,7 +392,6 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
             if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
                 batch.allocatedShares += req.body.allocatedShares; // dynamically generate total allocated to batch scheme
-                console.log()
               }else{ // run this if the user is an unconfirmed staff of the company
                 // update total allocated shares to unconfirmed scheme members
                 company.totalSharesOfUnconfirmedSchemeMembers += req.body.allocatedShares;
@@ -451,7 +452,6 @@ router.get("/user/dividend/:id",authenticate, (req,res)=>{
 
   // find user
   User.findById(id).then(user=>{
-    console.log(user);
     let companyID = user.company;
     Dividend.find({comany:companyID}).then(dividends=>{
       if(dividends.length < 1){
@@ -590,7 +590,7 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
   });
 
 // signout/logout route
-router.delete('/logout/destroyToken', (req, res)=>{
+router.delete('/user/destroyToken', (req, res)=>{
     let email = req.body.email;
     let token = req.header('x-auth'); // grap token from header
     User.findOne({email}).then(user=>{
