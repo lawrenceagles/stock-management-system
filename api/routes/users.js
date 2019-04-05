@@ -379,18 +379,26 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
             if(!batch){
               return res.status(404).json({Message: "No batch found"});
             }
-            console.log(batch)
+
+           if( batch.members.indexOf(user._id) < 0 ){
+            console.log()
+              return res.status(400).json({Message: "user already added to batch"});
+           } 
+
             batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
 
             if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
-                batch.allocatedShares += user.batch.allocatedShares; // dynamically generate total allocated to batch scheme
+                batch.allocatedShares += req.body.allocatedShares; // dynamically generate total allocated to batch scheme
+                console.log()
               }else{ // run this if the user is an unconfirmed staff of the company
                 // update total allocated shares to unconfirmed scheme members
-                company.totalSharesOfUnconfirmedSchemeMembers += user.batch.allocatedShares;;
+                company.totalSharesOfUnconfirmedSchemeMembers += req.body.allocatedShares;
             }
             batch.save();
-            company.save();
+            company.save().then(doc=>{
+              res.json({Message: "User added to batch successfully"})
+            })
 
           })
       });
@@ -509,66 +517,66 @@ router.patch('/user/forgetpassword', (req,res)=>{
     })
 });
 
- //login
-//  router.post('/user/login',(req,res)=>{
-//     User.findOne({'email':req.body.email},(err,user)=>{
-//         if(!user) return res.status(404).json({
-//              message:`auth failed email not found`
-//          })
-//         user.comparePassword(req.body.password,(isMatch,err)=>{
-//         if(err) throw err;
-//             if(!isMatch) return res.status(400).json({
-//                 message:"Wrong Password"
-//                 })   
-//                 if(isMatch) { 
+//login
+ router.post('/user/login',(req,res)=>{
+    User.findOne({'email':req.body.email},(err,user)=>{
+        if(!user) return res.status(404).json({
+             message:`auth failed email not found`
+         })
+        user.comparePassword(req.body.password,(isMatch,err)=>{
+        if(err) throw err;
+            if(!isMatch) return res.status(400).json({
+                message:"Wrong Password"
+                })   
+                if(isMatch) { 
 
-//                 //if user log in success, generate a JWT token for the user with a secret key    
-//                 // if(user.tokens.length > 0){
-//                 //     return res.send("You are already Logged in");
-//                 // }  
+                //if user log in success, generate a JWT token for the user with a secret key    
+                // if(user.tokens.length > 0){
+                //     return res.send("You are already Logged in");
+                // }  
                  
-//                     return user.generateToken()
-//                     .then((token)=> {
-//                       return res.header('x-auth', token).send({
-//                           _id: user._id,
-//                           email: user.email,
-//                           company: user.company,
-//                           Company_Schemerules: user.Company_Schemerules,
-//                           tokens: user.tokens,
-//                           status: user.status
-//                       });
-//                   })
-//                     .catch(err=>{
-//                       res.status(400).send({
-//                         message:`${err}`
-//                       })
-//                     })
-//                 }
-//             // else {
-//             //     res.status(400).json({message:"Wrong Password"})
-//             // }
-//          })
-//     }) 
-// })
+                    return user.generateToken()
+                    .then((token)=> {
+                      return res.header('x-auth', token).send({
+                          _id: user._id,
+                          email: user.email,
+                          company: user.company,
+                          Company_Schemerules: user.Company_Schemerules,
+                          tokens: user.tokens,
+                          status: user.status
+                      });
+                  })
+                    .catch(err=>{
+                      res.status(400).send({
+                        message:`${err}`
+                      })
+                    })
+                }
+            // else {
+            //     res.status(400).json({message:"Wrong Password"})
+            // }
+         })
+    }) 
+})
 
- // signin/login route
-router.post('/user/login', (req, res) => {
-    let body = _.pick(req.body, ['email', 'password']);
-    User.findByCredentials(body.email, body.password).then((user)=> { 
-        return user.generateToken().then((token)=> {
-            return res.header('x-auth', token).send({
-                _id: user._id,
-                email: user.email,
-                company: user.company,
-                Company_Schemerules: user.Company_Schemerules,
-                tokens: user.tokens,
-                status: user.status
-            });
-        });
-    }).catch((e)=> {
-        res.status(400).json({Message: `${e}`});
-    })
-});
+// signin/login route
+// router.post('/user/login', (req, res) => {
+//     let body = _.pick(req.body, ['email', 'password']);
+//     User.findByCredentials(body.email, body.password).then((user)=> { 
+//         return user.generateToken().then((token)=> {
+//             return res.header('x-auth', token).send({
+//                 _id: user._id,
+//                 email: user.email,
+//                 company: user.company,
+//                 Company_Schemerules: user.Company_Schemerules,
+//                 tokens: user.tokens,
+//                 status: user.status
+//             });
+//         });
+//     }).catch((e)=> {
+//         res.status(400).json({Message: `${e}`});
+//     })
+// });
 
 //logout
 router.delete('/user/logout',authenticateUser, (req, res)=>{
