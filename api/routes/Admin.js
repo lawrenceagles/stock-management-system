@@ -73,10 +73,6 @@ router.get('/admin/profile/image',authenticate,(req,res)=>{
   })
 });
 
-
-
-
-
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
     let options =  {
@@ -124,7 +120,9 @@ router.post('/admin',authenticate,(req, res) => {
             return Promise.reject();
         }
     }).catch((e)=>{
-        return res.status(400).send("Admin already exists");
+        console.log(e);
+        console.log(e.message);
+        return res.status(400).json({Message:"Admin already exists"});
     })
 
     // Auto generate random password for admin
