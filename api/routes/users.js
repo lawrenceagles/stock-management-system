@@ -314,16 +314,16 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           return res.status(400).send("This user already exists in this company");
         }
 
+          req.body.company = id;
+          req.body.companySchemerules = company.schemeRules;
+          req.body.currentShareValue = company.currentShareValue;
+
           // Auto generate random password for admin
            req.body.password = genRandomPassword(10);
            console.log(req.body.password);
            
         // create the user
-        let user = new User({
-          ...req.body,
-          company: id,
-          Company_Schemerules: company.schemeRules // set company scheme rules for this user
-        });
+        let user = new User(req.body);
 
         // send welcome email containing password
         sendUserWelcomePasswordEmail(user.email,user.firstName,user.lastName,user.password);
@@ -584,13 +584,13 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
 
       res.status(200).send("Logout successfull");
     }, ()=>{
-      res.status(400).send(`Error Logout not successfull ${e}`);
+      res.status(400).json({Message:`Error Logout not successfull ${e}`});
     })
 
   });
 
 // signout/logout route
-router.delete('/admin/destroyToken', (req, res)=>{
+router.delete('/logout/destroyToken', (req, res)=>{
     let email = req.body.email;
     let token = req.header('x-auth'); // grap token from header
     User.findOne({email}).then(user=>{

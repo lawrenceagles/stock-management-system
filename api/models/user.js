@@ -66,7 +66,7 @@ const userSchema = new Schema({
         required: [true, 'User password is required'],
         minlength:5,
     },
-    Company_Schemerules:{ //cannot be updated by users
+    companySchemerules:{ //cannot be updated by users
         type:String,
         trim: true,
     },
@@ -155,17 +155,24 @@ const userSchema = new Schema({
         required: true,
         ref: 'Company'
     },
-    sharesSold: {
+    currentShareValue:{
         type: Number
+    },
+    sharesSold: {
+        type: Number,
+        default:0
         },
     sharesBought:{
-        type: Number
+        type: Number,
+        default:0
         },
     shareCollaterised: {
-            type: Number
+            type: Number,
+            default:0
         },
     outstanding:{
-            type: Number
+            type: Number,
+            default:0
         },
     dividend:{
         date:{
@@ -272,24 +279,24 @@ userSchema.pre('save', function(next) {
  }
 
 // handle user login
- userSchema.statics.findByCredentials = function(email, password) {
-    let User = this;
-    return User.findOne({email}).then((user)=> { // find user by email
-        if(!user){  // handle user not found
-            return Promise.reject({Message:"No user with that email was found"});
-        }
+//  userSchema.statics.findByCredentials = function(email, password) {
+//     let User = this;
+//     return User.findOne({email}).then((user)=> { // find user by email
+//         if(!user){  // handle user not found
+//             return Promise.reject({Message:"No user with that email was found"});
+//         }
 
-        return new Promise((resolve, reject)=> {
-            bcrypt.compare(password, user.password, (err, res)=> {
-                if(res) {
-                    return resolve(user);
-                }else{
-                    return reject({Message:"Password does not match that user email"});
-                }
-            })
-        });
-    });
-}
+//         return new Promise((resolve, reject)=> {
+//             bcrypt.compare(password, user.password, (err, res)=> {
+//                 if(res) {
+//                     return resolve(user);
+//                 }else{
+//                     return reject({Message:"Password does not match that user email"});
+//                 }
+//             })
+//         });
+//     });
+// }
 
 userSchema.methods.generateToken = function() {
 
