@@ -264,12 +264,12 @@ userSchema.pre('save', function(next) {
   }
 })
 
- // userSchema.methods.comparePassword = function(candidatePassword, cb){      //req.body.password serves as candidatePassword in this module
- //     bcrypt.compare(candidatePassword,this.password,function(isMatch,err){
- //         if (err) return cb(err)         
- //         cb(isMatch,null);
- //     })
- // }
+ userSchema.methods.comparePassword = function(candidatePassword, cb){      //req.body.password serves as candidatePassword in this module
+     bcrypt.compare(candidatePassword,this.password,function(isMatch,err){
+         if (err) return cb(err)         
+         cb(isMatch,null);
+     })
+ }
 
 // handle user login
  userSchema.statics.findByCredentials = function(email, password) {
