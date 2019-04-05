@@ -169,7 +169,7 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
             }
 
             if(!company){// handle company not found
-              return res.json({Message:"Company not found"})
+              return res.json({Message:"Company not found"});
             }
 
             // decrease company total scheme members by 1 and delete user id in each batch
@@ -188,14 +188,19 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
             })
 
             if(user.status){ // run this if the user is a confirmed staff of the company
-                // updated total shares allocated to scheme members
-                let userBatches = user.batch;
-                userBatches.forEach(function(uBatch){
-                  batch.allocatedShares -= uBatch.allocatedShares; // dynamically generate total allocated to batch scheme
+                batches.forEach(function(batch){
+                  let cBatch = batch.allocatedShares;
+                  let userBatches = user.batch;
+                  userBatches.forEach(function(uBatch){
+                    cBatch -= uBatch.allocatedShares; // dynamically generate total allocated to batch scheme
+                  })
                 })
               }else{ // run this if the user is an unconfirmed staff of the company
                 // update total allocated shares to unconfirmed scheme members
-                company.totalSharesOfUnconfirmedSchemeMembers -= user.batch.allocatedShares;;
+                let userBatches = user.batch;
+                  userBatches.forEach(function(uBatch){
+                    company.totalSharesOfUnconfirmedSchemeMembers -= uBatch.allocatedShares;
+                  })
             }
             // update total unallocated shares
             company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
