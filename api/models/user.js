@@ -50,12 +50,12 @@ const userSchema = new Schema({
         enum: ['male', 'female']
     },
     phone: {
-        type: String,
+        type: Number,
         required: [true, 'User phone number is required'],
         minlength:11,
       },
     otherPhoneNumber:{
-        type: String,
+        type: Number,
         maxlength:100,
       },
     username: {

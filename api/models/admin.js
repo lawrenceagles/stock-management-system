@@ -47,7 +47,7 @@ const AdminSchema = new Schema({
       trim:true
     },
     phone: {
-        type: String,
+        type: Number,
         minlength: 11,          
         required: [true, 'User phone number required'],
         trim: true
