@@ -51,8 +51,11 @@ app.post('/upload/schemerule/:companyid',upload.single('upload'), (req, res) => 
 		}
 
 		company.schemeRule = companySchemeRule; // set company scheme rule to the pdf path
-
-		res.json({Message: "Scheme rule uploaded successfully"});
+		company.save().then(companyDoc=>{
+			res.json({Message: "Scheme rule uploaded successfully"});
+		}).catch(e=>{
+			return res.status(400).json({Message:`${e}`});
+		})
 	}).catch(e=>{
 		return res.status(400).json({Message:`${e}`});
 	})

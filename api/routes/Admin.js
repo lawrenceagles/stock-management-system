@@ -40,7 +40,7 @@ router.post('/upload/profile/image',authenticate,upload.single('avatar'),(req,re
     .then(sharpImage=>{
       req.admin.avatar = sharpImage; // set admin avater to sharp Image
       req.admin.save().then(image=>{ // save admin avatar
-      res.send("Image Successfully Uploaded");
+        res.json({Message:"Image Successfully Uploaded"});
       }).catch(e=>{
         res.status(400).send(`${e}`);
       });
@@ -54,7 +54,7 @@ router.post('/upload/profile/image',authenticate,upload.single('avatar'),(req,re
 router.delete('/upload/profile/image',authenticate,(req,res)=>{
   req.admin.avatar = undefined;
     req.admin.save().then(doc=>{
-      res.send("Image Successfully Deleted");
+      res.json({Message:"Image Successfully Deleted"});
     }).catch(e=>{
       res.status(400).send(`${e}`);
     })

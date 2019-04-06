@@ -47,9 +47,9 @@ router.post('/upload/user/profile/image',authenticateUser,upload.single('avatar'
     .then(sharpImage=>{
       req.user.avatar = sharpImage; // set user avater to sharp Image
       req.user.save().then(image=>{ // save user avatar
-      res.send("Image Successfully Uploaded");
+      res.json({Message:"Image Successfully Uploaded"});
       }).catch(e=>{
-        res.status(400).send(`${e}`);
+        res.status(400).json({Message:`${e}`});
       });
   }).catch(e=>{
     res.status(400).send(`${e}`);

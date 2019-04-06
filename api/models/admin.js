@@ -92,43 +92,40 @@ AdminSchema.methods.toJSON = function() {
  return newAdmin;
 }
 
-// // encrypt password using bcrypt conditionally. Only if the user is newly created.
-// AdminSchema.pre('save', function(next) {
-//   const admin = this // bind this
+// encrypt password using bcrypt conditionally. Only if the user is newly created.
+AdminSchema.pre('save', function(next) {
+  const admin = this // bind this
 
-//   if (admin.isModified('password')) {
-//     bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
-//       if (err) {
-//         return next(err);
-//       }
-//       bcrypt.hash(admin.password, salt, (err, hash) => {
-//         if (err) {
-//           return next(err);
-//         }
-//         admin.password = hash
-//         return next()
-//       })
-//     }) 
-//   } else {
-//     return next();
-//   }
-// })
+  if (admin.isModified('password')) {
+    try {
+        const salt = bcrypt.genSaltSync(12);
+        const hash = bcrypt.hashSync(admin.password, salt);
+        admin.password = hash;
+        next();
+    } catch (error) {
+        return next(error);
+    }
+  } else {
+    return next();
+  }
+})
 
-// // fix hashing password on update
-// AdminSchema.pre("update", function(next) {
-//     const password = this.getUpdate().$set.password;
-//     if (!password) {
-//         return next();
-//     }
-//     try {
-//         const salt = bcrypt.genSaltSync(12);
-//         const hash = bcrypt.hashSync(password, salt);
-//         this.getUpdate().$set.password = hash;
-//         next();
-//     } catch (error) {
-//         return next(error);
-//     }
-// });
+// fix hashing password on update
+AdminSchema.pre("update", function(next) {
+    const admin = this // bind this
+    const password = admin.getUpdate().$set.password;
+    if (!password) {
+        return next();
+    }
+    try {
+        const salt = bcrypt.genSaltSync(12);
+        const hash = bcrypt.hashSync(password, salt);
+        admin.getUpdate().$set.password = hash;
+        next();
+    } catch (error) {
+        return next(error);
+    }
+});
 
 AdminSchema.methods.generateToken = function() {
 
@@ -173,14 +170,16 @@ AdminSchema.statics.findByCredentials = function(email, password) {
         }
 
         return new Promise((resolve, reject)=> {
-            // bcrypt.compare(password, admin.password, (err, res)=> {
+            // bcrypt.compare(password, , (err, res)=> {
             //     if(res) {
             //         return resolve(admin);
             //     }else{
             //         return reject("Error Wrong Password");
             //     }
             // })
-            if(admin.password === password){
+
+            const passwordValidation = bcrypt.compareSync(password, admin.password);
+            if(passwordValidation === true){
               return resolve(admin);
             }else{
               return reject("Error Wrong Password");
