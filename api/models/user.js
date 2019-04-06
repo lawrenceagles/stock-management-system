@@ -233,23 +233,6 @@ userSchema.virtual('receivedNotifications', {
   foreignField: 'receiver'
 });
 
-// userSchema.pre('save',function(next){
-//     var user = this;
-//     if (user.isModified('password')){
-//         bcrypt.genSalt(SALT_i,function(err,salt){
-//             if (err) return next(err);
-//             bcrypt.hash(user.password,salt,function(err,hash){
-//                 if (err) return next(err);
-//                 user.password = hash;
-//                 next();
-//             })
-//         })
-//     }
-//     else{
-//         next()
-//     } 
-// })
-
 userSchema.pre('save', function(next) {
   const user = this // bind this
 
@@ -271,32 +254,26 @@ userSchema.pre('save', function(next) {
   }
 })
 
- userSchema.methods.comparePassword = function(candidatePassword, cb){      //req.body.password serves as candidatePassword in this module
-     bcrypt.compare(candidatePassword,this.password,function(isMatch,err){
-         if (err) return cb(err)         
-         cb(isMatch,null);
-     })
- }
 
 // handle user login
-//  userSchema.statics.findByCredentials = function(email, password) {
-//     let User = this;
-//     return User.findOne({email}).then((user)=> { // find user by email
-//         if(!user){  // handle user not found
-//             return Promise.reject({Message:"No user with that email was found"});
-//         }
+ userSchema.statics.findByCredentials = function(email, password) {
+    let User = this;
+    return User.findOne({email}).then((user)=> { // find user by email
+        if(!user){  // handle user not found
+            return Promise.reject("No user with that email was found");
+        }
 
-//         return new Promise((resolve, reject)=> {
-//             bcrypt.compare(password, user.password, (err, res)=> {
-//                 if(res) {
-//                     return resolve(user);
-//                 }else{
-//                     return reject({Message:"Password does not match that user email"});
-//                 }
-//             })
-//         });
-//     });
-// }
+        return new Promise((resolve, reject)=> {
+            bcrypt.compare(password, user.password, (err, res)=> {
+                if(res) {
+                    return resolve(user);
+                }else{
+                    return reject("Password does not match that user email");
+                }
+            })
+        });
+    });
+}
 
 userSchema.methods.generateToken = function() {
 
@@ -352,28 +329,6 @@ userSchema.statics.findByToken = function(token) {
         'tokens.access': 'auth'
     });
 }
-
-
-// create a new mongoose method for user login authentication
-// userSchema.statics.findByCredentials = function(email, password) {
-//     let User = this;
-//     return User.findOne({email}).then((user)=> { // find user by email
-//         if(!user){  // handle user not found
-//             return Promise.reject();
-//         }
-
-//         return new Promise((resolve, reject)=> {
-//             bcrypt.compare(password, user.password, (err, res)=> {
-//                 if(res) {
-//                     return resolve(user);
-//                 }else{
-//                     return reject("Wrong password");
-//                 }
-//             })
-//         });
-//     });
-// }
-
 
 userSchema.methods.removeToken = function(token) {
   let user = this;

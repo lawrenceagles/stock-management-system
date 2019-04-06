@@ -3,6 +3,7 @@ const router = express.Router();
 const _ = require('lodash');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
+const sharp = require('sharp');
 
 const {Admin} = require ('../models/admin');
 const {User} = require("../models/user");
@@ -18,7 +19,7 @@ const {genRandomPassword} = require('../../config/genPassword.js');
 // Set Storage Engine
 const upload = multer({
     limits: {
-        fileSize: 3000000
+        fileSize: 5000000
     },
     fileFilter(req, file, cb) {
         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
@@ -256,29 +257,11 @@ router.patch('/admin/:id',authenticate, (req, res) => {
         if(!doc){
             res.status(404).send();
         }
-
-        if(req.password !== doc.password){
-            let password = doc.password;
-            let saltRounds = 10;
-            let hash = bcrypt.hashSync(password, saltRounds);
-            doc.password = hash;
-        }
-
-        doc.save();
-
-        Admin.findById(id).then(doc=>{
-            let log = new Log({
-                action: `$Edited an admin profile`,
-                createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-                user: `${doc.firstname} ${doc.lastname}`
-            });
-
-            log.save();
-            res.send(doc);
-        })
+        
+        return res.status(200).json({Message: "User password updated Successfully"}); 
         
     }).catch((e)=>{
-        res.status(400).send(e, "Error update error");
+        res.status(400).json({Message: `${e}`});
     });
     
 });

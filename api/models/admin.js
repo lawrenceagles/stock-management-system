@@ -92,27 +92,43 @@ AdminSchema.methods.toJSON = function() {
  return newAdmin;
 }
 
-// encrypt password using bcrypt conditionally. Only if the user is newly created.
-AdminSchema.pre('save', function(next) {
-  const admin = this // bind this
+// // encrypt password using bcrypt conditionally. Only if the user is newly created.
+// AdminSchema.pre('save', function(next) {
+//   const admin = this // bind this
 
-  if (admin.isModified('password')) {
-    bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
-      if (err) {
-        return next(err);
-      }
-      bcrypt.hash(admin.password, salt, (err, hash) => {
-        if (err) {
-          return next(err);
-        }
-        admin.password = hash
-        return next()
-      })
-    }) 
-  } else {
-    return next();
-  }
-})
+//   if (admin.isModified('password')) {
+//     bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
+//       if (err) {
+//         return next(err);
+//       }
+//       bcrypt.hash(admin.password, salt, (err, hash) => {
+//         if (err) {
+//           return next(err);
+//         }
+//         admin.password = hash
+//         return next()
+//       })
+//     }) 
+//   } else {
+//     return next();
+//   }
+// })
+
+// // fix hashing password on update
+// AdminSchema.pre("update", function(next) {
+//     const password = this.getUpdate().$set.password;
+//     if (!password) {
+//         return next();
+//     }
+//     try {
+//         const salt = bcrypt.genSaltSync(12);
+//         const hash = bcrypt.hashSync(password, salt);
+//         this.getUpdate().$set.password = hash;
+//         next();
+//     } catch (error) {
+//         return next(error);
+//     }
+// });
 
 AdminSchema.methods.generateToken = function() {
 
@@ -153,17 +169,22 @@ AdminSchema.statics.findByCredentials = function(email, password) {
     let Admin = this;
     return Admin.findOne({email}).then((admin)=> { // find admin by email
         if(!admin){  // handle admin not found
-            return Promise.reject();
+            return Promise.reject("No user with that email in database");
         }
 
         return new Promise((resolve, reject)=> {
-            bcrypt.compare(password, admin.password, (err, res)=> {
-                if(res) {
-                    return resolve(admin);
-                }else{
-                    return reject("Error Wrong Password");
-                }
-            })
+            // bcrypt.compare(password, admin.password, (err, res)=> {
+            //     if(res) {
+            //         return resolve(admin);
+            //     }else{
+            //         return reject("Error Wrong Password");
+            //     }
+            // })
+            if(admin.password === password){
+              return resolve(admin);
+            }else{
+              return reject("Error Wrong Password");
+            }
         });
     });
 }

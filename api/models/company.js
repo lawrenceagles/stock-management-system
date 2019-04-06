@@ -69,8 +69,7 @@ const companySchema = new Schema({
         type: Boolean
     },
     schemeRule: {
-        type: String,
-        required: true
+        type: Buffer
     },
     batch:[{
         type: mongoose.Schema.Types.ObjectId,

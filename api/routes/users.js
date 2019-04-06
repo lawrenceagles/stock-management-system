@@ -26,7 +26,7 @@ const {ObjectId} = require('mongodb');
 // Set Storage Engine
 const upload = multer({
     limits: {
-        fileSize: 3000000
+        fileSize: 5000000
     },
     fileFilter(req, file, cb) {
         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
@@ -236,22 +236,10 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
             return res.status(404).send();
         }
 
-        if(req.password !== doc.password){
-            let password = doc.password;
-            let saltRounds = 12;
-            let hash = bcrypt.hashSync(password, saltRounds);
-            doc.password = hash;
-        }
+        return res.json({Message:"user updated Successfully"});
 
-        doc.save();
-
-        User.findById(id).then(doc=>{
-          // confirmUser(); // call the confirm user to update necessary shares.
-          return res.send("Update Successful");
-        })
-        
     }).catch((e)=>{
-        res.status(400).send(`${e}`);
+        res.status(400).json({Message:`${e}`});
     });
     
 });
@@ -523,65 +511,65 @@ router.patch('/user/forgetpassword', (req,res)=>{
 });
 
 //login
- router.post('/user/login',(req,res)=>{
-    User.findOne({'email':req.body.email},(err,user)=>{
-        if(!user) return res.status(404).json({
-             message:`auth failed email not found`
-         })
-        user.comparePassword(req.body.password,(isMatch,err)=>{
-        if(err) throw err;
-            if(!isMatch) return res.status(400).json({
-                message:"Wrong Password"
-                })   
-                if(isMatch) { 
+//  router.post('/user/login',(req,res)=>{
+//     User.findOne({'email':req.body.email},(err,user)=>{
+//         if(!user) return res.status(404).json({
+//              message:`auth failed email not found`
+//          })
+//         user.comparePassword(req.body.password,(isMatch,err)=>{
+//         if(err) throw err;
+//             if(!isMatch) return res.status(400).json({
+//                 message:"Wrong Password"
+//                 })   
+//                 if(isMatch) { 
 
-                //if user log in success, generate a JWT token for the user with a secret key    
-                // if(user.tokens.length > 0){
-                //     return res.send("You are already Logged in");
-                // }  
+//                 //if user log in success, generate a JWT token for the user with a secret key    
+//                 // if(user.tokens.length > 0){
+//                 //     return res.send("You are already Logged in");
+//                 // }  
                  
-                    return user.generateToken()
-                    .then((token)=> {
-                      return res.header('x-auth', token).send({
-                          _id: user._id,
-                          email: user.email,
-                          company: user.company,
-                          Company_Schemerules: user.Company_Schemerules,
-                          tokens: user.tokens,
-                          status: user.status
-                      });
-                  })
-                    .catch(err=>{
-                      res.status(400).send({
-                        message:`${err}`
-                      })
-                    })
-                }
-            // else {
-            //     res.status(400).json({message:"Wrong Password"})
-            // }
-         })
-    }) 
-})
+//                     return user.generateToken()
+//                     .then((token)=> {
+//                       return res.header('x-auth', token).send({
+//                           _id: user._id,
+//                           email: user.email,
+//                           company: user.company,
+//                           Company_Schemerules: user.Company_Schemerules,
+//                           tokens: user.tokens,
+//                           status: user.status
+//                       });
+//                   })
+//                     .catch(err=>{
+//                       res.status(400).send({
+//                         message:`${err}`
+//                       })
+//                     })
+//                 }
+//             // else {
+//             //     res.status(400).json({message:"Wrong Password"})
+//             // }
+//          })
+//     }) 
+// })
 
 // signin/login route
-// router.post('/user/login', (req, res) => {
-//     let body = _.pick(req.body, ['email', 'password']);
-//     User.findByCredentials(body.email, body.password).then((user)=> { 
-//         return user.generateToken().then((token)=> {
-//             return res.header('x-auth', token).send({
-//                 _id: user._id,
-//                 email: user.email,
-//                 company: user.company,
-//                 Company_Schemerules: user.Company_Schemerules,
-//                 tokens: user.tokens,
-//                 status: user.status
-//             });
-//         });
-//     }).catch((e)=> {
-//         res.status(400).json({Message: `${e}`});
-//     })
-// });
+router.post('/user/login', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password']);
+    User.findByCredentials(body.email, body.password).then((user)=> { 
+        return user.generateToken().then((token)=> {
+            return res.header('x-auth', token).send({
+                _id: user._id,
+                email: user.email,
+                company: user.company,
+                Company_Schemerules: user.Company_Schemerules,
+                tokens: user.tokens,
+                status: user.status
+            });
+        });
+    }).catch((e)=> {
+        res.status(400).json({Message: `${e}`});
+    })
+});
 
 //logout
 router.delete('/user/logout',authenticateUser, (req, res)=>{
