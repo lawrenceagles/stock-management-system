@@ -246,23 +246,27 @@ router.patch('/admin/:id',authenticate, (req, res) => {
     // get the admin id
     let id = req.params.id;
     // pickout only what you want to grant the admin permission to update
+    if(req.body.password.length > 5){
+        const salt = bcrypt.genSaltSync(12);
+        const hash = bcrypt.hashSync(req.body.password, salt);
+        req.body.password = hash
+    }
     let body = _.pick(req.body, ["firstname", "lastname", "username", "password", "email", "phone", "role"]);
     // validate the id
     if(!ObjectId.isValid(id)){
         res.status(400).send();
     }
+
     // find and update the admin by id if it is found, throw error 404 if not
-    Admin.findOneAndUpdate({_id:id}, {$set:body}, {new: true, runValidators: true  }).then((doc)=>{
-        // check if doc was foun and updated
-        if(!doc){
-            res.status(404).send();
+   Admin.updateOne({_id:id}, {$set:body}, {new:true, runValidators:true}).then(admin=>{
+        // check if admin was foun and updated
+        if(!admin){
+            res.status(404).json({Message: "Admin document not found."});
         }
-        
-        return res.status(200).json({Message: "User password updated Successfully"}); 
-        
-    }).catch((e)=>{
+        return res.status(200).json({Message: "User password updated Successfully"});
+    }).catch(e=>{
         res.status(400).json({Message: `${e}`});
-    });
+    })
     
 });
 

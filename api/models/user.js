@@ -237,18 +237,14 @@ userSchema.pre('save', function(next) {
   const user = this // bind this
 
   if (user.isModified('password')) {
-    bcrypt.genSalt(12, (err, salt) => { // generate salt and harsh password
-      if (err) {
-        return next(err);
-      }
-      bcrypt.hash(user.password, salt, (err, hash) => {
-        if (err) {
-          return next(err);
-        }
-        user.password = hash
-        return next()
-      })
-    }) 
+    try {
+        const salt = bcrypt.genSaltSync(12);
+        const hash = bcrypt.hashSync(user.password, salt);
+        user.password = hash;
+        next();
+    } catch (error) {
+        return next(error);
+    }
   } else {
     return next();
   }

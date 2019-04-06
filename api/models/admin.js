@@ -110,22 +110,25 @@ AdminSchema.pre('save', function(next) {
   }
 })
 
-// fix hashing password on update
-AdminSchema.pre("update", function(next) {
-    const admin = this // bind this
-    const password = admin.getUpdate().$set.password;
-    if (!password) {
-        return next();
-    }
-    try {
-        const salt = bcrypt.genSaltSync(12);
-        const hash = bcrypt.hashSync(password, salt);
-        admin.getUpdate().$set.password = hash;
-        next();
-    } catch (error) {
-        return next(error);
-    }
-});
+// // fix hashing password on update
+// AdminSchema.pre("update", function(next) {
+//     console.log("start")
+//     let admin = this;
+//     let {password} = admin.getUpdate();
+//     if (!password) {
+//         return next();
+//     }
+//     try {
+//         console.log(password)
+//         const salt = bcrypt.genSaltSync(12);
+//         const hash = bcrypt.hashSync(password, salt);
+//         console.log(hash)
+//         admin.password = hash;
+//         next();
+//     } catch (e) {
+//         return next(e);
+//     }
+// });
 
 AdminSchema.methods.generateToken = function() {
 

@@ -229,10 +229,17 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
     if(!ObjectId.isValid(id)){
         res.status(400).send();
     }
+
+    if(req.body.password.length > 5){
+        const salt = bcrypt.genSaltSync(12);
+        const hash = bcrypt.hashSync(req.body.password, salt);
+        req.body.password = hash
+    }
+
     // find and update the user by id if it is found, throw error 404 if not
-    User.findOneAndUpdate({_id:id}, {$set:req.body}, {new: true, runValidators: true  }).then((doc)=>{
-        // check if doc was foun and updated
-        if(!doc){
+    User.UpdateOne({_id:id}, {$set:req.body}, { new: true, runValidators: true  }).then((user)=>{
+        // check if user was foun and updated
+        if(!user){
             return res.status(404).send();
         }
 
@@ -488,7 +495,7 @@ router.patch('/user/forgetpassword', (req,res)=>{
         }
 
         // generate a new secure random password for the client
-        randomPassword = genRandomPassword(15);
+        randomPassword = genRandomPassword(10);
 
         // send email with link to update password.
         sendUpdatePasswordEmail(user.email, user.firstname, user.lastname, randomPassword);
