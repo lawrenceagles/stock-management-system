@@ -47,6 +47,8 @@ router.post('/upload/profile/image',authenticate,upload.single('avatar'),(req,re
   }).catch(e=>{
     res.status(400).send(`${e}`);
   })
+},(error, req, res, next) => {
+    res.status(400).json({ error: `${error.message}` })
 });
 
 
@@ -58,6 +60,8 @@ router.delete('/upload/profile/image',authenticate,(req,res)=>{
     }).catch(e=>{
       res.status(400).send(`${e}`);
     })
+},(error, req, res, next) => {
+    res.status(400).json({ error: `${error.message}` })
 });
 
 
@@ -72,6 +76,8 @@ router.get('/admin/profile/image',authenticate,(req,res)=>{
   }).catch(e=>{
     res.status(404).send(`${e}`);
   })
+},(error, req, res, next) => {
+    res.status(400).json({ error: `${error.message}` })
 });
 
 // GET route get all admins

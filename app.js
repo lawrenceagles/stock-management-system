@@ -59,6 +59,8 @@ app.post('/upload/schemerule/:companyid',upload.single('upload'), (req, res) => 
 	}).catch(e=>{
 		return res.status(400).json({Message:`${e}`});
 	})
+},(error, req, res, next) => {
+    res.status(400).json({ error: `${error.message}` })
 })
 
 app.get('/upload/schemerule/:companyid', (req,res)=>{
@@ -84,6 +86,8 @@ app.get('/upload/schemerule/:companyid', (req,res)=>{
 	}).catch(e=>{
 		return res.status(400).json({Message:`${e}`});
 	})
+},(error, req, res, next) => {
+    res.status(400).json({ error: `${error.message}` })
 })
 
 //support parsing of application/x-www-form-urlencoded post data

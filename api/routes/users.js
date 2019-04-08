@@ -79,6 +79,8 @@ router.get('/user/profile/image',authenticateUser,(req,res)=>{
   }).catch(e=>{
     res.status(404).send(`${e}`);
   })
+},(error, req, res, next) => {
+    res.status(400).json({ error: `${error.message}` })
 });
 
 //read user info
@@ -101,6 +103,8 @@ router.get('/user/profile/image',authenticateUser,(req,res)=>{
             if(err) { res.status(500).json(err); return; };            
             res.status(200).json(doc);
         })  
+},(error, req, res, next) => {
+    res.status(400).json({ error: `${error.message}` })
 })  
 
 //find one user
@@ -134,7 +138,9 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
     }).catch((e)=>{
         res.status(400).send(`${e}`);
     })
- })
+ },(error, req, res, next) => {
+    res.status(400).json({ error: `${error.message}` })
+})
 
 
 // delete a user
