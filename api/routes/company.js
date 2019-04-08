@@ -252,6 +252,9 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
 
     req.body.company = ID; // set company id from req.params.
     Company.findById(ID).then(company=>{
+        if(!company){
+            return res.json({Message: "No company in database"});
+        }
 
         if(!req.body.bonus_Shares && !req.body.rate){
             return res.status(400).json({Message: "Both rate and bonus Shares cannot be empty"});
@@ -280,12 +283,12 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
                     users.forEach(function(user){ // loop through company users array.
                         let dividendAmountReceived = user.dividend.amountReceived;
                         dividendAmountReceived += dividendDoc.bonus_Shares;
+                        if(dividendDoc.type !== "cash" ) {// add dividend to total shares allocated to scheme members
+                            company.totalSharesAllocatedToSchemeMembers += user.dividend.amountReceived;
+                        }
                         user.save();
                     });
-
-                    if(company.dividend.type !== "cash" ) {// add dividend to total shares allocated to scheme members
-						company.totalSharesAllocatedToSchemeMembers += user.dividend.amountReceived;
-					}
+                    
 					// save updated company data to store database
 			        company.save();
                     return res.json({Message: "Dividend successfully declared and added to eligible users"})
@@ -304,13 +307,13 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
 
                         let bonus_Shares = (dividendAmountReceived / dividendDoc.rate.per) * dividendDoc.rate.value;
                         dividendAmountReceived += bonus_Shares;
+                        if(dividendDoc.type !== "cash" ) {// add dividend to total shares allocated to scheme members
+                            company.totalSharesAllocatedToSchemeMembers += user.dividend.amountReceived;
+                        }
                         user.save();
 
                     });
 
-                    if(company.dividend.type !== "cash" ) {// add dividend to total shares allocated to scheme members
-						company.totalSharesAllocatedToSchemeMembers += user.dividend.amountReceived;
-					}
 					// save updated company data to store database
 			        company.save();
                     res.json({Message: "Dividend successfully declared and added to eligible users by rate"});
