@@ -496,8 +496,6 @@ router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
   }).catch(e=>{
     res.status(400).json({Message:`{e}`});
   })
-}).catch(e=>{
-    res.status(400).json({Message:`{e}`});
 })
 
 module.exports = router;
