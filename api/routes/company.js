@@ -484,15 +484,20 @@ router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
   }
 
   Batch.find({company:ID}).then(batches=>{
-    const finalData = batches.map(batch=>{
-      const data = {
-        name:batch.name,
-        id:batch._id
-      }
-      return data;
-    })
-    res.send(finalData);
+    // const finalData = batches.map(batch=>{
+    //   const data = {
+    //     name:batch.name,
+    //     id:batch._id
+    //   }
+    //   return data;
+    // })
+
+    res.send(batches);
+  }).catch(e=>{
+    res.status(400).json({Message:`{e}`});
   })
+}).catch(e=>{
+    res.status(400).json({Message:`{e}`});
 })
 
 module.exports = router;
