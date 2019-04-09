@@ -462,6 +462,9 @@ router.patch('/company/batch/:id',authenticate,(req,res)=>{
 	Company.findById(ID).then(company=>{
 		// pass the company id to req.body to link the batch
 		Batch.findOneAndUpdate({company:ID}, {$set:req.body}, {new:true, runValidators: true}).then(batch=>{
+            if(!batch){
+                return res.json({Message: "No batch Found"});
+            }
 
 			let log = new Log({ // create the audit log
                 action: `Created ${batch.name}`,
