@@ -236,14 +236,14 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
         res.status(400).send();
     }
 
-    if(req.body.password.length > 5){
+    if(req.body.password){
         const salt = bcrypt.genSaltSync(12);
         const hash = bcrypt.hashSync(req.body.password, salt);
         req.body.password = hash
     }
 
     // find and update the user by id if it is found, throw error 404 if not
-    User.UpdateOne({_id:id}, {$set:req.body}, { new: true, runValidators: true  }).then((user)=>{
+    User.updateOne({_id:id}, {$set:req.body}, { new: true, runValidators: true  }).then((user)=>{
         // check if user was foun and updated
         if(!user){
             return res.status(404).send();

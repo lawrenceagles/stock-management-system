@@ -251,6 +251,25 @@ userSchema.pre('save', function(next) {
 })
 
 
+// // fix hashing password on update
+// userSchema.pre("findOneAndUpdate", function(next) {
+//     let user = this;
+//     let {password} = user.getUpdate();
+//     if (!password) {
+//         return next();
+//     }
+//     try {
+//         const salt = bcrypt.genSaltSync(12);
+//         const hash = bcrypt.hashSync(password, salt);
+//         let passwordUpdate = user.password;
+//         user.findOneAndUpdate({}, { $set: { passwordUpdate: hash } });
+//         next();
+//     } catch (e) {
+//         return next(e);
+//     }
+// });
+
+
 // handle user login
  userSchema.statics.findByCredentials = function(email, password) {
     let User = this;
