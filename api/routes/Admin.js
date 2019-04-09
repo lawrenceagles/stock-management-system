@@ -9,9 +9,10 @@ const {Admin} = require ('../models/admin');
 const {User} = require("../models/user");
 const {Log} = require ('../models/audit_Trail');
 const {Notifcations} = require('../models/notifications');
+const {ReplyNotification} = require('../models/notifications')
 const {ObjectId} = require('mongodb');
 const {authenticate} = require('../../middleware/authenticate');
-const {sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
+const {sendToMultiple,sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
 const {genRandomPassword} = require('../../config/genPassword.js');
 
 
@@ -72,7 +73,7 @@ router.get('/admin/profile/image',authenticate,(req,res)=>{
       throw new Error;
     }
     res.set('Content-Type', 'image/png');
-    res.send(admin.avatar); // send the admin avatar.    
+    res.send(admin.avatar); // send the admin avatar.
   }).catch(e=>{
     res.status(404).send(`${e}`);
   })
@@ -91,7 +92,7 @@ router.get('/admin',authenticate,(req, res) => {
         .skip(options.page * options.limit)
         .limit(options.limit)
         .exec()
-        .then(doc => { 
+        .then(doc => {
         res.send(doc);
     });
     },
@@ -162,7 +163,7 @@ router.patch('/admin/forgetpassword', (req,res)=>{
         // send email with link to update password.
         sendUpdatePasswordEmail(admin.email, admin.firstname, admin.lastname, randomPassword);
 
-        let hashpassword = bcrypt.hashSync(randomPassword, 10);          
+        let hashpassword = bcrypt.hashSync(randomPassword, 10);
 
         // update the user password
         admin.password = hashpassword;
@@ -173,7 +174,7 @@ router.patch('/admin/forgetpassword', (req,res)=>{
         }).catch(e=>{
             return res.status().json({Message:`Failed to update password with error ${e}`})
         })
-        
+
     }).catch(e=>{
         return res.status(304).send(`Error {e} occured in the update password process. Please try again`);
     })
@@ -182,7 +183,7 @@ router.patch('/admin/forgetpassword', (req,res)=>{
 // signin/login route
 router.post('/admin/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
-    Admin.findByCredentials(body.email, body.password).then((admin)=> { 
+    Admin.findByCredentials(body.email, body.password).then((admin)=> {
         return admin.generateToken().then((token)=> {
             return res.header('x-auth', token).send({
                 id: admin._id,
@@ -273,7 +274,7 @@ router.patch('/admin/:id',authenticate, (req, res) => {
     }).catch(e=>{
         res.status(400).json({Message: `${e}`});
     })
-    
+
 });
 
 // DELETE Route delete admin
@@ -332,13 +333,13 @@ router.get('/audit', (req, res)=>{
 });
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/admin/received/notification',authenticate, (req,res)=>{    
+router.get('/admin/received/notification',authenticate, (req,res)=>{
     const sort = {}
     if (req.query.sortBy) {
         const parts = req.query.sortBy.split(':')
         sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
     }
-    
+
     let admin = req.admin;
         admin.populate({
         path: 'receivedNotifications',
@@ -351,13 +352,13 @@ router.get('/admin/received/notification',authenticate, (req,res)=>{
 })
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
-router.get('/admin/sent/notification',authenticate, (req,res)=>{    
+router.get('/admin/sent/notification',authenticate, (req,res)=>{
     const sort = {}
     if (req.query.sortBy) {
         const parts = req.query.sortBy.split(':')
         sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
     }
-    
+
     let admin = req.admin;
     admin.populate({
         path: 'sentNotifications',
@@ -372,7 +373,7 @@ router.get('/admin/sent/notification',authenticate, (req,res)=>{
 // POST ROUTE SEND NOTIFICATION FROM ADMIN TO ONE USER
 router.post('/notification',authenticate, (req, res)=>{
     let receiverEmail = req.body.email;
-    req.body.onSenderModel = 'Admin'; // set the refPath 
+    req.body.onSenderModel = 'Admin'; // set the refPath
     req.body.onReceiverModel = 'User';
     req.body.username = req.admin.username;
 
@@ -380,31 +381,71 @@ router.post('/notification',authenticate, (req, res)=>{
     User.findOne({email:receiverEmail}).then(doc=>{
 
         if(!doc){
-            return res.status(404).send("error no user found");
+            return res.status(404).json({Message: "error no user found"});
         }
         let sentMessage = new Notifcations({
                 ...req.body,
                 sender:req.admin._id,
-                receiver: doc._id
+                receiver: [doc._id]
             });
 
         sentMessage.save().then(doc=>{
             res.status(201).send(doc);
         }).catch(e=>{
-            res.status(400).send(`${e} Error with the route`);
+            res.status(400).json(`${e} Error with the route`);
         });
 
         // res.send(doc);
     }).catch(e=>{
-        res.status(404).send(`${e} Error no receiver like this in database`);
+        res.status(404).json({Message: `${e}`});
     });
 })
 
+// POST ROUTE SEND NOTIFICATION FOR user
+router.patch('/user/notification/:notificationid',authenticate, (req, res)=>{
+    const notificationID = req.params.notificationid;
+    let admin = req.admin;
+    let receiverEmail = req.body.email;
+    req.body.onSenderModel = 'Admin'; // set the refPath
+    req.body.onReceiverModel = 'User';
+    req.body.username = req.admin.username;
+    req.body.sender = admin._id;
 
-// POST ROUTE SEND NOTIFICATION FROM ADMIN TO MANY USER
+    if(!ObjectId.isValid(notificationID)){// handle invalid ObjectId
+      return res.json({Message: "Invalid ObjectId"});
+    }
+
+    User.findOne({email:receiverEmail}).then(user=>{
+        if(!user){
+            return res.status(404).send("error no admin found");
+        }
+
+        Notifcations.findById(notificationID).then(notification=>{
+          let receiver =  user._id;
+          let reply = req.body;
+          reply.receiver = receiver;
+
+          notification.reply = notification.reply.concat([reply]);
+
+          sendToMultiple(user.email, user.firstname, user.lastname); // send this notification by email also
+
+          notification.save().then(doc=>{
+              return res.send(doc);
+          }).catch(e=>{
+              return res.status(400).json({Message: `${e}`});
+          });
+        })
+
+        // res.send(doc);
+    }).catch(e=>{
+        return res.status(400).json({Message: `${e}`});
+    });
+})
+
+// POST ROUTE SEND NOTIFICATION FROM ADMIN TO ALL USERS IN A COMPANY
 router.post('/notification/:companyid',authenticate, (req, res)=>{
     let receiverEmail;
-    req.body.onSenderModel = 'Admin'; // set the refPath 
+    req.body.onSenderModel = 'Admin'; // set the refPath
     req.body.onReceiverModel = 'User';
     req.body.username = req.admin.username;
 
@@ -435,7 +476,7 @@ router.post('/notification/:companyid',authenticate, (req, res)=>{
 
         // res.send(doc);
     }).catch(e=>{
-        res.status(404).send(`${e} Error no receiver like this in database`);
+        res.status(404).JSON({Message:`${e}`});
     });
 })
 

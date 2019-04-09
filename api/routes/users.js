@@ -7,7 +7,7 @@ const _ = require('lodash');
 const path = require("path");
 const bcrypt = require('bcryptjs');
 
-const {sendUserWelcomePasswordEmail,sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
+const {sendToMultiple,sendUserWelcomePasswordEmail,sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
 const {genRandomPassword} = require('../../config/genPassword.js');
 const {authenticateUser} = require('../../middleware/authenticateUser');
 const {authenticate} = require('../../middleware/authenticate');
@@ -74,7 +74,7 @@ router.get('/user/profile/image',authenticateUser,(req,res)=>{
       throw new Error;
     }
     res.set('Content-Type', 'image/png');
-    res.send(user.avatar); // send the user avatar.    
+    res.send(user.avatar); // send the user avatar.
   }).catch(e=>{
     res.status(404).send(`${e}`);
   })
@@ -83,7 +83,7 @@ router.get('/user/profile/image',authenticateUser,(req,res)=>{
 });
 
 //read user info
- router.get('/users',authenticate,(req,res,next)=>{ 
+ router.get('/users',authenticate,(req,res,next)=>{
     const sort = {}
     let pageOptions = {
         page: req.query.page || 0,
@@ -93,18 +93,18 @@ router.get('/user/profile/image',authenticateUser,(req,res)=>{
         const parts = req.query.sortBy.split(':')
         sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
     }
-    
+
     User.find()
         .skip(pageOptions.page*pageOptions.limit)
         .limit(pageOptions.limit)
         .sort(sort)
         .exec( (err, doc)=>{
-            if(err) { res.status(500).json(err); return; };            
+            if(err) { res.status(500).json(err); return; };
             res.status(200).json(doc);
-        })  
+        })
 },(error, req, res, next) => {
     res.status(400).json({ error: `${error.message}` })
-})  
+})
 
 //find one user
 router.get("/user/:id",authenticateUser,(req,res,next)=>{
@@ -121,7 +121,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
           res.status(404).send("User not found");
         }
 
-        let companyID = user.company; 
+        let companyID = user.company;
         Company.findById(companyID).then(company=>{
             res.send({
                 user,
@@ -129,7 +129,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                 companyCanBuy: company.canBuyShares,
                 comapanyCanSell: company.canSellShares,
                 companyCanCollacterize: company.canCollateriseShares,
-                vestingSchedule: company.vestingSchedule 
+                vestingSchedule: company.vestingSchedule
             });
         }).catch(e=>{
           res.status(400).send(`${e}`);
@@ -178,7 +178,7 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
             }
 
             // decrease company total scheme members by 1 and delete user id in each batch
-            company.totalSchemeMembers -= 1; 
+            company.totalSchemeMembers -= 1;
 
             //  find all the batch in user company
             Batch.find({company:user.company}).then(batches=>{
@@ -225,7 +225,7 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
         return res.status(400).json({Message: `${e}`});
        })
    })
-   
+
 //Update user information
 router.patch('/user/:id',authenticateUser, (req, res) => {
     // get the user id
@@ -253,7 +253,7 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
     }).catch((e)=>{
         res.status(400).json({Message:`${e}`});
     });
-    
+
 });
 
 // find all the company members by id.
@@ -340,7 +340,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
             createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
             action: `created a new user`,
             user: `${user.firstName} ${user.lastName}`,
-            company: `${user.Company_Name}`             
+            company: `${user.Company_Name}`
         });
 
         log.save();
@@ -422,7 +422,7 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
 
            if( batch.members.indexOf(user._id) >= 0 ){
               return res.status(400).json({Message: "user already added to batch"});
-           } 
+           }
 
             batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
 
@@ -505,7 +505,7 @@ router.patch('/user/forgetpassword', (req,res)=>{
         // send email with link to update password.
         sendUpdatePasswordEmail(user.email, user.firstname, user.lastname, randomPassword);
 
-        let hashpassword = bcrypt.hashSync(randomPassword, 12);          
+        let hashpassword = bcrypt.hashSync(randomPassword, 12);
 
         // update the user password
         user.password = hashpassword;
@@ -516,7 +516,7 @@ router.patch('/user/forgetpassword', (req,res)=>{
         }).catch(e=>{
             return res.status().send(`${e}`)
         })
-        
+
     }).catch(e=>{
         return res.status(400).send(`${e}`);
     })
@@ -525,7 +525,7 @@ router.patch('/user/forgetpassword', (req,res)=>{
 // signin/login route
 router.post('/user/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
-    User.findByCredentials(body.email, body.password).then((user)=> { 
+    User.findByCredentials(body.email, body.password).then((user)=> {
         return user.generateToken().then((token)=> {
             return res.header('x-auth', token).send({
                 _id: user._id,
@@ -545,6 +545,9 @@ router.post('/user/login', (req, res) => {
 router.delete('/user/destroy/token', (req, res)=>{
     let email = req.body.email;
     let token = req.header('x-auth'); // grap token from header
+    if(!token){// handle no token sent
+      return res.json({Message: "Error no token was sent in the header"});
+    }
     User.findOne({email}).then(user=>{
     if(!user){
         return res.status(404).json({Message:"Incorrect email"})
@@ -561,7 +564,7 @@ router.delete('/user/destroy/token', (req, res)=>{
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
 router.get('/user/sent/notification',authenticateUser, (req,res)=>{
-    
+
     const sort = {}
     if (req.query.sortBy) {
         const parts = req.query.sortBy.split(':')
@@ -582,7 +585,7 @@ router.get('/user/sent/notification',authenticateUser, (req,res)=>{
 
 // GET ROUTE VIEW ALL NOTIFICATIONS
 router.get('/user/received/notification',authenticateUser, (req,res)=>{
-    
+
     const sort = {}
     if (req.query.sortBy) {
         const parts = req.query.sortBy.split(':')
@@ -606,7 +609,7 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
     let receivers;
     let user = req.user;
     let companyID = user.company;
-    req.body.onSenderModel = 'User'; // set the refPath 
+    req.body.onSenderModel = 'User'; // set the refPath
     req.body.onReceiverModel = 'Admin';
     req.body.username = req.user.username;
 
@@ -636,6 +639,49 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
         // res.send(doc);
     }).catch(e=>{
         res.status(404).send(`${e}`);
+    });
+})
+
+// PATCH ROUTE SEND NOTIFICATION FOR user
+router.patch('/user/notification/:notificationid',authenticateUser, (req, res)=>{
+    let id = req.user._id;
+    let receivers;
+    let user = req.user;
+    let companyID = user.company;
+    const notificationID = req.params.notificationid;
+    req.body.onSenderModel = 'User'; // set the refPath
+    req.body.onReceiverModel = 'Admin';
+    req.body.username = req.user.username;
+    req.body.sender = req.user._id;
+
+    if(!ObjectId.isValid(notificationID)){// handle invalid ObjectId
+      return res.json({Message: "Invalid ObjectId"});
+    }
+
+    Admin.find({}).then(adminArray=>{
+        if(!adminArray){
+            return res.status(404).send("error no admin found");
+        }
+
+        Notifcations.findById(notificationID).then(notification=>{
+          let receivers =  _.map(adminArray, 'id');
+          let reply = req.body;
+          reply.receiver = receivers
+
+          notification.reply = notification.reply.concat([reply]);
+
+          // sendToMultiple(doc.email, doc.firstname, doc.lastname); // send this notification by email also
+
+          notification.save().then(doc=>{
+              return res.send(doc);
+          }).catch(e=>{
+              return res.status(400).json({Message: `${e}`});
+          });
+        })
+
+        // res.send(doc);
+    }).catch(e=>{
+        return res.status(400).json({Message: `${e}`});
     });
 })
 
