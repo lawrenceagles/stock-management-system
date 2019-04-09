@@ -142,17 +142,6 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
     res.status(400).json({ error: `${error.message}` })
 })
 
-//logout
-router.delete('/user/logout',authenticateUser, (req, res)=>{
-    req.user.removeToken(req.token).then(()=>{
-
-      res.status(200).send("Logout successfull");
-    }, ()=>{
-      res.status(400).json({Message:`Error Logout not successfull ${e}`});
-    })
-
-  });
-
 
 // delete a user
 router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
@@ -650,5 +639,16 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
         res.status(404).send(`${e}`);
     });
 })
+
+//logout
+router.delete('/user/remove/user/token',authenticateUser, (req, res)=>{
+    req.user.removeToken(req.token).then(()=>{
+
+      res.status(200).send("Logout successfull");
+    }, ()=>{
+      res.status(400).json({Message:`Error Logout not successfull ${e}`});
+    })
+
+  });
 
 module.exports = router;
