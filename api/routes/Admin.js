@@ -252,7 +252,7 @@ router.patch('/admin/:id',authenticate, (req, res) => {
     // get the admin id
     let id = req.params.id;
     // pickout only what you want to grant the admin permission to update
-    if(req.body.password.length > 5){
+    if(req.body.password){
         const salt = bcrypt.genSaltSync(12);
         const hash = bcrypt.hashSync(req.body.password, salt);
         req.body.password = hash

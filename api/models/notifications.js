@@ -39,7 +39,46 @@ const notificationSchema = new Schema({
   	createdAt: {
   		type: Date,
   		default: Date.now
-  	}
+  	},
+  	reply:[{
+		message: {
+			type: String,
+			required: true
+		},
+		companyName:{
+			type:String,
+			trim:true,
+			default: "Vetiva"
+		},
+		username:{
+			type:String,
+			trim:true
+		},
+		sender:{
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+			refpath: 'onModel'
+		},
+		receiver: [{
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+			refpath: 'onModel'
+		}],
+		onSenderModel: {
+		    type: String,
+		    required: true,
+		    enum: ['Admin', 'User']
+	  	},
+	  	onReceiverModel: {
+		    type: String,
+		    required: true,
+		    enum: ['Admin', 'User']
+	  	},
+	  	createdAt: {
+	  		type: Date,
+	  		default: Date.now
+	  	}
+	}]
 });
 
 const Notifcations = mongoose.model('Notifcations', notificationSchema);
