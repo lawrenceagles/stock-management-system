@@ -455,7 +455,7 @@ router.patch('/company/batch/:id',authenticate,(req,res)=>{
 	const ID = req.params.id;
 
 	// validate the company id
-	if(!ObjectId.isValid(id)){
+	if(!ObjectId.isValid(ID)){
 	    return res.status(400).json({Message:"Error invalid ObjectId"});
 	}
 
@@ -464,7 +464,7 @@ router.patch('/company/batch/:id',authenticate,(req,res)=>{
 		Batch.findOneAndUpdate({company:ID}, {$set:req.body}, {new:true, runValidators: true}).then(batch=>{
 
 			let log = new Log({ // create the audit log
-                action: `Created ${newBatch.name}`,
+                action: `Created ${batch.name}`,
                 createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
                 user: `${company.name}`
             });
