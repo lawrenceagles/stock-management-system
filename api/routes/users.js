@@ -365,6 +365,38 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
     });
 })
 
+// get all the batch a user belongs to
+router.get("/user/batch/:id",authenticate, (req,res)=>{
+  let id = req.params.id; // get user id
+  // validate the company id
+  if(!ObjectId.isValid(id)){
+      return res.status(400).json({Message:"Error invalid ObjectId"});
+  }
+
+  // find user
+  User.findById(id).then(user=>{ // find the user by id
+    if(!user){ // handle user not found
+      return res.status(404).json({Message: "Error user not found."});
+    }
+
+    const companyID = user.company; // grab the user company id
+    let userBatches = [];
+    Batch.find({comany:companyID}).then(batches=>{ // find all the company batches
+      let batchMembers = batches.members;
+      userBatches = batches.filter(batch=>{ // filter through the company batches and return the onces that conatains the user id
+        return batchMembers.includes(id) == true;
+      });
+    }).catch(e=>{
+      res.status(400).json({Message:`${e}`});
+    });
+
+    res.send(userBatches); // return the array of all the batch a user belongs to
+
+  }).catch(e=>{
+    res.status(400).json({Message:`${e}`});
+  });
+});
+
 // Add user to batch
 router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
   const ID = req.params.id;
@@ -414,38 +446,6 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
     res.status(400).json({Message:`Error here ${e}`});
   });
 })
-
-// get all the batch a user belongs to
-router.get("/user/batch/:id",authenticate, (req,res)=>{
-  let id = req.params.id; // get user id
-  // validate the company id
-  if(!ObjectId.isValid(id)){
-      return res.status(400).json({Message:"Error invalid ObjectId"});
-  }
-
-  // find user
-  User.findById(id).then(user=>{ // find the user by id
-    if(!user){ // handle user not found
-      return res.status(404).json({Message: "Error user not found."});
-    }
-
-    const companyID = user.company; // grab the user company id
-    let userBatches = [];
-    Batch.find({comany:companyID}).then(batches=>{ // find all the company batches
-      let batchMembers = batches.members;
-      userBatches = batches.filter(batch=>{ // filter through the company batches and return the onces that conatains the user id
-        return batchMembers.includes(id) == true;
-      });
-    }).catch(e=>{
-      res.status(400).json({Message:`${e}`});
-    });
-
-    res.send(userBatches); // return the array of all the batch a user belongs to
-
-  }).catch(e=>{
-    res.status(400).json({Message:`${e}`});
-  });
-});
 
 
 // get all the dividends a user belongs to

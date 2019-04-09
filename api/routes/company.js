@@ -451,22 +451,24 @@ router.post('/company/batch/:id',authenticate,(req,res)=>{
 })
 
 // edit a batch
-router.patch('/company/batch/:id',authenticate,(req,res)=>{
-	const ID = req.params.id;
+router.patch('/company/batch/:batchid',authenticate,(req,res)=>{
+	const ID = req.params.batchid;
 
 	// validate the company id
 	if(!ObjectId.isValid(ID)){
 	    return res.status(400).json({Message:"Error invalid ObjectId"});
 	}
 
-	Company.findById(ID).then(company=>{
-		// pass the company id to req.body to link the batch
-		Batch.findOneAndUpdate({company:ID}, {$set:req.body}, {new:true, runValidators: true}).then(batch=>{
-            if(!batch){
-                return res.json({Message: "No batch Found"});
-            }
+    // pass the company id to req.body to link the batch
+    Batch.findOneAndUpdate({_id:ID}, {$set:req.body}, {new:true, runValidators: true}).then(batch=>{
+        if(!batch){
+            return res.json({Message: "No batch Found"});
+        }
 
-			let log = new Log({ // create the audit log
+        let companyID = batch.company;
+
+        Company.findOne({_id:companyID}).then(company=>{
+            let log = new Log({ // create the audit log
                 action: `Created ${batch.name}`,
                 createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
                 user: `${company.name}`
@@ -474,11 +476,8 @@ router.patch('/company/batch/:id',authenticate,(req,res)=>{
 
             log.save(); // save the audit log
             res.send("Batch Updated Successfully");
-		})
-
-	}).catch(e=>{
-		res.status(400).json({Message: `${e}`});
-	})
+        })
+    })
 })
 
 // Route to show all the batch in a company
