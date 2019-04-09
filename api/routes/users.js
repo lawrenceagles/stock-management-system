@@ -595,8 +595,9 @@ router.delete('/user/logout',authenticateUser, (req, res)=>{
 
   });
 
+
 // signout/logout route
-router.delete('/user/destroyToken', (req, res)=>{
+router.delete('/user/destroy/token', (req, res)=>{
     let email = req.body.email;
     let token = req.header('x-auth'); // grap token from header
     User.findOne({email}).then(user=>{
