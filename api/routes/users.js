@@ -3,7 +3,6 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const multer =  require('multer');
 const sharp = require('sharp');
-const moment = require('moment');
 const _ = require('lodash');
 const path = require("path");
 const bcrypt = require('bcryptjs');
@@ -329,8 +328,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 
           // Auto generate random password for admin
            req.body.password = genRandomPassword(10);
-           console.log(req.body.password);
-           
+
         // create the user
         let user = new User(req.body);
 
@@ -350,6 +348,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
         user.save().then(user=>{ // Return the user doc and update user-company data relationship
           // increase company total scheme members by 1
           company.totalSchemeMembers += 1;
+          company.save();
 
           let body = _.pick(user, ['firstname', 'lastname', 'email','Company_Schemerules','company','status','tokens']);
           return res.status(201).send(body);
