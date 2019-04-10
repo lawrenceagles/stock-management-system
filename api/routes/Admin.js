@@ -43,13 +43,13 @@ router.post('/upload/profile/image',authenticate,upload.single('avatar'),(req,re
       req.admin.save().then(image=>{ // save admin avatar
         res.json({Message:"Image Successfully Uploaded"});
       }).catch(e=>{
-        res.status(400).json({Message:`${e}`});
+        return res.status(400).json({Message:`${e}`});
       });
   }).catch(e=>{
-    res.status(400).json({Message:`${e}`});
+    return res.status(400).json({Message:`${e}`});
   })
 },(error, req, res, next) => {
-    res.status(400).json({ error: `${error.message}` })
+    return res.status(400).json({ error: `${error.message}` });
 });
 
 
@@ -57,12 +57,12 @@ router.post('/upload/profile/image',authenticate,upload.single('avatar'),(req,re
 router.delete('/upload/profile/image',authenticate,(req,res)=>{
   req.admin.avatar = undefined;
     req.admin.save().then(doc=>{
-      res.json({Message:"Image Successfully Deleted"});
+      return res.json({Message:"Image Successfully Deleted"});
     }).catch(e=>{
-      res.status(400).json({Message:`${e}`});
+      return res.status(400).json({Message:`${e}`});
     })
 },(error, req, res, next) => {
-    res.status(400).json({ error: `${error.message}` });
+    return res.status(400).json({ error: `${error.message}` });
 });
 
 
@@ -73,12 +73,12 @@ router.get('/admin/profile/image',authenticate,(req,res)=>{
       throw new Error;
     }
     res.set('Content-Type', 'image/png');
-    res.send(admin.avatar); // send the admin avatar.
+    return res.send(admin.avatar); // send the admin avatar.
   }).catch(e=>{
-    res.status(404).json({Message:`${e}`});
+    return res.status(404).json({Message:`${e}`});
   })
 },(error, req, res, next) => {
-    res.status(400).json({ error: `${error.message}` })
+    return res.status(400).json({ error: `${error.message}` })
 });
 
 // GET route get all admins
@@ -93,12 +93,12 @@ router.get('/admin',authenticate,(req, res) => {
         .limit(options.limit)
         .exec()
         .then(doc => {
-        res.send(doc);
+        return res.send(doc);
     });
     },
 
     (e) => {
-      res.status(404).json({Message:`{e}`});
+      return res.status(404).json({Message:`{e}`});
     }
 );
 
@@ -111,11 +111,11 @@ router.get('/admin/role/:role',authenticate,(req, res)=>{
             return res.status(404).json({Message: `No ${role} admin found`});
         }
 
-        res.send(docs);
+        return res.send(docs);
 
     })
     .catch((e)=>{
-        res.status(400).json({Message:`${e}`});
+        return res.status(400).json({Message:`${e}`});
     })
 })
 
@@ -146,7 +146,7 @@ router.post('/admin',authenticate,(req, res) => {
     admin.save().then(doc=>{
         // send welcome email containing password
         sendWelcomePasswordEmail(body.email,body.firstname,body.lastname,body.password);
-        res.status(201).send(doc);
+        return res.status(201).send(doc);
     });
 });
 
@@ -170,7 +170,7 @@ router.patch('/admin/forgetpassword', (req,res)=>{
 
         // save admin with new password
         admin.save().then(doc=>{
-            res.status(201).json(`New password generated`);
+            return res.status(201).json(`New password generated`);
         }).catch(e=>{
             return res.status().json({Message:`${e}`})
         })
@@ -193,7 +193,7 @@ router.post('/admin/login', (req, res) => {
             });
         });
     }).catch((e)=> {
-        res.status(400).json({Message: `${e}`});
+        return res.status(400).json({Message: `${e}`});
     })
 });
 
@@ -201,9 +201,9 @@ router.post('/admin/login', (req, res) => {
 router.delete('/admin/logout',authenticate, (req, res)=>{
   req.admin.removeToken(req.token).then(()=>{
     deleteAccountEmail(req.admin.email, req.admin.firstname, req.admin.lastname);
-    res.status(200).json({Message:"You have successfully logged out"});
+    return res.status(200).json({Message:"You have successfully logged out"});
   }, ()=>{
-    res.status(400).json({Message:"Error logging out"});
+    return res.status(400).json({Message:"Error logging out"});
   })
 });
 
@@ -219,9 +219,9 @@ router.delete('/admin/destroytoken', (req, res)=>{
     admin.removeToken(token).then(()=>{ // delete token from admin
         // send admin delete account email
         deleteAccountEmail(admin.email, admin.firstname, admin.lastname);
-        res.status(200).json({Message:"You have successfully logged out"});
+        return res.status(200).json({Message:"You have successfully logged out"});
       }, ()=>{
-        res.status(400).json({Message:"Error logging out"});
+        return res.status(400).json({Message:"Error logging out"});
     })
     })
 });
@@ -234,16 +234,19 @@ router.get('/admin/:id',authenticate, (req, res) => {
 
     // checks if the object is valid
     if(!ObjectId.isValid(id)) {
-        res.status(400).json({Message:"Invalid ObjectId"});
+        return return res.status(400).json({Message:"Invalid ObjectId"});
     }
 
     // find the admin by id.
     Admin.findOne({_id:id}).then((doc)=> {
 
         // if admin is not found return error 404 otherwise send the admin.
-        doc ? res.send(doc) : res.status(404).json({Message:"No admin found"});
+        if(!doc){
+          return res.status(404).json({Message:"No admin found"});
+        }
+        return res.send(doc);
     }).catch((e)=>{
-        res.status(400).json({Message: `${e}`});
+        return res.status(400).json({Message: `${e}`});
     })
 
 });
@@ -261,18 +264,18 @@ router.patch('/admin/:id',authenticate, (req, res) => {
     let body = _.pick(req.body, ["firstname", "lastname", "username", "password", "email", "phone", "role"]);
     // validate the id
     if(!ObjectId.isValid(id)){
-        res.status(400).json({Message: "Invalid ObjectId"});
+        return res.status(400).json({Message: "Invalid ObjectId"});
     }
 
     // find and update the admin by id if it is found, throw error 404 if not
    Admin.updateOne({_id:id}, {$set:body}, {new:true, runValidators:true}).then(admin=>{
         // check if admin was foun and updated
         if(!admin){
-            res.status(404).json({Message: "Admin document not found."});
+            return res.status(404).json({Message: "Admin document not found."});
         }
         return res.status(200).json({Message: "User password updated Successfully"});
     }).catch(e=>{
-        res.status(400).json({Message: `${e}`});
+        return res.status(400).json({Message: `${e}`});
     })
 
 });
@@ -304,7 +307,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 
         return res.json({Message: "Admin succefully deleted"});
     }).catch((e)=>{
-        res.status(400).send();
+        return res.status(400).send();
     });
 });
 
@@ -328,7 +331,7 @@ router.get('/audit', (req, res)=>{
     .sort(sort)
     .exec()
     .then((doc)=>{
-        res.send(doc);
+        return res.send(doc);
     });
 });
 
@@ -347,7 +350,7 @@ router.get('/admin/received/notification',authenticate, (req,res)=>{
     })
     .execPopulate()
     .then(doc=>{
-        res.send(admin.receivedNotifications);
+        return res.send(admin.receivedNotifications);
     })
 })
 
@@ -366,7 +369,7 @@ router.get('/admin/sent/notification',authenticate, (req,res)=>{
     })
     .execPopulate()
     .then(doc=>{
-        res.send(admin.sentNotifications);
+        return res.send(admin.sentNotifications);
     })
 })
 
@@ -389,14 +392,14 @@ router.post('/notification',authenticate, (req, res)=>{
             });
 
         sentMessage.save().then(doc=>{
-            res.status(200).send(doc);
+            return res.status(200).send(doc);
         }).catch(e=>{// handle error caught
-            res.status(400).json(`${e} Error with the route`);
+            return res.status(400).json(`${e} Error with the route`);
         });
 
         // res.send(doc);
     }).catch(e=>{
-        res.status(404).json({Message: `${e}`});
+        return res.status(404).json({Message: `${e}`});
     });
 })
 
@@ -466,12 +469,12 @@ router.post('/notification/:companyid',authenticate, (req, res)=>{
         })
 
         sentMessage.save().then(doc=>{
-            res.status(200).send(doc);
+            return res.status(200).send(doc);
         }).catch(e=>{
-            res.status(400).json({Message: `${e}`});
+            return res.status(400).json({Message: `${e}`});
         });
     }).catch(e=>{ // catch any errors
-        res.status(404).JSON({Message:`${e}`});
+        return res.status(404).JSON({Message:`${e}`});
     });
 })
 

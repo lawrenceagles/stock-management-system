@@ -138,7 +138,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
         res.status(400).json({Message:`${e}`});
     })
  },(error, req, res, next) => {
-    res.status(400).json({ error: `${error.message}` })
+    return res.status(400).json({ error: `${error.message}` })
 })
 
 
@@ -148,7 +148,7 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
 
       // Validate the user id
       if(!ObjectId.isValid(id)){
-          res.status(400).json({Message:"invalid ObjectId"});
+          return res.status(400).json({Message:"invalid ObjectId"});
       }
 
       User.findOneAndDelete({_id:id})
@@ -215,7 +215,7 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
             company.save(); // save to store data
 
           }).catch(e=>{
-            res.status(400).json({message:`${e}`})
+            return res.status(400).json({message:`${e}`})
           })
 
           log.save(); // save audit log
@@ -232,7 +232,7 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
     let id = req.params.id;
     // validate the id
     if(!ObjectId.isValid(id)){
-        res.status(400).json({Message:"Invalid ObjectId"});
+        return res.status(400).json({Message:"Invalid ObjectId"});
     }
 
     if(req.body.password){
@@ -251,7 +251,7 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
         return res.json({Message:"user updated Successfully"});
 
     }).catch((e)=>{
-        res.status(400).json({Message:`${e}`});
+        return res.status(400).json({Message:`${e}`});
     });
 
 });
@@ -273,7 +273,7 @@ router.get("/:companyid/users",authenticate,(req, res, next) => {
       return res.send(users);
 
     }).catch(e=>{
-      res.status(400).json({Message:`${e}`});
+      return res.status(400).json({Message:`${e}`});
     })
 
 })
@@ -296,8 +296,8 @@ router.get("/:companyid/companystaff",authenticate,(req, res, next) => {
       return res.send(user);
 
     }).catch(e=>{
-      res.status(400).json({Message:`${e}`});
-    })
+      return res.status(400).json({Message:`${e}`});
+    });
 })
 
 
@@ -354,12 +354,12 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           return res.status(201).send(body);
 
         }).catch(e=>{
-          res.status(400).json({Message:`${e}`});
+          return res.status(400).json({Message:`${e}`});
         });
 
       }).catch(e=>{
-          res.status(400).json({Message:`${e}`});
-      })
+          return res.status(400).json({Message:`${e}`});
+      });
 
     });
 })
@@ -386,13 +386,13 @@ router.get("/user/batch/:id",authenticate, (req,res)=>{
         return batchMembers.includes(id) == true;
       });
     }).catch(e=>{
-      res.status(400).json({Message:`${e}`});
+      return res.status(400).json({Message:`${e}`});
     });
 
-    res.send(userBatches); // return the array of all the batch a user belongs to
+    return res.send(userBatches); // return the array of all the batch a user belongs to
 
   }).catch(e=>{
-    res.status(400).json({Message:`${e}`});
+    return res.status(400).json({Message:`${e}`});
   });
 });
 
@@ -435,14 +435,18 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
             }
             batch.save();
             company.save().then(doc=>{
-              res.json({Message: "User added to batch successfully"})
+              return res.json({Message: "User added to batch successfully"})
             })
 
-          })
+          }).catch(e=>{
+              return res.status(400).json({Message:`${e}`});
+          });
+      }).catch(e=>{
+          return res.status(400).json({Message:`${e}`});
       });
     });
   }).catch(e=>{
-    res.status(400).json({Message:`${e}`});
+      return res.status(400).json({Message:`${e}`});
   });
 })
 
@@ -494,11 +498,6 @@ router.patch('/user/forgetpassword', (req,res)=>{
             return res.status(404).json({Message:"Error this user does not exists in our database"});
         }
 
-        // handle user is logged in
-        if(user.tokens.length > 0){
-            return res.status(400).json({Message:"Error you have to be logged out to make this request"});
-        }
-
         // generate a new secure random password for the client
         randomPassword = genRandomPassword(10);
 
@@ -512,9 +511,9 @@ router.patch('/user/forgetpassword', (req,res)=>{
 
         // save user with new password
         user.save().then(doc=>{
-            res.status(200).json({Message:"new password successfully regenerated"});
+            return res.status(200).json({Message:"new password successfully regenerated"});
         }).catch(e=>{
-            return res.status().json({Message:`${e}`});
+            return res.status(400).json({Message:`${e}`});
         })
 
     }).catch(e=>{
@@ -537,7 +536,7 @@ router.post('/user/login', (req, res) => {
             });
         });
     }).catch((e)=> {
-        res.status(400).json({Message: `${e}`});
+        return res.status(400).json({Message: `${e}`});
     })
 });
 
@@ -555,9 +554,9 @@ router.delete('/user/destroy/token', (req, res)=>{
     user.removeToken(token).then(()=>{ // delete token from user
         // send user delete account email
         deleteAccountEmail(user.email, user.firstName, user.lastName);
-        res.status(200)..json({Message:"You have successfully logged out"});
+        return res.status(200)..json({Message:"You have successfully logged out"});
       }, ()=>{
-        res.status(400).json({Message:"Error logging out"});
+        return res.status(400).json({Message:"Error logging out"});
     })
     })
 });
@@ -578,7 +577,7 @@ router.get('/user/sent/notification',authenticateUser, (req,res)=>{
     })
     .execPopulate()
     .then(doc=>{
-        res.send(user.sentNotifications);
+        return res.send(user.sentNotifications);
     })
 });
 
@@ -599,7 +598,7 @@ router.get('/user/received/notification',authenticateUser, (req,res)=>{
     })
     .execPopulate()
     .then(doc=>{
-        res.send(user.receivedNotifications);
+        return res.send(user.receivedNotifications);
     })
 });
 
@@ -630,15 +629,15 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
           sendToOne(doc.email, doc.firstname, doc.lastname); // send this notification by email also
 
           sentMessage.save().then(doc=>{
-              res.status(201).send(doc);
+              return res.send(doc);
           }).catch(e=>{
-              res.status(400).json({Message:`${e}`});
+              return res.status(400).json({Message:`${e}`});
           });
         })
 
         // res.send(doc);
     }).catch(e=>{
-        res.status(404).json({Message:`${e}`});
+        return res.status(404).json({Message:`${e}`});
     });
 })
 
@@ -689,9 +688,9 @@ router.patch('/user/notification/:notificationid',authenticateUser, (req, res)=>
 router.delete('/user/remove/user/token',authenticateUser, (req, res)=>{
     req.user.removeToken(req.token).then(()=>{
 
-      res.status(200).send("Logout successfull");
+      return res.status(200).json({message:"Logout successfull"return });
     }, ()=>{
-      res.status(400).json({Message:`${e}`});
+      return res.status(400).json({Message:`${e}`});
     })
 
   });
