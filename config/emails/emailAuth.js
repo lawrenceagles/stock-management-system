@@ -4,9 +4,9 @@ const sgMail = require('@sendgrid/mail');
 
 sgMail.setApiKey("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");
 
-const deleteAccountEmail = (Email, firstname, lastname)=>{
+const deleteAccountEmail = (email, firstname, lastname)=>{
 	const msg = {
-	  to: Email,
+	  to: email,
 	  from: 'vetiva@gmail.com',
 	  subject: "ACCOUNT CANCELLATION",
 	  text: `Hello ${lastname} ${firstname} your account has been successfully deleted`
@@ -15,32 +15,32 @@ const deleteAccountEmail = (Email, firstname, lastname)=>{
 	sgMail.send(msg);
 }
 
-const sendToOne = (Email, firstname, lastname)=>{
+const sendToOne = (email, firstname, lastname, body)=>{
 	let msg = {
-	  to: Email,
+	  to: email,
 	  from: 'vetiva@gmail.com',
-	  subject: "DYNAMIC SUBJECT",
-	  text: 'DYNAMICALLY GENERATED CONTENT'
+	  subject: "NEW NOTIFICATION",
+	  text: `${body}`
 	};
 
 	sgMail.send(msg);
 }
 
-const sendToMultiple = (Email, firstname, lastname)=>{
+const sendToMultiple = (email, body)=>{
 	const msg = {
-	  to: [Email],
-	  from: 'sender@example.org',
-	  subject: 'Hello world',
-	  text: 'Hello plain world!',
-	  html: '<p>Hello HTML world!</p>',
+	  to: [email],
+	  from: 'vetiva@gmail.com',
+	  subject: 'NEW NOTIFICATION',
+	  text: `${body}`,
+	  html: `<p>${body}</p>`,
 	};
-	sgMail.sendMultiple(msg);
+	sgMail.send(msg);
 }
 
 
-const sendUpdatePasswordEmail = (Email, firstname, lastname, password)=>{
+const sendUpdatePasswordEmail = (email, firstname, lastname, password)=>{
 	const msg = {
-	  to: Email,
+	  to: email,
 	  from: 'vetiva@gmail.com',
 	  subject: `PASSWORD UPDATE REQUEST`,
 	  text: `${lastname} ${firstname} has made a request to retrive passord, please login with the passowrd: ${password} and update your password or kindly ignore this mail if it is not you.`

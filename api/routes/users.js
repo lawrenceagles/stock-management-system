@@ -404,7 +404,7 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
       return res.status(400).json({Message:"Error invalid ObjectId"});
   }
 
-  User.findById(ID).then(user=>{ // get user to add to batch by id;
+  User.findById(ID).then(user=>{ // get user to add to batch by id
     user.batch = user.batch.concat([req.body]); // add batch data to user
       user.save().then(user=>{
         const companyID = user.company;
@@ -664,12 +664,13 @@ router.patch('/user/notification/:notificationid',authenticateUser, (req, res)=>
 
         Notifcations.findById(notificationID).then(notification=>{
           let receivers =  _.map(adminArray, 'id');
+          let receiversEmail = _.map(adminArray, 'email');
           let reply = req.body;
           reply.receiver = receivers
 
           notification.reply = notification.reply.concat([reply]);
 
-          // sendToMultiple(doc.email, doc.firstname, doc.lastname); // send this notification by email also
+          sendToMultiple(receiversEmail,req.body.message); // send this notification by email also
 
           notification.save().then(doc=>{
               return res.send(doc);

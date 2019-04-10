@@ -390,6 +390,7 @@ router.post('/notification',authenticate, (req, res)=>{
                 sender:req.admin._id,
                 receiver: [doc._id]
             });
+        sendToOne(user.email, user.firstname, user.lastname, req.body.message); // send this notification by email also
 
         sentMessage.save().then(doc=>{
             return res.status(200).send(doc);
@@ -429,7 +430,7 @@ router.patch('/admin/notification/:notificationid',authenticate, (req, res)=>{
 
           notification.reply = notification.reply.concat([reply]); // concat the reply object into the reply array
 
-          sendToOne(user.email, user.firstname, user.lastname); // send this notification by email also
+          sendToOne(user.email, user.firstname, user.lastname, req.body.message); // send this notification by email also
 
           notification.save().then(doc=>{ // save the updated notification
               return res.send(doc);
@@ -467,6 +468,8 @@ router.post('/notification/:companyid',authenticate, (req, res)=>{
                 receiver: receiverID
             });
         })
+
+        sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
 
         sentMessage.save().then(doc=>{
             return res.status(200).send(doc);
