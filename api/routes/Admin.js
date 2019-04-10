@@ -403,8 +403,8 @@ router.post('/notification',authenticate, (req, res)=>{
     });
 })
 
-// POST ROUTE SEND NOTIFICATION FOR user
-router.patch('/user/notification/:notificationid',authenticate, (req, res)=>{
+// PATCH reply a user message
+router.patch('/admin/notification/:notificationid',authenticate, (req, res)=>{
     const notificationID = req.params.notificationid;
     let admin = req.admin;
     let receiverEmail = req.body.email;
@@ -429,7 +429,7 @@ router.patch('/user/notification/:notificationid',authenticate, (req, res)=>{
 
           notification.reply = notification.reply.concat([reply]); // concat the reply object into the reply array
 
-          sendToMultiple(user.email, user.firstname, user.lastname); // send this notification by email also
+          sendToOne(user.email, user.firstname, user.lastname); // send this notification by email also
 
           notification.save().then(doc=>{ // save the updated notification
               return res.send(doc);

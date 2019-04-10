@@ -626,7 +626,7 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
               receiver:receivers
           });
 
-          sendToOne(doc.email, doc.firstname, doc.lastname); // send this notification by email also
+          // sendToMultiple(doc.email, doc.firstname, doc.lastname); // send this notification by email also
 
           sentMessage.save().then(doc=>{
               return res.send(doc);

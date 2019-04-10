@@ -19,7 +19,7 @@ const AdminSchema = new Schema({
         required: [true, 'Last Name is required'],
         maxlength: 120,
         trim: true
-    }, 
+    },
     username: {
         type: String,
         required: [true, 'Username is required'],
@@ -48,7 +48,7 @@ const AdminSchema = new Schema({
     },
     phone: {
         type: Number,
-        minlength: 11,          
+        minlength: 11,
         required: [true, 'User phone number required'],
         trim: true
       },
@@ -136,7 +136,7 @@ AdminSchema.methods.generateToken = function() {
 
     // set the admin.tokens empty array of object, object properties with the token and the access generated.
     admin.tokens = admin.tokens.concat([{access, token}]);
-    
+
     // save the admin and return the token to be used in the server.js where with the POST route for assiging tokens to newly signed up users.
     return admin.save().then(() => {
         return token;
@@ -171,14 +171,6 @@ AdminSchema.statics.findByCredentials = function(email, password) {
         }
 
         return new Promise((resolve, reject)=> {
-            // bcrypt.compare(password, , (err, res)=> {
-            //     if(res) {
-            //         return resolve(admin);
-            //     }else{
-            //         return reject("Error Wrong Password");
-            //     }
-            // })
-
             const passwordValidation = bcrypt.compareSync(password, admin.password);
             if(passwordValidation === true){
               return resolve(admin);
@@ -192,7 +184,7 @@ AdminSchema.statics.findByCredentials = function(email, password) {
 AdminSchema.statics.findByEmail = function(email) {
     let Admin = this;
     return Admin.findOne({email}).then((admin)=> { // find admin by email
-        if(admin){ 
+        if(admin){
             return resolve(admin);
         }
     });
