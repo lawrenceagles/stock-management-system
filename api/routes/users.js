@@ -6,6 +6,7 @@ const sharp = require('sharp');
 const _ = require('lodash');
 const path = require("path");
 const bcrypt = require('bcryptjs');
+const {ObjectId} = require('mongodb');
 
 const {sendToMultiple,sendUserWelcomePasswordEmail,sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
 const {genRandomPassword} = require('../../config/genPassword.js');
@@ -17,7 +18,7 @@ const {Notifcations} = require('../models/notifications');
 const {Company} = require('../models/company');
 const {Batch} = require('../models/batch');
 const {Log} = require ('../models/audit_Trail');
-const {ObjectId} = require('mongodb');
+const {vestShares} = require('../../app');
 
 
 

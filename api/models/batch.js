@@ -2,11 +2,7 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const batchSchema = new Schema({
-        name:{
-            type: String,
-            required: [true, 'Please enter a batch name']
-        },  
+const batchSchema = new Schema({  
         allocatedShares: {
             type: Number,
             required: [true, 'This field is required']

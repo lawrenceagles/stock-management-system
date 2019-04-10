@@ -65,19 +65,19 @@ app.post('/upload/schemerule/:companyid',upload.single('upload'), (req, res) => 
 
 app.get('/upload/schemerule/:companyid', (req,res)=>{
 	const companyID = req.params.companyid;
-	
+
 	// Validate ID.
 	if(!ObjectId.isValid(companyID)){
 		return res.status(400).json({Message: "Error invalid object id"});
 	}
 
 	Company.findById(companyID).then(company=>{ // find company by id
-		
+
 		if(!company){ // handle no company found
 			return res.status(404).json({Message: "No company found"});
 		}
 
-		if(!company.schemeRule){// handle no scheme rule 
+		if(!company.schemeRule){// handle no scheme rule
 			return res.status(404).json({Message: "Error no scheme rule found. Please upload one for this company"});
 		}
 
@@ -107,15 +107,22 @@ app.use((req, res, next)=>{
   next(err);
 });
 
-// // cron functions
-// const vestingDateAuto = (today)=>{
-// 	console.log(`running a task every minute at ${today}`);
-// }
+// cron functions
+const vestingDateAuto = (today)=>{
+	console.log(`running a task every minute at ${today}`);
+}
 
-// // Cron Jobs
-// cron.schedule('* * * * *', () => {
-//   vestingDateAuto(Date.now());
-// });
+// vesting function with cron job
+// const vestShares = (vestingDate, vestingPeriod)=>{
+//   // Cron Jobs
+//   cron.schedule('* * * * *', () => {
+//     vestingDateAuto(vestingDate);
+//   });
+// }
+//
+// module.exports = {vestShares};
+
+// vestShares(Date.now());
 
 app.listen(Port, () => {
     console.log(`${Host} server started on ${Port}`);
