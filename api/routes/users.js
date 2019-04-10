@@ -46,12 +46,12 @@ router.post('/upload/user/profile/image',authenticateUser,upload.single('avatar'
     .then(sharpImage=>{
       req.user.avatar = sharpImage; // set user avater to sharp Image
       req.user.save().then(image=>{ // save user avatar
-      res.json({Message:"Image Successfully Uploaded"});
+      return res.json({Message:"Image Successfully Uploaded"});
       }).catch(e=>{
-        res.status(400).json({Message:`${e}`});
+        return res.status(400).json({Message:`${e}`});
       });
   }).catch(e=>{
-    res.status(400).send(`${e}`);
+    return res.status(400).json({Message:`${e}`});
   })
 });
 
@@ -60,9 +60,9 @@ router.post('/upload/user/profile/image',authenticateUser,upload.single('avatar'
 router.delete('/upload/user/profile/image',authenticateUser,(req,res)=>{
   req.user.avatar = undefined;
     req.user.save().then(doc=>{
-      res.send("Image Successfully Deleted");
+      return res.json({Message:"Image Successfully Deleted"});
     }).catch(e=>{
-      res.status(400).send(`${e}`);
+      return res.status(400).json({message:`${e}`});
     })
 });
 
@@ -74,12 +74,12 @@ router.get('/user/profile/image',authenticateUser,(req,res)=>{
       throw new Error;
     }
     res.set('Content-Type', 'image/png');
-    res.send(user.avatar); // send the user avatar.
+    return res.send(user.avatar); // send the user avatar.
   }).catch(e=>{
-    res.status(404).send(`${e}`);
+    return res.status(404).json({Message:`${e}`});
   })
 },(error, req, res, next) => {
-    res.status(400).json({ error: `${error.message}` })
+    return res.status(400).json({ error: `${error.message}` })
 });
 
 //read user info
@@ -100,10 +100,10 @@ router.get('/user/profile/image',authenticateUser,(req,res)=>{
         .sort(sort)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
-            res.status(200).json(doc);
+            return res.status(200).send(doc);
         })
 },(error, req, res, next) => {
-    res.status(400).json({ error: `${error.message}` })
+    return res.status(400).json({ error: `${error.message}` })
 })
 
 //find one user
@@ -111,14 +111,14 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
     let id = req.params.id;
     // checks if the object is valid
     if(!ObjectId.isValid(id)) {
-        res.status(400).send(`Error: Please enter a valid Object ID`);
+        res.status(400).json({Message:`Error: Please enter a valid Object ID`});
     }
 
 
      User.findById(id).then((user)=> {
         // if user is not found return error 404 otherwise send the admin.
         if(!user){
-          res.status(404).send("User not found");
+          res.status(404)..json({Message:"User not found"});
         }
 
         let companyID = user.company;
@@ -132,10 +132,10 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                 vestingSchedule: company.vestingSchedule
             });
         }).catch(e=>{
-          res.status(400).send(`${e}`);
+          res.status(400).json({Message:`${e}`});
         })
     }).catch((e)=>{
-        res.status(400).send(`${e}`);
+        res.status(400).json({Message:`${e}`});
     })
  },(error, req, res, next) => {
     res.status(400).json({ error: `${error.message}` })
@@ -148,7 +148,7 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
 
       // Validate the user id
       if(!ObjectId.isValid(id)){
-          res.status(400).send();
+          res.status(400).json({Message:"invalid ObjectId"});
       }
 
       User.findOneAndDelete({_id:id})
@@ -215,7 +215,7 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
             company.save(); // save to store data
 
           }).catch(e=>{
-            res.status(400).send(`${e}`)
+            res.status(400).json({message:`${e}`})
           })
 
           log.save(); // save audit log
@@ -232,7 +232,7 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
     let id = req.params.id;
     // validate the id
     if(!ObjectId.isValid(id)){
-        res.status(400).send();
+        res.status(400).json({Message:"Invalid ObjectId"});
     }
 
     if(req.body.password){
@@ -245,7 +245,7 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
     User.updateOne({_id:id}, {$set:req.body}, { new: true, runValidators: true  }).then((user)=>{
         // check if user was foun and updated
         if(!user){
-            return res.status(404).send();
+            return res.status(404).json({Message: "No user found"});
         }
 
         return res.json({Message:"user updated Successfully"});
@@ -262,18 +262,18 @@ router.get("/:companyid/users",authenticate,(req, res, next) => {
 
     // confirm that object ID is valid
     if(!ObjectId.isValid(companyID)){
-      return res.status(400).send(`Error: The Company Object ID is not valid`);
+      return res.status(400).json({Message:`Error: The Company Object ID is not valid`});
     }
 
     User.find({company:companyID}).then(users=>{
       if(!users){
-        return res.status(404).send(`No user was found in this company`);
+        return res.status(404).json({message:`No user was found in this company`});
       }
 
       return res.send(users);
 
     }).catch(e=>{
-      res.status(400).send(`Error: ${e}`);
+      res.status(400).json({Message:`${e}`});
     })
 
 })
@@ -285,18 +285,18 @@ router.get("/:companyid/companystaff",authenticate,(req, res, next) => {
 
     // confirm that object ID is valid
     if(!ObjectId.isValid(companyID)){
-      return res.status(400).send(`Error: The Company Object ID is not valid`);
+      return res.status(400).json({Message:`Error: The Company Object ID is not valid`});
     }
 
     User.findOne({username, company:companyID}).then(user=>{
       if(!user){
-        return res.status(404).send(`No user was found in this company`);
+        return res.status(404).json({Message:`No user was found in this company`});
       }
 
       return res.send(user);
 
     }).catch(e=>{
-      res.status(400).send(`Error: ${e}`);
+      res.status(400).json({Message:`${e}`});
     })
 })
 
@@ -314,12 +314,12 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 
     Company.findById(id).then(company=>{
       if(!company){
-        return res.status(404).send("Error No company was selected. Wrong company ID")
+        return res.status(404).json({Message:"Error No company was selected. Wrong company ID"});
       }
 
       User.find({employee_number, email}).then(doc=>{
         if(doc.length > 1){
-          return res.status(400).send("This user already exists in this company");
+          return res.status(400).json({Message:"This user already exists in this company"});
         }
 
           req.body.company = id;
@@ -354,11 +354,11 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           return res.status(201).send(body);
 
         }).catch(e=>{
-          res.status(400).send(`${e}`)
+          res.status(400).json({Message:`${e}`});
         });
 
       }).catch(e=>{
-          res.status(400).send(`${e}`)
+          res.status(400).json({Message:`${e}`});
       })
 
     });
@@ -442,7 +442,7 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
       });
     });
   }).catch(e=>{
-    res.status(400).json({Message:`Error here ${e}`});
+    res.status(400).json({Message:`${e}`});
   });
 })
 
@@ -481,7 +481,7 @@ router.patch('/userComfirmation/:id',authenticate,(req, res)=>{
     let companyID = user.company; // get company id
     Company.findById().then(company=>{
       user.userConfirmation(company).then(doc=>{
-        return res.status(200).send("User has been confirmed");
+        return res.status(200).json({Message:"User has been confirmed"});
       });
     })
   })
@@ -491,12 +491,12 @@ router.patch('/userComfirmation/:id',authenticate,(req, res)=>{
 router.patch('/user/forgetpassword', (req,res)=>{
     User.findOne({email:req.body.email}).then(user=>{
         if(!user){// handle if the user with that email is not found
-            return res.status(404).send("Error this user does not exists in our database");
+            return res.status(404).json({Message:"Error this user does not exists in our database"});
         }
 
         // handle user is logged in
         if(user.tokens.length > 0){
-            return res.status(400).send("Error you have to be logged out to make this request");
+            return res.status(400).json({Message:"Error you have to be logged out to make this request"});
         }
 
         // generate a new secure random password for the client
@@ -512,13 +512,13 @@ router.patch('/user/forgetpassword', (req,res)=>{
 
         // save user with new password
         user.save().then(doc=>{
-            res.status(200).send(`new password successfully regenerated.`);
+            res.status(200).json({Message:"new password successfully regenerated"});
         }).catch(e=>{
-            return res.status().send(`${e}`)
+            return res.status().json({Message:`${e}`});
         })
 
     }).catch(e=>{
-        return res.status(400).send(`${e}`);
+        return res.status(400).json({Message:`${e}`});
     })
 });
 
@@ -555,9 +555,9 @@ router.delete('/user/destroy/token', (req, res)=>{
     user.removeToken(token).then(()=>{ // delete token from user
         // send user delete account email
         deleteAccountEmail(user.email, user.firstName, user.lastName);
-        res.status(200).send("You have successfully logged out");
+        res.status(200)..json({Message:"You have successfully logged out"});
       }, ()=>{
-        res.status(400).send("Error logging out");
+        res.status(400).json({Message:"Error logging out"});
     })
     })
 });
@@ -615,7 +615,7 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
 
     Admin.find({}).then(adminArray=>{
         if(!adminArray){
-            return res.status(404).send("error no user found");
+            return res.status(404).json({Message:"error no user found"});
         }
 
         Company.findById(companyID).then(company=>{
@@ -632,13 +632,13 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
           sentMessage.save().then(doc=>{
               res.status(201).send(doc);
           }).catch(e=>{
-              res.status(400).send(`${e}`);
+              res.status(400).json({Message:`${e}`});
           });
         })
 
         // res.send(doc);
     }).catch(e=>{
-        res.status(404).send(`${e}`);
+        res.status(404).json({Message:`${e}`});
     });
 })
 
@@ -691,7 +691,7 @@ router.delete('/user/remove/user/token',authenticateUser, (req, res)=>{
 
       res.status(200).send("Logout successfull");
     }, ()=>{
-      res.status(400).json({Message:`Error Logout not successfull ${e}`});
+      res.status(400).json({Message:`${e}`});
     })
 
   });

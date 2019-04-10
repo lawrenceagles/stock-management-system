@@ -12,7 +12,7 @@ const {Log} = require ('../models/audit_Trail');
 
 // Company Onboarding Route
 router.post('/company/registration',authenticate,(req,res,next)=>{
-    
+
     Company.find({name:req.body.name},(err,doc)=>{
     if(doc.length){
         res.status(400).json({
@@ -33,21 +33,21 @@ router.post('/company/registration',authenticate,(req,res,next)=>{
 
         company.save()
         .then(response=>{
-                 res.status(200).json({
+                 return res.status(200).json({
                     response,
                     info:"save successfull"
                 })
             })
         .catch(err=>{
             return res.status(404).json({
-                message:'something is wrong '+ err
+                message:`${err}`
             });
         })
       }
     })
 })
 
-router.get('/company/list',authenticate,(req,res,next)=>{ 
+router.get('/company/list',authenticate,(req,res,next)=>{
     const sort = {}
 
     let pageOptions = {
@@ -59,26 +59,26 @@ router.get('/company/list',authenticate,(req,res,next)=>{
         const parts = req.query.sortBy.split(':')
         sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
     }
-    
+
     Company.find()
         .skip(pageOptions.page*pageOptions.limit)
         .sort(sort)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
-            res.status(200).json(doc);
-        })   
+            return res.status(200).json(doc);
+        })
 })
 
-router.get('/allcompany',authenticate,(req,res,next)=>{ 
-    
+router.get('/allcompany',authenticate,(req,res,next)=>{
+
     Company.find({}).then(docs=>{
         if(!docs){
-            return res.status(404).send("No company found. Please onboard companies");
+            return res.status(404).json({Message:"No company found. Please onboard companies"});
         }
 
         return res.send(docs);
     })
-          
+
 })
 
 
@@ -94,9 +94,9 @@ router.get('/companymember/:name',authenticate, (req,res)=>{
             .execPopulate()
             .then(company=>{
                 if(!company){
-                    return res.status(404).send("No scheme member for this company")
+                    return res.status(404).json({Message:"No scheme member for this company"});
                 }
-                res.send(company.staffs);
+                return res.send(company.staffs);
             });
         })
 
@@ -108,13 +108,13 @@ router.get('/companystaff/:id', authenticate, (req,res)=>{
     let id = req.params.id;
 
     if(!ObjectId.isValid(id)){
-        res.status(400).send(`Error: invalid Object ID`);
+        return res.status(400).json({Message:`Error: invalid Object ID`});
     }
 
     Company.findById(id)
         .then(doc=>{
             if(!doc){
-                return res.status(404).send(`No users found`);
+                return res.status(404).json({Message:`No users found`});
             }
             doc
             .populate({
@@ -123,9 +123,9 @@ router.get('/companystaff/:id', authenticate, (req,res)=>{
             .execPopulate()
             .then(company=>{
                 if(!company){
-                    return res.status(404).send("No scheme member for this company")
+                    return res.status(404).json({Message:"No scheme member for this company"})
                 }
-                res.send(company.staffs);
+                return res.send(company.staffs);
             });
         })
 
@@ -138,20 +138,20 @@ router.get('/company/:id',authenticate, (req,res)=>{
 
     // validate the company id
     if(!ObjectId.isValid(id)){
-        return res.status(400).send("Error invalid ObjectId");
+        return res.status(400).json({Message:"Error invalid ObjectId"});
     }
 
     Company.findOne({_id:id}).then(company=>{
         if(!company){
-            return res.status(404).send("Error No company Found");
+            return res.status(404).json({Message:"Error No company Found"});
         }
 
-        res.send(company);
+        return res.send(company);
 
     }).catch(e=>{
-        res.status(400).send(`Error ${e}`);
+        return res.status(400).json({Message:`${e}`});
     })
-        
+
 
 });
 
@@ -165,14 +165,14 @@ router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
 
    Company.findOneAndDelete({_id:id})
     .then(response=>{
-       res.status(200).json({
+       return res.status(200).json({
            message:"Company has been deleted"
          })
         .then(id=>{
             find({_id:id},(err,doc)=>{
                 if (err){
-                    res.status(404).json({
-                     message:`Delete failed${err}`
+                    return res.status(404).json({
+                     message:`${err}`
                     })
                 }
                 else{
@@ -180,19 +180,19 @@ router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
                         createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
                         action: `deleted a company`,
                         company: `${company.name}`
-                        
+
                     });
 
                     log.save();
 
-                    res.satus(200).json({
+                    return res.status(200).json({
                         message:`Document has been deleted`
                       })
-                    }       
+                    }
                 })
             })
         .catch(err=>{
-            res.status(404).json({
+            return res.status(404).json({
                 error:`delete request failed${err}`
             })
         })
@@ -202,7 +202,7 @@ router.delete('/delete/:id',authenticate,(req,res,next)=>{   //delete
 // Update company route
 router.patch('/company/:id',authenticate,(req,res)=>{//update
     const id = req.params.id;
-    
+
     // validate the company id
     if(!ObjectId.isValid(id)){
         return res.status(400).json({Message:"Error invalid ObjectId"});
@@ -211,7 +211,7 @@ router.patch('/company/:id',authenticate,(req,res)=>{//update
         Company.findOneAndUpdate({_id:id}, {$set:req.body}, {new: true, runValidators: true}).then(doc=>{
             // check if doc was foun and updated
             if(!doc){
-                res.status(404).send();
+                return res.status(404).json({Message:"No company foundreturn "})
             }
 
             if(req.password !== doc.password){
@@ -231,13 +231,13 @@ router.patch('/company/:id',authenticate,(req,res)=>{//update
                 });
 
                 log.save();
-                res.send(doc);
+                return res.send(doc);
             }).catch((e)=>{
-                res.status(400).send(`${e}`, "Error cannot return updated document");
+                return res.status(400).json({Message:`${e}`, "Error cannot return updated document"});
             });
-            
+
        }).catch((e)=>{
-            res.status(400).send(`${e}`, "Error update error");
+            return res.status(400).json({Message:`${e}`, "Error update error"});
         });
 })
 
@@ -288,11 +288,11 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
                         }
                         user.save();
                     });
-                    
+
 					// save updated company data to store database
 			        company.save();
                     return res.json({Message: "Dividend successfully declared and added to eligible users"})
-                  
+
                 })
             }else if(dividendDoc.rate){
                 User.find({company:ID}).then(users=>{
@@ -316,17 +316,17 @@ router.post('/company/dividend/:id',authenticate,(req,res)=>{
 
 					// save updated company data to store database
 			        company.save();
-                    res.json({Message: "Dividend successfully declared and added to eligible users by rate"});
+                    return res.json({Message: "Dividend successfully declared and added to eligible users by rate"});
                 })
 
             }
 
         }).catch(e=>{
-           res.status(400).json({Message:`${e}`}); 
+           return res.status(400).json({Message:`${e}`});
         })
 
     }).catch(e=>{
-        res.status(400).json({Message:`${e}`});
+        return res.status(400).json({Message:`${e}`});
     })
 })
 
@@ -362,10 +362,10 @@ router.delete('/company/dividend/:id',authenticate,(req,res)=>{
                     if(company.dividend.type !== "cash" ) {// add dividend to total shares allocated to scheme members
 						company.totalSharesAllocatedToSchemeMembers -= user.dividend.amountReceived;
 					}
-					// save updated company data to store database
+					    // save updated company data to store database
 			        company.save();
                     return res.json({Message: "Dividend successfully declared and added to eligible users"})
-                  
+
                 })
             }else if(dividendDoc.rate){
                 User.find({company:ID}).then(users=>{
@@ -385,7 +385,7 @@ router.delete('/company/dividend/:id',authenticate,(req,res)=>{
 					}
 					// save updated company data to store database
 			        company.save();
-                    res.json({Message: "Dividend successfully declared and added to eligible users by rate"});
+                    return res.json({Message: "Dividend successfully declared and added to eligible users by rate"});
                 })
 
             }
@@ -393,7 +393,7 @@ router.delete('/company/dividend/:id',authenticate,(req,res)=>{
             log.save(); // save audit trail
 
 	    }).catch(e=>{
-	        res.status(400).json({Message:`${e}`});
+	        return res.status(400).json({Message:`${e}`});
 	    })
  	})
 })
@@ -410,9 +410,9 @@ router.get('/company/dividend/:id', (req,res)=>{
 		if(dividends.length < 1){
 			return res.status(404).json({Message:"This company has not declared any dividend"});
 		}
-		res.send(dividends);
+		return res.send(dividends);
 	}).catch(e=>{
-		res.status(400).json({Message:`${e}`});
+		return res.status(400).json({Message:`${e}`});
 	})
 })
 
@@ -426,7 +426,7 @@ router.post('/company/batch/:id',authenticate,(req,res)=>{
 
 	Company.findById(ID).then(company=>{
 		req.body.company = company._id; // pass the company id to req.body to link the batch
-		let newBatch = new Batch({...req.body})
+		let newBatch = new Batch({...req.body});
 
 		let log = new Log({ // create the audit log
                 action: `Created ${newBatch.name}`,
@@ -437,16 +437,16 @@ router.post('/company/batch/:id',authenticate,(req,res)=>{
         log.save(); // save the audit log
         newBatch.save().then(batch=>{
         	let batchID = batch._id;
-        	company.batch = company.batch.concat([batchID]); 
+        	company.batch = company.batch.concat([batchID]);
         	company.save();
-        	res.status(201).send(batch);
+        	return res.status(201).send(batch);
         }).catch(e=>{
-        	res.status(400).json({Message: `${e}`});
+        	return res.status(400).json({Message: `${e}`});
         })
 
 
 	}).catch(e=>{
-		res.status(400).json({Message: `${e}`});
+		return res.status(400).json({Message: `${e}`});
 	})
 })
 
@@ -475,9 +475,13 @@ router.patch('/company/batch/:batchid',authenticate,(req,res)=>{
             });
 
             log.save(); // save the audit log
-            res.send("Batch Updated Successfully");
-        })
-    })
+            return res.json({Message:"Batch Updated Successfully"});
+        }).catch(e=>{
+          return res.status(400).json({Message:`${e}`})
+        });
+    }).catch(e=>{
+      return res.status(400).json({Message:`${e}`})
+    });
 })
 
 // Route to show all the batch in a company
@@ -497,9 +501,9 @@ router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
     //   return data;
     // })
 
-    res.send(batches);
+    return res.send(batches);
   }).catch(e=>{
-    res.status(400).json({Message:`{e}`});
+    return res.status(400).json({Message:`{e}`});
   })
 })
 

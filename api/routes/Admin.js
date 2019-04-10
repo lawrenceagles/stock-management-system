@@ -43,10 +43,10 @@ router.post('/upload/profile/image',authenticate,upload.single('avatar'),(req,re
       req.admin.save().then(image=>{ // save admin avatar
         res.json({Message:"Image Successfully Uploaded"});
       }).catch(e=>{
-        res.status(400).send(`${e}`);
+        res.status(400).json({Message:`${e}`});
       });
   }).catch(e=>{
-    res.status(400).send(`${e}`);
+    res.status(400).json({Message:`${e}`});
   })
 },(error, req, res, next) => {
     res.status(400).json({ error: `${error.message}` })
@@ -59,10 +59,10 @@ router.delete('/upload/profile/image',authenticate,(req,res)=>{
     req.admin.save().then(doc=>{
       res.json({Message:"Image Successfully Deleted"});
     }).catch(e=>{
-      res.status(400).send(`${e}`);
+      res.status(400).json({Message:`${e}`});
     })
 },(error, req, res, next) => {
-    res.status(400).json({ error: `${error.message}` })
+    res.status(400).json({ error: `${error.message}` });
 });
 
 
@@ -75,7 +75,7 @@ router.get('/admin/profile/image',authenticate,(req,res)=>{
     res.set('Content-Type', 'image/png');
     res.send(admin.avatar); // send the admin avatar.
   }).catch(e=>{
-    res.status(404).send(`${e}`);
+    res.status(404).json({Message:`${e}`});
   })
 },(error, req, res, next) => {
     res.status(400).json({ error: `${error.message}` })
@@ -98,7 +98,7 @@ router.get('/admin',authenticate,(req, res) => {
     },
 
     (e) => {
-      res.status(404).send();
+      res.status(404).json({Message:`{e}`});
     }
 );
 
@@ -108,14 +108,14 @@ router.get('/admin/role/:role',authenticate,(req, res)=>{
     Admin.find({role}).then(docs=>{
 
         if(docs.length === 0){
-            return res.status(404).send(`No ${role} admin found`);
+            return res.status(404).json({Message: `No ${role} admin found`});
         }
 
         res.send(docs);
 
     })
     .catch((e)=>{
-        res.status(400).send(`Error cannot get user ${e}`);
+        res.status(400).json({Message:`${e}`});
     })
 })
 
@@ -170,13 +170,13 @@ router.patch('/admin/forgetpassword', (req,res)=>{
 
         // save admin with new password
         admin.save().then(doc=>{
-            res.status(200).send(`new password successfully regenerated.`);
+            res.status(201).json(`New password generated`);
         }).catch(e=>{
-            return res.status().json({Message:`Failed to update password with error ${e}`})
+            return res.status().json({Message:`${e}`})
         })
 
     }).catch(e=>{
-        return res.status(304).send(`Error {e} occured in the update password process. Please try again`);
+        return res.status(304).json({Message:`${e}`});
     })
 });
 
@@ -201,9 +201,9 @@ router.post('/admin/login', (req, res) => {
 router.delete('/admin/logout',authenticate, (req, res)=>{
   req.admin.removeToken(req.token).then(()=>{
     deleteAccountEmail(req.admin.email, req.admin.firstname, req.admin.lastname);
-    res.status(200).send("You have successfully logged out");
+    res.status(200).json({Message:"You have successfully logged out"});
   }, ()=>{
-    res.status(400).send("Error logging out");
+    res.status(400).json({Message:"Error logging out"});
   })
 });
 
@@ -213,15 +213,15 @@ router.delete('/admin/destroytoken', (req, res)=>{
     let token = req.header('x-auth'); // grap token from header
     Admin.findOne({email}).then(admin=>{
     if(!admin){
-        return res.status(404).send("Incorrect email")
+        return res.status(404).json({Message:"Incorrect email"});
     }
 
     admin.removeToken(token).then(()=>{ // delete token from admin
         // send admin delete account email
         deleteAccountEmail(admin.email, admin.firstname, admin.lastname);
-        res.status(200).send("You have successfully logged out");
+        res.status(200).json({Message:"You have successfully logged out"});
       }, ()=>{
-        res.status(400).send("Error logging out");
+        res.status(400).json({Message:"Error logging out"});
     })
     })
 });
@@ -234,16 +234,16 @@ router.get('/admin/:id',authenticate, (req, res) => {
 
     // checks if the object is valid
     if(!ObjectId.isValid(id)) {
-        res.status(400).send("Invalid ObjectId");
+        res.status(400).json({Message:"Invalid ObjectId"});
     }
 
     // find the admin by id.
     Admin.findOne({_id:id}).then((doc)=> {
 
         // if admin is not found return error 404 otherwise send the admin.
-        doc ? res.send(doc) : res.status(404).send("No admin found");
+        doc ? res.send(doc) : res.status(404).json({Message:"No admin found"});
     }).catch((e)=>{
-        res.status(400).send("Error: Something is wrong with the route");
+        res.status(400).json({Message: `${e}`});
     })
 
 });
@@ -261,7 +261,7 @@ router.patch('/admin/:id',authenticate, (req, res) => {
     let body = _.pick(req.body, ["firstname", "lastname", "username", "password", "email", "phone", "role"]);
     // validate the id
     if(!ObjectId.isValid(id)){
-        res.status(400).send();
+        res.status(400).json({Message: "Invalid ObjectId"});
     }
 
     // find and update the admin by id if it is found, throw error 404 if not
@@ -282,11 +282,11 @@ router.delete('/admin/:id',authenticate, (req, res) => {
     // get the admin id
     let id = req.params.id;
     // validate the company id
-    if(!ObjectId.isValid(id)){
+    if(!ObjectId.isValid(id)){// validate ObjectId
         return res.status(400).send();
     }
     // query to find admin and delete
-    Admin.findByIdAndDelete(id).then((doc)=>{
+    Admin.findByIdAndDelete(id).then((doc)=>{// find and delete admin
 
         if(!doc){ // if doc is not found return error 404.
             return res.status(404).json({Message:`This user is not in the database`});
@@ -302,7 +302,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 
         deleteAccountEmail(doc.email, doc.firstname, doc.lastname); // send accound cancellation email to admin
 
-        return res.send("Admin succefully deleted"); // return the deleted doc (admin) if found and deleted
+        return res.json({Message: "Admin succefully deleted"});
     }).catch((e)=>{
         res.status(400).send();
     });
@@ -374,24 +374,23 @@ router.get('/admin/sent/notification',authenticate, (req,res)=>{
 router.post('/notification',authenticate, (req, res)=>{
     let receiverEmail = req.body.email;
     req.body.onSenderModel = 'Admin'; // set the refPath
-    req.body.onReceiverModel = 'User';
+    req.body.onReceiverModel = 'User'; // set the refPath
     req.body.username = req.admin.username;
 
-    // find user company specific
-    User.findOne({email:receiverEmail}).then(doc=>{
+    User.findOne({email:receiverEmail}).then(doc=>{// find user by email given
 
-        if(!doc){
+        if(!doc){// handle user not found
             return res.status(404).json({Message: "error no user found"});
         }
-        let sentMessage = new Notifcations({
+        let sentMessage = new Notifcations({// create new notification
                 ...req.body,
                 sender:req.admin._id,
                 receiver: [doc._id]
             });
 
         sentMessage.save().then(doc=>{
-            res.status(201).send(doc);
-        }).catch(e=>{
+            res.status(200).send(doc);
+        }).catch(e=>{// handle error caught
             res.status(400).json(`${e} Error with the route`);
         });
 
@@ -407,7 +406,7 @@ router.patch('/user/notification/:notificationid',authenticate, (req, res)=>{
     let admin = req.admin;
     let receiverEmail = req.body.email;
     req.body.onSenderModel = 'Admin'; // set the refPath
-    req.body.onReceiverModel = 'User';
+    req.body.onReceiverModel = 'User'; // set the refPath
     req.body.username = req.admin.username;
     req.body.sender = admin._id;
 
@@ -415,23 +414,23 @@ router.patch('/user/notification/:notificationid',authenticate, (req, res)=>{
       return res.json({Message: "Invalid ObjectId"});
     }
 
-    User.findOne({email:receiverEmail}).then(user=>{
-        if(!user){
-            return res.status(404).send("error no admin found");
+    User.findOne({email:receiverEmail}).then(user=>{ // find user with email given
+        if(!user){// handle wrong usesr emails
+            return res.status(404).json({Message: "error no user with that email in database"});
         }
 
-        Notifcations.findById(notificationID).then(notification=>{
+        Notifcations.findById(notificationID).then(notification=>{// find the message to reply by id
           let receiver =  user._id;
           let reply = req.body;
-          reply.receiver = receiver;
+          reply.receiver = [receiver];
 
-          notification.reply = notification.reply.concat([reply]);
+          notification.reply = notification.reply.concat([reply]); // concat the reply object into the reply array
 
           sendToMultiple(user.email, user.firstname, user.lastname); // send this notification by email also
 
-          notification.save().then(doc=>{
+          notification.save().then(doc=>{ // save the updated notification
               return res.send(doc);
-          }).catch(e=>{
+          }).catch(e=>{// handle any error caught
               return res.status(400).json({Message: `${e}`});
           });
         })
@@ -446,22 +445,20 @@ router.patch('/user/notification/:notificationid',authenticate, (req, res)=>{
 router.post('/notification/:companyid',authenticate, (req, res)=>{
     let receiverEmail;
     req.body.onSenderModel = 'Admin'; // set the refPath
-    req.body.onReceiverModel = 'User';
+    req.body.onReceiverModel = 'User'; // set the refPath
     req.body.username = req.admin.username;
 
-    // find user company specific
-    Company.findById(id).then(company=>{
-        if(!ObjectId.isValid(id)){
-            return res.send(`Invalid company ID`);
+    if(!ObjectId.isValid(id)){// validate company id
+        return res.send(`Invalid company ID`);
+    }
+    Company.findById(id).then(company=>{// find the user company with id
+        if(!company){// handle user not found
+            return res.status(404).json({Message:"No company found"});
         }
 
-        if(!company){
-            return res.status(404).send("No company found");
-        }
-
-        company.find({}).then(usersArr=>{
+        company.find({}).then(usersArr=>{// find all the users in a company
             receiverID =  _.map(usersArr, 'id');
-            let sentMessage = new Notifcations({
+            let sentMessage = new Notifcations({// create notification
                 ...req.body,
                 sender:req.admin._id,
                 receiver: receiverID
@@ -469,13 +466,11 @@ router.post('/notification/:companyid',authenticate, (req, res)=>{
         })
 
         sentMessage.save().then(doc=>{
-            res.status(201).send(doc);
+            res.status(200).send(doc);
         }).catch(e=>{
-            res.status(400).send(`${e} Error with the route`);
+            res.status(400).json({Message: `${e}`});
         });
-
-        // res.send(doc);
-    }).catch(e=>{
+    }).catch(e=>{ // catch any errors
         res.status(404).JSON({Message:`${e}`});
     });
 })
