@@ -380,26 +380,23 @@ router.post('/notification',authenticate, (req, res)=>{
     req.body.onSenderModel = 'Admin'; // set the refPath
     req.body.onReceiverModel = 'User'; // set the refPath
     req.body.username = req.admin.username;
+    req.body.sender = req.admin._id;
 
-    User.findOne({email:receiverEmail}).then(doc=>{// find user by email given
 
-        if(!doc){// handle user not found
+    User.findOne({email:receiverEmail}).then(user=>{// find user by email given
+        if(!user){// handle user not found
             return res.status(404).json({Message: "error no user found"});
         }
-        let sentMessage = new Notifcations({// create new notification
-                ...req.body,
-                sender:req.admin._id,
-                receiver: [doc._id]
-            });
+        let message = req.body;
+        message.receiver = [user._id];
+        let sentMessage = new Notifcations(message);
         sendToOne(user.email, user.firstname, user.lastname, req.body.message); // send this notification by email also
 
-        sentMessage.save().then(doc=>{
-            return res.status(200).send(doc);
+        sentMessage.save().then(message=>{
+            return res.status(200).send(message);
         }).catch(e=>{// handle error caught
             return res.status(400).json(`${e} Error with the route`);
         });
-
-        // res.send(doc);
     }).catch(e=>{
         return res.status(404).json({Message: `${e}`});
     });
@@ -489,37 +486,37 @@ router.post('/notification/:companyid',authenticate, (req, res)=>{
     });
 })
 
-// POST ADMIN TO ALL USERS IN scheme
-router.post('/notification/allvetiva/scheme/members',authenticate, (req, res)=>{
-    req.body.onSenderModel = 'Admin'; // set the refPath
-    req.body.onReceiverModel = 'User'; // set the refPath
-    req.body.username = req.admin.username;
-
-    Company.find({}).then(allCompanies=>{// find the user company with id
-        if(allCompanies.length < 0){// handle user not found
-            return res.status(404).json({Message:"No company found, please onboard companies"});;
-        }
-
-        let receiverID =  _.map(allCompanies, 'id');
-        let receiverEmail =  _.map(allCompanies, 'email');
-
-        let sentMessage = new Notifcations({// create notification
-            ...req.body,
-            sender:req.admin._id,
-            receiver: receiverID
-        });
-
-        sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
-
-        sentMessage.save().then(doc=>{
-            return res.status(200).send(doc);
-        }).catch(e=>{
-            return res.status(400).json({Message: `${e}`});
-        });
-    }).catch(e=>{ // catch any errors
-        return res.status(404).JSON({Message:`${e}`});
-    });
-})
+// // POST ADMIN TO ALL USERS IN scheme
+// router.post('/notification/allvetiva/scheme/members',authenticate, (req, res)=>{
+//     req.body.onSenderModel = 'Admin'; // set the refPath
+//     req.body.onReceiverModel = 'User'; // set the refPath
+//     req.body.username = req.admin.username;
+//
+//     Company.find({}).then(allCompanies=>{// find the user company with id
+//         if(allCompanies.length < 0){// handle user not found
+//             return res.status(404).json({Message:"No company found, please onboard companies"});;
+//         }
+//
+//         let receiverID =  _.map(allCompanies, 'id');
+//         let receiverEmail =  _.map(allCompanies, 'email');
+//
+//         let sentMessage = new Notifcations({// create notification
+//             ...req.body,
+//             sender:req.admin._id,
+//             receiver: receiverID
+//         });
+//
+//         sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
+//
+//         sentMessage.save().then(doc=>{
+//             return res.status(200).send(doc);
+//         }).catch(e=>{
+//             return res.status(400).json({Message: `${e}`});
+//         });
+//     }).catch(e=>{ // catch any errors
+//         return res.status(404).JSON({Message:`${e}`});
+//     });
+// })
 
 
 module.exports = router;
