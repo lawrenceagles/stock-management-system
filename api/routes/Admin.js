@@ -234,7 +234,7 @@ router.get('/admin/:id',authenticate, (req, res) => {
 
     // checks if the object is valid
     if(!ObjectId.isValid(id)) {
-        return return res.status(400).json({Message:"Invalid ObjectId"});
+        return res.status(400).json({Message:"Invalid ObjectId"});
     }
 
     // find the admin by id.

@@ -118,7 +118,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
      User.findById(id).then((user)=> {
         // if user is not found return error 404 otherwise send the admin.
         if(!user){
-          res.status(404)..json({Message:"User not found"});
+          res.status(404).json({Message:"User not found"});
         }
 
         let companyID = user.company;
@@ -554,7 +554,7 @@ router.delete('/user/destroy/token', (req, res)=>{
     user.removeToken(token).then(()=>{ // delete token from user
         // send user delete account email
         deleteAccountEmail(user.email, user.firstName, user.lastName);
-        return res.status(200)..json({Message:"You have successfully logged out"});
+        return res.status(200).json({Message:"You have successfully logged out"});
       }, ()=>{
         return res.status(400).json({Message:"Error logging out"});
     })
@@ -688,7 +688,7 @@ router.patch('/user/notification/:notificationid',authenticateUser, (req, res)=>
 router.delete('/user/remove/user/token',authenticateUser, (req, res)=>{
     req.user.removeToken(req.token).then(()=>{
 
-      return res.status(200).json({message:"Logout successfull"return });
+      return res.status(200).json({message:"Logout successfull"});
     }, ()=>{
       return res.status(400).json({Message:`${e}`});
     })

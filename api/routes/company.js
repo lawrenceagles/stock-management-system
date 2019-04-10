@@ -233,11 +233,11 @@ router.patch('/company/:id',authenticate,(req,res)=>{//update
                 log.save();
                 return res.send(doc);
             }).catch((e)=>{
-                return res.status(400).json({Message:`${e}`, "Error cannot return updated document"});
+                return res.status(400).json({Message:`${e}`});
             });
 
        }).catch((e)=>{
-            return res.status(400).json({Message:`${e}`, "Error update error"});
+            return res.status(400).json({Message:`${e}`});
         });
 })
 
