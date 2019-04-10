@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 // connect to a promise library for usage
-mongoose.Promise = global.Promise; 
+mongoose.Promise = global.Promise;
 mongoose.set('useFindAndModify', false);
 
 // connect mongoose with DB  process.env.MONGODB_URI || 'mongodb://localhost/Todoapp'

@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const cron = require('node-cron');
 const bodyParser = require('body-parser');
 const route = require('./api/routes/Admin');
 const multer = require('multer');

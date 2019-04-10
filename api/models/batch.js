@@ -18,6 +18,9 @@ const batchSchema = new Schema({
             schedule:{
                 type: String
             },
+            directDate:{
+              type: Date
+            },
             period:{
                 type: Number
             }

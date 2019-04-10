@@ -144,7 +144,7 @@ const userSchema = new Schema({
               trim: true,
               maxlength:120,
         }
-        
+
     },
     role:{
         type: String,
@@ -188,7 +188,7 @@ const userSchema = new Schema({
         name:{
             type: String,
             required: [true, 'Please enter a batch name']
-        },  
+        },
         allocatedShares: {
             type: Number,
             required: [true, 'This field is required']
@@ -250,26 +250,6 @@ userSchema.pre('save', function(next) {
   }
 })
 
-
-// // fix hashing password on update
-// userSchema.pre("findOneAndUpdate", function(next) {
-//     let user = this;
-//     let {password} = user.getUpdate();
-//     if (!password) {
-//         return next();
-//     }
-//     try {
-//         const salt = bcrypt.genSaltSync(12);
-//         const hash = bcrypt.hashSync(password, salt);
-//         let passwordUpdate = user.password;
-//         user.findOneAndUpdate({}, { $set: { passwordUpdate: hash } });
-//         next();
-//     } catch (e) {
-//         return next(e);
-//     }
-// });
-
-
 // handle user login
  userSchema.statics.findByCredentials = function(email, password) {
     let User = this;
@@ -298,7 +278,7 @@ userSchema.methods.generateToken = function() {
 
     // set the user.tokens empty array of object, object properties with the token and the access generated.
     user.tokens = user.tokens.concat([{access, token}]);
-    
+
     // save the user and return the token to be used in the server.js where with the POST route for assiging tokens to newly signed up users.
     return user.save().then(() => {
         return token;
@@ -322,7 +302,7 @@ userSchema.methods.batchRegistration = function(batchObject) {
     }catch(e) {
         return Promise.reject(`${e}`);
     }
-    
+
     // return userBatch; // return new userBatch
     return user.save().then(() => {
         return user;
@@ -363,7 +343,7 @@ userSchema.methods.userConfirmation = function(companyObj){
     // update total shares alloted by company to scheme members dynamically
     let companyBatch = company.schemeBatch;
     let userBatch = user.batch;
-    let totalRetrivedShares; 
+    let totalRetrivedShares;
 
     companyBatch.forEach(function(batch){
         userBatch.forEach(function(item){

@@ -5,7 +5,7 @@ const multer =  require('multer');
 const sharp = require('sharp');
 const _ = require('lodash');
 const path = require("path");
-const cron = require('node-cron');
+const schedule = require('node-schedule');
 const bcrypt = require('bcryptjs');
 const {ObjectId} = require('mongodb');
 
@@ -19,24 +19,6 @@ const {Notifcations} = require('../models/notifications');
 const {Company} = require('../models/company');
 const {Batch} = require('../models/batch');
 const {Log} = require ('../models/audit_Trail');
-
-
-// cron functions
-const vestingDateAuto = (today)=>{
-	console.log(`running a task every minute at ${today}`);
-}
-
-// vesting function with cron job
-vestShares = function(vestingDate, vestingPeriod){
-  // Cron Jobs
-  cron.schedule('* * * * *', () => {
-    vestingDateAuto(vestingDate);
-  });
-}
-
-
-
-
 
 // Set Multer
 // Set Storage Engine
@@ -438,9 +420,41 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
            if( batch.members.indexOf(user._id) >= 0 ){
               return res.status(400).json({Message: "user already added to batch"});
            }
+           let vestingDate = Date.now();
+           let vestingPeriod = req.body.vesting.period;
+           let vestingSchedule = req.body.vesting.schedule;
+
             req.body.name = batch.name;
+
+            // // make sure a direct vesting date or vesting schedule is entered
+            // if(!vesting.directDate && !vesting.schedule){
+            //   return res.json({Message:"please enter a vesting date or a vesting schedule period"});
+            // }
+            //
+            // // make sure both direct vesting date and vesting schedule is entered is not entered
+            // if(vesting.directDate && vesting.schedule){
+            //   return res.json({Message:"please enter either a vesting date or a vesting schedule period"});
+            // }
+
             user.batch = user.batch.concat([req.body]); // add batch data to user
             batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
+
+            // let rule = new schedule.RecurrenceRule();// set the schedule rule
+            //
+            // if(vesting.directDate && !vesting.schedule){// handle vesting on specific date
+            //   vestedShares.nextVestingDate = batch.vesting.directDate; // get the vesting year.
+            //   rule.mounth = batch.vesting.directDate.getMonth(); // get the vesting month
+            //   rule.day = batch.vesting.directDate.getDate(); // get the vesting day
+            //
+            //   let startTime = vestedShares.nextVestingDate;
+            //   let endTime = startTime + batch.vesting.period;
+            //
+            //   // run the cron job every vesting day
+            //   let j = schedule.scheduleJob({ start: startTime, end: endTime, rule}, function(){
+            //     console.log('Time for tea!');
+            //     batch.vesting.directDate.getFullYear() += 1;
+            //   });
+            // }
 
             if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members

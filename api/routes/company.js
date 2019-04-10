@@ -493,14 +493,6 @@ router.get('/allcompany/batch/:companyid',authenticate,(req,res)=>{
   }
 
   Batch.find({company:ID}).then(batches=>{
-    // const finalData = batches.map(batch=>{
-    //   const data = {
-    //     name:batch.name,
-    //     id:batch._id
-    //   }
-    //   return data;
-    // })
-
     return res.send(batches);
   }).catch(e=>{
     return res.status(400).json({Message:`{e}`});
