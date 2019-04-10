@@ -113,14 +113,13 @@ const vestingDateAuto = (today)=>{
 }
 
 // vesting function with cron job
-// const vestShares = (vestingDate, vestingPeriod)=>{
-//   // Cron Jobs
-//   cron.schedule('* * * * *', () => {
-//     vestingDateAuto(vestingDate);
-//   });
-// }
-//
-// module.exports = {vestShares};
+vestShares = function(vestingDate, vestingPeriod){
+  // Cron Jobs
+  cron.schedule('* * * * *', () => {
+    vestingDateAuto(vestingDate);
+  });
+}
+
 
 // vestShares(Date.now());
 

@@ -18,7 +18,22 @@ const {Notifcations} = require('../models/notifications');
 const {Company} = require('../models/company');
 const {Batch} = require('../models/batch');
 const {Log} = require ('../models/audit_Trail');
-const {vestShares} = require('../../app');
+
+
+// // cron functions
+// const vestingDateAuto = (today)=>{
+// 	console.log(`running a task every minute at ${today}`);
+// }
+//
+// // vesting function with cron job
+// vestShares = function(vestingDate, vestingPeriod){
+//   // Cron Jobs
+//   cron.schedule('* * * * *', () => {
+//     vestingDateAuto(vestingDate);
+//   });
+// }
+//
+// app.vestShares(Date.now(), 5);
 
 
 
