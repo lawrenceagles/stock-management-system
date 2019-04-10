@@ -5,6 +5,7 @@ const multer =  require('multer');
 const sharp = require('sharp');
 const _ = require('lodash');
 const path = require("path");
+const cron = require('node-cron');
 const bcrypt = require('bcryptjs');
 const {ObjectId} = require('mongodb');
 
@@ -20,20 +21,20 @@ const {Batch} = require('../models/batch');
 const {Log} = require ('../models/audit_Trail');
 
 
-// // cron functions
-// const vestingDateAuto = (today)=>{
-// 	console.log(`running a task every minute at ${today}`);
-// }
-//
-// // vesting function with cron job
-// vestShares = function(vestingDate, vestingPeriod){
-//   // Cron Jobs
-//   cron.schedule('* * * * *', () => {
-//     vestingDateAuto(vestingDate);
-//   });
-// }
-//
-// app.vestShares(Date.now(), 5);
+// cron functions
+const vestingDateAuto = (today)=>{
+	console.log(`running a task every minute at ${today}`);
+}
+
+// vesting function with cron job
+vestShares = function(vestingDate, vestingPeriod){
+  // Cron Jobs
+  cron.schedule('* * * * *', () => {
+    vestingDateAuto(vestingDate);
+  });
+}
+
+
 
 
 
@@ -421,8 +422,6 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
   }
 
   User.findById(ID).then(user=>{ // get user to add to batch by id
-    user.batch = user.batch.concat([req.body]); // add batch data to user
-      user.save().then(user=>{
         const companyID = user.company;
         Company.findById(companyID).then(company=>{ // find the user company by id
           let addToBatch;
@@ -439,7 +438,8 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
            if( batch.members.indexOf(user._id) >= 0 ){
               return res.status(400).json({Message: "user already added to batch"});
            }
-
+            req.body.name = batch.name;
+            user.batch = user.batch.concat([req.body]); // add batch data to user
             batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
 
             if(user.status){ // run this if the user is a confirmed staff of the company
@@ -449,6 +449,7 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
                 // update total allocated shares to unconfirmed scheme members
                 company.totalSharesOfUnconfirmedSchemeMembers += req.body.allocatedShares;
             }
+            user.save();
             batch.save();
             company.save().then(doc=>{
               return res.json({Message: "User added to batch successfully"})
@@ -460,7 +461,6 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
       }).catch(e=>{
           return res.status(400).json({Message:`${e}`});
       });
-    });
   }).catch(e=>{
       return res.status(400).json({Message:`${e}`});
   });
