@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const sharp = require('sharp');
 
 const {Admin} = require ('../models/admin');
+const {Company} = require('../models/company');
 const {User} = require("../models/user");
 const {Log} = require ('../models/audit_Trail');
 const {Notifcations} = require('../models/notifications');
@@ -448,37 +449,43 @@ router.patch('/admin/notification/:notificationid',authenticate, (req, res)=>{
 // POST ROUTE SEND NOTIFICATION FROM ADMIN TO ALL USERS IN A COMPANY
 router.post('/notification/:companyid',authenticate, (req, res)=>{
     let id = req.params.companyid;
-    let receiverEmail;
     req.body.onSenderModel = 'Admin'; // set the refPath
     req.body.onReceiverModel = 'User'; // set the refPath
     req.body.username = req.admin.username;
 
     if(!ObjectId.isValid(id)){// validate company id
-        return res.send(`Invalid company ID`);
+        return res.json({Message:`Invalid company ID`});
     }
     Company.findById(id).then(company=>{// find the user company with id
         if(!company){// handle user not found
             return res.status(404).json({Message:"No company found"});
         }
+        company.populate({
+            path: 'staffs'
+        })
+        .execPopulate()
+        .then(company=>{
+            if(company.staffs.length < 0){
+                return res.status(404).json({Message:"No scheme member for this company"})
+            }
 
-        company.find({}).then(usersArr=>{// find all the users in a company
-            receiverID =  _.map(usersArr, 'id');
+            let usersArr = company.staffs;
+            let receiversEmail = _.map(usersArr, 'email');
+            let receiverID =  _.map(usersArr, 'id');
             let sentMessage = new Notifcations({// create notification
                 ...req.body,
                 sender:req.admin._id,
                 receiver: receiverID
             });
-        })
-
-        sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
-
-        sentMessage.save().then(doc=>{
-            return res.status(200).send(doc);
-        }).catch(e=>{
-            return res.status(400).json({Message: `${e}`});
+            sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
+            sentMessage.save().then(doc=>{
+                return res.status(200).send(doc);
+            }).catch(e=>{
+                return res.status(400).json({Message: `${e}`});
+            });
         });
     }).catch(e=>{ // catch any errors
-        return res.status(404).JSON({Message:`${e}`});
+        return res.status(404).json({Message:`${e}`});
     });
 })
 
