@@ -447,6 +447,7 @@ router.patch('/admin/notification/:notificationid',authenticate, (req, res)=>{
 
 // POST ROUTE SEND NOTIFICATION FROM ADMIN TO ALL USERS IN A COMPANY
 router.post('/notification/:companyid',authenticate, (req, res)=>{
+    let id = req.params.companyid;
     let receiverEmail;
     req.body.onSenderModel = 'Admin'; // set the refPath
     req.body.onReceiverModel = 'User'; // set the refPath
@@ -468,6 +469,38 @@ router.post('/notification/:companyid',authenticate, (req, res)=>{
                 receiver: receiverID
             });
         })
+
+        sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
+
+        sentMessage.save().then(doc=>{
+            return res.status(200).send(doc);
+        }).catch(e=>{
+            return res.status(400).json({Message: `${e}`});
+        });
+    }).catch(e=>{ // catch any errors
+        return res.status(404).JSON({Message:`${e}`});
+    });
+})
+
+// POST ADMIN TO ALL USERS IN scheme
+router.post('/notification/allvetiva/scheme/members',authenticate, (req, res)=>{
+    req.body.onSenderModel = 'Admin'; // set the refPath
+    req.body.onReceiverModel = 'User'; // set the refPath
+    req.body.username = req.admin.username;
+
+    Company.find({}).then(allCompanies=>{// find the user company with id
+        if(allCompanies.length < 0){// handle user not found
+            return res.status(404).json({Message:"No company found, please onboard companies"});;
+        }
+
+        let receiverID =  _.map(allCompanies, 'id');
+        let receiverEmail =  _.map(allCompanies, 'email');
+
+        let sentMessage = new Notifcations({// create notification
+            ...req.body,
+            sender:req.admin._id,
+            receiver: receiverID
+        });
 
         sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
 

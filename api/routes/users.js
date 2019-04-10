@@ -619,6 +619,7 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
 
         Company.findById(companyID).then(company=>{
           receivers =  _.map(adminArray, 'id');
+          receiversEmail = _.map(adminArray, 'email');
           req.body.company = company;
           let sentMessage = new Notifcations({
               ...req.body,
@@ -626,7 +627,7 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
               receiver:receivers
           });
 
-          // sendToMultiple(doc.email, doc.firstname, doc.lastname); // send this notification by email also
+          sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
 
           sentMessage.save().then(doc=>{
               return res.send(doc);
