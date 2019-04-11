@@ -40,9 +40,6 @@ const userSchema = new Schema({
             message: '{VALUE }is not a valid Email!'
         }
     },
-    toEmail:{
-      type: Boolean
-    },
     gender:{
         type: String,
         required: true,
@@ -231,25 +228,6 @@ userSchema.virtual('receivedNotifications', { // links users to notification
   localField: '_id',
   foreignField: 'receiver'
 });
-
-// // Cron-scheduler for automaticing share vesting.
-// rule.mounth = batch.vesting.directDate.getMonth(); // get the vesting month
-// rule.day = batch.vesting.directDate.getDate(); // get the vesting day
-//
-// let startTime = vestedShares.nextVestingDate; // when should the cron job start
-// let endTime = startTime.setFullYear(startTime.getFullYear() + batch.vesting.period); // how long should the cron start
-//
-// // cron-schedule setup
-// const vestShares = (dateToStart, dateToEnd)=>{
-//   let j = schedule.scheduleJob({ start: startTime, end: endTime, rule}, function(){
-//     let currentBatchIndex = user.batch.indexOf(req.body.name); // get current batch index
-//     let currentBatch = user.batch[currentBatchIndex]; // get the current batch using currentBatchIndex
-//     currentBatch.vestedShares.amount += amountToVest; // user vests shares per calculation
-//     // increment next vesting date
-//     vestedShares.nextVestingDate.setFullYear(batch.vesting.directDate.getFullYear() + 1);
-//   });
-// }
-
 
 // Handle passing password when onboarding users
 userSchema.pre('save', function(next) {
