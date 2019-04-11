@@ -456,8 +456,8 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
               // var toStart = vestedShares.nextVestingDate; // when should the cron job start
               // var toEnd = startTime.setFullYear(startTime.getFullYear() + batch.vesting.period); // how long should the cron start
 
-              var start = new Date(Date.now() + 5000);
-              var end = new Date(start.getTime() + 5000000);
+              var start = new Date(Date.now() + 0100);
+              var end = new Date(start.getTime() + 0500);
 
               var vestUserShare = (startTime, endTime, rule, userID, batchName ) => {
                 // run the cron job every vesting day
@@ -477,11 +477,11 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
                 currentBatch.nextVestingDate = vestingDate.setFullYear(vestingDate.getFullYear() + vestingScheduleDate);
               }else{
                 vestingScheduleDate = 6;
-                currentBatch.nextVestingDate = vestingDate.setFullYear(vestingDate.getMonth() + vestingScheduleDate);
+                currentBatch.nextVestingDate = vestingDate.setMonth(vestingDate.getMonth() + vestingScheduleDate);
               }
 
               // get cron job start and end time
-              var start = vestedShares.nextVestingDate; // when should the cron job start
+              var start = currentBatch.nextVestingDate; // when should the cron job start
               var end = startTime.setFullYear(startTime.getFullYear() + batch.vesting.period); // how long should the cron start
 
               // var start = new Date(Date.now() + 5000);
