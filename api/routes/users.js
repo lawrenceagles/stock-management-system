@@ -404,6 +404,9 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
   }
 
   User.findById(ID).then(user=>{ // get user to add to batch by id
+        if(!user){
+          return res.status(404).json({Message:"No user was found"});
+        }
         const companyID = user.company;
         Company.findById(companyID).then(company=>{ // find the user company by id
           let addToBatch;
@@ -420,41 +423,66 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
            if( batch.members.indexOf(user._id) >= 0 ){
               return res.status(400).json({Message: "user already added to batch"});
            }
-           let vestingDate = Date.now();
-           let vestingPeriod = req.body.vesting.period;
-           let vestingSchedule = req.body.vesting.schedule;
+           let vestingPeriod = batch.vesting.period;
+           console.log(vestingPeriod, "vesting  Period sir");
 
             req.body.name = batch.name;
 
-            // // make sure a direct vesting date or vesting schedule is entered
-            // if(!vesting.directDate && !vesting.schedule){
-            //   return res.json({Message:"please enter a vesting date or a vesting schedule period"});
-            // }
-            //
-            // // make sure both direct vesting date and vesting schedule is entered is not entered
-            // if(vesting.directDate && vesting.schedule){
-            //   return res.json({Message:"please enter either a vesting date or a vesting schedule period"});
-            // }
+            // make sure a direct vesting date or vesting schedule is entered
+            if(!batch.vesting.directDate && !batch.vesting.schedule){
+              return res.json({Message:"please enter a vesting date or a vesting schedule period"});
+            }
+
+            // make sure both direct vesting date and vesting schedule is entered is not entered
+            if(batch.vesting.directDate && batch.vesting.schedule){
+              return res.json({Message:"please enter either a vesting date or a vesting schedule period"});
+            }
 
             user.batch = user.batch.concat([req.body]); // add batch data to user
+            let batchName = req.body.name;
+            console.log(batchName);
+            let currentBatch =  _.find(user.batch, { name:batchName }); // get current batch index
+            console.log(currentBatch, "currentBatch sir smiles");
             batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
+            let userAllocatedShares = req.body.allocatedShares;
+            console.log(userAllocatedShares, "allocated shares sir");
+            let vestingPercent = 100/batch.vesting.period;
+            console.log(vestingPercent, "vesting percent sir");
+            let amountToVest = (userAllocatedShares * vestingPercent)/100;
+            console.log(amountToVest, "amount to vest sir");
 
-            // let rule = new schedule.RecurrenceRule();// set the schedule rule
-            //
-            // if(vesting.directDate && !vesting.schedule){// handle vesting on specific date
-            //   vestedShares.nextVestingDate = batch.vesting.directDate; // get the vesting year.
-            //   rule.mounth = batch.vesting.directDate.getMonth(); // get the vesting month
-            //   rule.day = batch.vesting.directDate.getDate(); // get the vesting day
-            //
-            //   let startTime = vestedShares.nextVestingDate;
-            //   let endTime = startTime + batch.vesting.period;
-            //
-            //   // run the cron job every vesting day
-            //   let j = schedule.scheduleJob({ start: startTime, end: endTime, rule}, function(){
-            //     console.log('Time for tea!');
-            //     batch.vesting.directDate.getFullYear() += 1;
-            //   });
-            // }
+            let rule = new schedule.RecurrenceRule();// set the schedule rule
+            rule.mounth = batch.vesting.directDate.getMonth(); // get the vesting month
+            rule.day = batch.vesting.directDate.getDate(); // get the vesting day
+
+            if(!batch.vesting.directDate && batch.vesting.schedule){
+              let vestingSchedule = batch.vesting.schedule;
+              console.log(vestingSchedule, "vesting schedule sir")
+            }
+
+            if(batch.vesting.directDate && !batch.vesting.schedule){// handle vesting on specific date
+              let vestingDate = batch.vesting.directDate;
+              console.log(vestingDate, "vesting Date sir")
+              console.log("ok working")
+
+              currentBatch.nextVestingDate = batch.vesting.directDate;
+              console.log(currentBatch.nextVestingDate, "updated vested DATE sir");
+
+              // let startTime = vestedShares.nextVestingDate; // when should the cron job start
+              // let endTime = startTime.setFullYear(startTime.getFullYear() + batch.vesting.period); // how long should the cron start
+
+              let startTime = new Date(Date.now() + 5000);
+              let endTime = new Date(startTime.getTime() + 5000000);
+
+              // run the cron job every vesting day
+              let j = schedule.scheduleJob({ start: startTime, end: endTime, rule}, function(){
+                currentBatch.amount += amountToVest; // user vests shares per calculation
+                console.log(currentBatch.amount, "vested amount sir")
+                // increment next vesting date
+                currentBatch.nextVestingDate.setFullYear(batch.vesting.directDate.getFullYear() + 1);
+                console.log(currentBatch.nextVestingDate, "next vesting date sir")
+              });
+            }
 
             if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
@@ -463,11 +491,11 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
                 // update total allocated shares to unconfirmed scheme members
                 company.totalSharesOfUnconfirmedSchemeMembers += req.body.allocatedShares;
             }
-            user.save();
-            batch.save();
-            company.save().then(doc=>{
-              return res.json({Message: "User added to batch successfully"})
-            })
+            // user.save();
+            // batch.save();
+            // company.save().then(doc=>{
+            //   return res.json({Message: "User added to batch successfully"})
+            // })
 
           }).catch(e=>{
               return res.status(400).json({Message:`${e}`});

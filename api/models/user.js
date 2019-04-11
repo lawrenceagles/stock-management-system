@@ -197,14 +197,13 @@ const userSchema = new Schema({
             type: Date,
             required: [true, 'This field is required']
         },
-        vestedShares: [{
-            nextVestingDate:{
-                type: Date
-            },
-            amount:{
-                type: Number
-            }
-        }]
+        nextVestingDate:{
+            type: Date
+        },
+        amount:{
+            type: Number,
+            default: 0
+        }
     }],
     avatar:{
         type: Buffer
@@ -221,18 +220,38 @@ const userSchema = new Schema({
     }]
 });
 
-userSchema.virtual('sentNotifications', {
+userSchema.virtual('sentNotifications', { // links users to notification
   ref: 'Notifcations',
   localField: '_id',
   foreignField: 'sender'
 });
 
-userSchema.virtual('receivedNotifications', {
+userSchema.virtual('receivedNotifications', { // links users to notification
   ref: 'Notifcations',
   localField: '_id',
   foreignField: 'receiver'
 });
 
+// // Cron-scheduler for automaticing share vesting.
+// rule.mounth = batch.vesting.directDate.getMonth(); // get the vesting month
+// rule.day = batch.vesting.directDate.getDate(); // get the vesting day
+//
+// let startTime = vestedShares.nextVestingDate; // when should the cron job start
+// let endTime = startTime.setFullYear(startTime.getFullYear() + batch.vesting.period); // how long should the cron start
+//
+// // cron-schedule setup
+// const vestShares = (dateToStart, dateToEnd)=>{
+//   let j = schedule.scheduleJob({ start: startTime, end: endTime, rule}, function(){
+//     let currentBatchIndex = user.batch.indexOf(req.body.name); // get current batch index
+//     let currentBatch = user.batch[currentBatchIndex]; // get the current batch using currentBatchIndex
+//     currentBatch.vestedShares.amount += amountToVest; // user vests shares per calculation
+//     // increment next vesting date
+//     vestedShares.nextVestingDate.setFullYear(batch.vesting.directDate.getFullYear() + 1);
+//   });
+// }
+
+
+// Handle passing password when onboarding users
 userSchema.pre('save', function(next) {
   const user = this // bind this
 
@@ -282,30 +301,6 @@ userSchema.methods.generateToken = function() {
     // save the user and return the token to be used in the server.js where with the POST route for assiging tokens to newly signed up users.
     return user.save().then(() => {
         return token;
-    });
-}
-
-userSchema.methods.batchRegistration = function(batchObject) {
-    let user = this;
-    userBatch = user.batch;
-
-    try {
-        // validate for batch name
-        userBatch.map(companyBatch=>{
-            if (companyBatch.name === batchObject.name){
-                return "A batch with that name is already in existence";
-            }
-        });
-
-        [...userBatch, batchObject]; // append new batch to batch
-
-    }catch(e) {
-        return Promise.reject(`${e}`);
-    }
-
-    // return userBatch; // return new userBatch
-    return user.save().then(() => {
-        return user;
     });
 }
 
