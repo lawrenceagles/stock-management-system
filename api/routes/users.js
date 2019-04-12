@@ -464,7 +464,7 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
                 var j = schedule.scheduleJob({ start: startTime, end: endTime, rule}, function(){
                   currentBatch.amount += amountToVest; // user vests shares per calculation
                   // increment next vesting date
-                  currentBatch.nextVestingDate.setFullYear(batch.vesting.directDate.getFullYear() + 1);
+                  currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
                 });
               }
             }else if(!batch.vesting.directDate && batch.vesting.schedule){// handle vesting schedule if in use
@@ -492,10 +492,11 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
                 var j = schedule.scheduleJob({ start: startTime, end: endTime, rule}, function(){
                   currentBatch.amount += amountToVest; // user vests shares per calculation
                   // increment next vesting date
-                  currentBatch.nextVestingDate.setFullYear(batch.vesting.directDate.getFullYear() + 1);
+                  currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
                 });
 
             }
+          }
 
             vestUserShare(start, end, rule, null, null); // function to run cron job to vest a user share
 
