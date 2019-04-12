@@ -8,7 +8,6 @@ const companyRoute = require('./api/routes/company');
 const router = express.Router();
 
 const {ObjectId} = require('mongodb');
-var schedule = require('node-schedule');
 const {Company} = require('./api/models/company');
 
 const Host = 'localhost';

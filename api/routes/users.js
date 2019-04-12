@@ -5,7 +5,7 @@ const multer =  require('multer');
 const sharp = require('sharp');
 const _ = require('lodash');
 const path = require("path");
-const schedule = require('node-schedule');
+const cron = require('node-cron');
 const bcrypt = require('bcryptjs');
 const {ObjectId} = require('mongodb');
 
@@ -444,29 +444,30 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
             let vestingPercent = 100/batch.vesting.period;
             let amountToVest = (userAllocatedShares * vestingPercent)/100;
 
-            let rule = new schedule.RecurrenceRule();// set the schedule rule
-            rule.mounth = batch.vesting.directDate.getMonth(); // get the vesting month
-            rule.day = batch.vesting.directDate.getDate(); // get the vesting day
-
             if(batch.vesting.directDate && !batch.vesting.schedule){// handle vesting on specific date
               let vestingDate = batch.vesting.directDate;
+              let vestingMounth = batch.vesting.directDate.getMonth(); // get the vesting month
               currentBatch.nextVestingDate = batch.vesting.directDate;
 
               // get cron job start and end time
-              // var toStart = vestedShares.nextVestingDate; // when should the cron job start
-              // var toEnd = startTime.setFullYear(startTime.getFullYear() + batch.vesting.period); // how long should the cron start
-
-              var start = new Date(Date.now() + 0100);
-              var end = new Date(start.getTime() + 0500);
-
-              var vestUserShare = (startTime, endTime, rule, userID, batchName ) => {
-                // run the cron job every vesting day
-                var j = schedule.scheduleJob({ start: startTime, end: endTime, rule}, function(){
+              let test = 1;
+              let count = 0;
+              // run the cron job every vesting day
+              var task = cron.schedule('* * 24 * *', () =>  {
+                let newCount = count + 1;
+                if(new Date.getMonth() == vestingMounth){
                   currentBatch.amount += amountToVest; // user vests shares per calculation
                   // increment next vesting date
                   currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
-                });
-              }
+                }
+                if(count === batch.vesting.period){
+                  task.destroy();
+                }
+
+                count +=1;
+
+              });
+
             }else if(!batch.vesting.directDate && batch.vesting.schedule){// handle vesting schedule if in use
               var schedule = batch.vesting.schedule; // get the company schedule period
               var vestingDate = new Date();
@@ -475,30 +476,55 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
               if(schedule.toLowerCase() == "annually"){
                 vestingScheduleDate = 1;
                 currentBatch.nextVestingDate = vestingDate.setFullYear(vestingDate.getFullYear() + vestingScheduleDate);
+
+                // get cron job start and end time
+                let test = 1;
+                let count = 0;
+                // run the cron job every vesting day
+                var task = cron.schedule('* * 24 * *', () =>  {
+                  let newCount = count + 1;
+                  if(new Date.getMonth() == vestingMounth){
+                    currentBatch.amount += amountToVest; // user vests shares per calculation
+                    // increment next vesting date
+                    currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
+                  }
+                  if(count === batch.vesting.period){
+                    task.destroy();
+                  }
+
+                  count +=1;
+
+                });
+
               }else{
                 vestingScheduleDate = 6;
                 currentBatch.nextVestingDate = vestingDate.setMonth(vestingDate.getMonth() + vestingScheduleDate);
+
+                // get cron job start and end time
+                let test = 1;
+                let count = 0;
+                // run the cron job every vesting day
+                var task = cron.schedule('* * 12 * *', () =>  {
+                  let newCount = count + 1;
+                  if(new Date.getMonth() == vestingMounth){
+                    currentBatch.amount += amountToVest; // user vests shares per calculation
+                    // increment next vesting date
+                    currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
+                  }
+                  if(count === batch.vesting.period){
+                    task.destroy();
+                  }
+
+                  count +=1;
+
+                });
               }
 
               // get cron job start and end time
               var start = currentBatch.nextVestingDate; // when should the cron job start
               var end = startTime.setFullYear(startTime.getFullYear() + batch.vesting.period); // how long should the cron start
 
-              // var start = new Date(Date.now() + 5000);
-              // var end = new Date(start.getTime() + 5000000);
-
-              var vestUserShare = (startTime, endTime, rule, userID, batchName ) => {
-                // run the cron job every vesting day
-                var j = schedule.scheduleJob({ start: startTime, end: endTime, rule}, function(){
-                  currentBatch.amount += amountToVest; // user vests shares per calculation
-                  // increment next vesting date
-                  currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
-                });
-
-            }
           }
-
-            vestUserShare(start, end, rule, null, null); // function to run cron job to vest a user share
 
             if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
