@@ -106,22 +106,6 @@ app.use((req, res, next)=>{
   next(err);
 });
 
-// cron functions
-const vestingDateAuto = (today)=>{
-	console.log(`running a task every minute at ${today}`);
-}
-
-// vesting function with cron job
-vestShares = function(vestingDate, vestingPeriod){
-  // Cron Jobs
-  cron.schedule('* * * * *', () => {
-    vestingDateAuto(vestingDate);
-  });
-}
-
-
-// vestShares(Date.now());
-
 app.listen(Port, () => {
     console.log(`${Host} server started on ${Port}`);
 });

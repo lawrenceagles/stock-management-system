@@ -521,8 +521,8 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
               }
 
               // get cron job start and end time
-              var start = currentBatch.nextVestingDate; // when should the cron job start
-              var end = startTime.setFullYear(startTime.getFullYear() + batch.vesting.period); // how long should the cron start
+              // var start = currentBatch.nextVestingDate; // when should the cron job start
+              // var end = startTime.setFullYear(startTime.getFullYear() + batch.vesting.period); // how long should the cron start
 
           }
 
@@ -533,11 +533,11 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
                 // update total allocated shares to unconfirmed scheme members
                 company.totalSharesOfUnconfirmedSchemeMembers += req.body.allocatedShares;
             }
-            // user.save();
-            // batch.save();
-            // company.save().then(doc=>{
-            //   return res.json({Message: "User added to batch successfully"})
-            // })
+            user.save();
+            batch.save();
+            company.save().then(doc=>{
+              return res.json({Message: "User added to batch successfully"})
+            })
 
           }).catch(e=>{
               return res.status(400).json({Message:`${e}`});

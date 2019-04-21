@@ -3,12 +3,12 @@ const {User} = require('../api/models/user');
 // create a middleware function
 let authenticateUser = (req, res, next) => {
     let token = req.header('x-auth'); // grap the token from the server
-    
+
         User.findByToken(token).then((user) => { // model method to find user by token
         if(user){
             req.user = user;
             req.token = token;
-            
+
             return next();
         }else{
              Admin.findByToken(token).then((admin)=>{
@@ -17,23 +17,23 @@ let authenticateUser = (req, res, next) => {
 
                 // Role management
                 if(req.method !== 'GET' && req.admin.role === 'observer'){
-                     return Promise.reject();
+                     return Promise.reject("You do not have the permission to perform this operation");
                     // you can redirect the user to the login page!
                 }
 
                 if(req.method === 'POST' && req.admin.role === 'manager') {
-                    return Promise.reject();
+                    return Promise.reject("You do not have the permission to perform this operation");
                     // you can redirect the user to the login page!
                 }
                 return next();
             })
             .catch((e) => {
-                res.status(401).send(e);
-            }); 
+                res.status(401).json({Message:`${e}`});
+            });
         }
     })
     .catch((e) => {
         res.status(401).send(e);
-    });  
+    });
 }
 module.exports = {authenticateUser};
