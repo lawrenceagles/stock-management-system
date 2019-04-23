@@ -45,14 +45,15 @@ const AdminSchema = new Schema({
     },
     phone: {
         type: Number,
-        minlength: 11,
+        minlength: 12,
         required: [true, 'User phone number required'],
         trim: true
       },
     role:{
       type: String,
       trim: true,
-      enum: role
+      enum: role,
+      required:[true,'role is required']
     },
     avatar:{
         type: Buffer
@@ -122,7 +123,7 @@ AdminSchema.methods.generateToken = function() {
     });
 }
 
-// create a custom model method to find admin by token for authentication
+// create a custom model method to find admin by token for authenticationn
 AdminSchema.statics.findByToken = function(token) {
     let Admin = this;
     let decoded;
@@ -141,14 +142,13 @@ AdminSchema.statics.findByToken = function(token) {
 
 
 
-// create a new mongoose method for user login authentication
+// create a new mongoose method for user login authenticationn
 AdminSchema.statics.findByCredentials = function(email, password) {
     let Admin = this;
     return Admin.findOne({email}).then((admin)=> { // find admin by email
         if(!admin){  // handle admin not found
-            return Promise.reject("No user with that email in database");
+            return Promise.reject("Email does not exist");
         }
-
         return new Promise((resolve, reject)=> {
             const passwordValidation = bcrypt.compareSync(password, admin.password);
             if(passwordValidation === true){

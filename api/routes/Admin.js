@@ -3,7 +3,6 @@ const router = express.Router();
 const _ = require('lodash');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
-const sharp = require('sharp');
 
 const {Admin} = require ('../models/admin');
 const {Company} = require('../models/company');
@@ -34,24 +33,24 @@ const upload = multer({
 
 
 // route to upload an image
-router.post('/upload/profile/image',authenticate,upload.single('avatar'),(req,res)=>{
-  let buffer = sharp(req.file.buffer)
-    .resize({width: 400, height: 400})
-    .png()
-    .toBuffer()
-    .then(sharpImage=>{
-      req.admin.avatar = sharpImage; // set admin avater to sharp Image
-      req.admin.save().then(image=>{ // save admin avatar
-        res.json({Message:"Image Successfully Uploaded"});
-      }).catch(e=>{
-        return res.status(400).json({Message:`${e}`});
-      });
-  }).catch(e=>{
-    return res.status(400).json({Message:`${e}`});
-  })
-},(error, req, res, next) => {
-    return res.status(400).json({ error: `${error.message}` });
-});
+// router.post('/upload/profile/image',authenticate,upload.single('avatar'),(req,res)=>{
+//   let buffer = sharp(req.file.buffer)
+//     .resize({width: 400, height: 400})
+//     .png()
+//     .toBuffer()
+//     .then(sharpImage=>{
+//       req.admin.avatar = sharpImage; // set admin avater to sharp Image
+//       req.admin.save().then(image=>{ // save admin avatar
+//         res.json({Message:"Image Successfully Uploaded"});
+//       }).catch(e=>{
+//         return res.status(400).json({Message:`${e}`});
+//       });
+//   }).catch(e=>{
+//     return res.status(400).json({Message:`${e}`});
+//   })
+// },(error, req, res, next) => {
+//     return res.status(400).json({ error: `${error.message}` });
+// });
 
 
 // route to upload an image
@@ -84,23 +83,14 @@ router.get('/admin/profile/image',authenticate,(req,res)=>{
 
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
-    let options =  {
-        page: parseInt(req.query.page) || 0,
-        limit: parseInt(req.query.limit) || 3
-    }
-
     Admin.find()
-        .skip(options.page * options.limit)
-        .limit(options.limit)
-        .exec()
         .then(doc => {
         return res.send(doc);
-    });
+    })
+    .catch(e=>{
+        return res.status(404).json({Message:`${e}`});
+    })
     },
-
-    (e) => {
-      return res.status(404).json({Message:`{e}`});
-    }
 );
 
 // SORT find by role
@@ -122,8 +112,11 @@ router.get('/admin/role/:role',authenticate,(req, res)=>{
 
 // POST Route onboard admin
 router.post('/admin',authenticate,(req, res) => {
+    const { firstname, lastname, username, email,phone,role} = req.body
+    if(firstname.trim()!==''&& lastname.trim() !=='' && username.trim()!=='' && email.trim()!=='' && phone.trim() !==''&& role.trim()!==''){
     // pick out fields to set and from req.body
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role', 'password']);
+    console.log(body)
     Admin.findByEmail(body.email).then(doc=>{ // handle already registered admin
         if(doc){
             return Promise.reject();
@@ -149,6 +142,12 @@ router.post('/admin',authenticate,(req, res) => {
         sendWelcomePasswordEmail(body.email,body.firstname,body.lastname,body.password);
         return res.status(201).send(doc);
     });
+    }
+    else{
+        res.status(400).json({
+            Message:'All feilds are required'
+        })
+    }
 });
 
 // forgot Password Request Route

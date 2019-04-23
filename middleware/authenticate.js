@@ -24,7 +24,7 @@ let authenticate = (req, res, next) => {
 
         next();
     }).catch((e) => {
-        res.status(401).send("You do not have the permission you perform this operation Admin only");
+        res.status(401).json({Message:"You do not have the permission you perform this operation Admin only"});
     });  
 }
 module.exports = {authenticate};

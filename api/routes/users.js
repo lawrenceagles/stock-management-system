@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const multer =  require('multer');
-const sharp = require('sharp');
 const _ = require('lodash');
 const path = require("path");
 const cron = require('node-cron');
@@ -37,22 +36,22 @@ const upload = multer({
 
 
 // route to upload an image
-router.post('/upload/user/profile/image',authenticateUser,upload.single('avatar'),(req,res)=>{
-  let buffer = sharp(req.file.buffer)
-    .resize({width: 400, height: 400})
-    .png()
-    .toBuffer()
-    .then(sharpImage=>{
-      req.user.avatar = sharpImage; // set user avater to sharp Image
-      req.user.save().then(image=>{ // save user avatar
-      return res.json({Message:"Image Successfully Uploaded"});
-      }).catch(e=>{
-        return res.status(400).json({Message:`${e}`});
-      });
-  }).catch(e=>{
-    return res.status(400).json({Message:`${e}`});
-  })
-});
+// router.post('/upload/user/profile/image',authenticateUser,upload.single('avatar'),(req,res)=>{
+//   let buffer = sharp(req.file.buffer)
+//     .resize({width: 400, height: 400})
+//     .png()
+//     .toBuffer()
+//     .then(sharpImage=>{
+//       req.user.avatar = sharpImage; // set user avater to sharp Image
+//       req.user.save().then(image=>{ // save user avatar
+//       return res.json({Message:"Image Successfully Uploaded"});
+//       }).catch(e=>{
+//         return res.status(400).json({Message:`${e}`});
+//       });
+//   }).catch(e=>{
+//     return res.status(400).json({Message:`${e}`});
+//   })
+// });
 
 
 // route to upload an image
