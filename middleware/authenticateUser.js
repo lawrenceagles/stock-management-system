@@ -28,12 +28,16 @@ let authenticateUser = (req, res, next) => {
                 return next();
             })
             .catch((e) => {
-                res.status(401).send(e);
+                res.status(401).json({
+                    Message:`${e}`
+                });
             }); 
         }
     })
     .catch((e) => {
-        res.status(401).send(e);
+        res.status(401).json({
+            Message:`${e}`
+        });
     });  
 }
 module.exports = {authenticateUser};

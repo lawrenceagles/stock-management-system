@@ -177,7 +177,7 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
 
             // decrease company total scheme members by 1 and delete user id in each batch
             company.totalSchemeMembers -= 1;
-
+            company.save()
             //  find all the batch in user company
             Batch.find({company:user.company}).then(batches=>{
               _.remove(batches, function(b){
@@ -240,7 +240,7 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
     }
 
     // find and update the user by id if it is found, throw error 404 if not
-    User.updateOne({_id:id}, {$set:req.body}, { new: true, runValidators: true  }).then((user)=>{
+    User.updateOne({_id:id}, {$set:req.body}, { new: true, runValidators: false  }).then((user)=>{
         // check if user was foun and updated
         if(!user){
             return res.status(404).json({Message: "No user found"});
@@ -324,14 +324,10 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           req.body.companySchemerules = company.schemeRules;
           req.body.currentShareValue = company.currentShareValue;
 
-          // Auto generate random password for admin
+          // Auto generate random password for user
            req.body.password = genRandomPassword(10);
-
         // create the user
         let user = new User(req.body);
-
-        // send welcome email containing password
-        sendUserWelcomePasswordEmail(user.email,user.firstName,user.lastName,user.password);
 
         // log audit trail
         let log = new Log({
@@ -342,23 +338,19 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
         });
 
         log.save();
-
-        user.save().then(user=>{ // Return the user doc and update user-company data relationship
+        user.save()
+        .then(user=>{ // Return the user doc and update user-company data relationship
           // increase company total scheme members by 1
           company.totalSchemeMembers += 1;
           company.save();
-
+          // send welcome email containing password
+        sendUserWelcomePasswordEmail(user.email,user.firstName,user.lastName,user.password);
           let body = _.pick(user, ['firstname', 'lastname', 'email','Company_Schemerules','company','status','tokens']);
           return res.status(201).send(body);
-
         }).catch(e=>{
           return res.status(400).json({Message:`${e}`});
         });
-
-      }).catch(e=>{
-          return res.status(400).json({Message:`${e}`});
-      });
-
+      })
     });
 })
 
