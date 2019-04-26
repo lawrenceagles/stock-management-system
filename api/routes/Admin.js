@@ -33,24 +33,24 @@ const upload = multer({
 
 
 // route to upload an image
-// router.post('/upload/profile/image',authenticate,upload.single('avatar'),(req,res)=>{
-//   let buffer = sharp(req.file.buffer)
-//     .resize({width: 400, height: 400})
-//     .png()
-//     .toBuffer()
-//     .then(sharpImage=>{
-//       req.admin.avatar = sharpImage; // set admin avater to sharp Image
-//       req.admin.save().then(image=>{ // save admin avatar
-//         res.json({Message:"Image Successfully Uploaded"});
-//       }).catch(e=>{
-//         return res.status(400).json({Message:`${e}`});
-//       });
-//   }).catch(e=>{
-//     return res.status(400).json({Message:`${e}`});
-//   })
-// },(error, req, res, next) => {
-//     return res.status(400).json({ error: `${error.message}` });
-// });
+router.post('/upload/profile/image',authenticate,upload.single('avatar'),(req,res)=>{
+  let buffer = sharp(req.file.buffer)
+    .resize({width: 400, height: 400})
+    .png()
+    .toBuffer()
+    .then(sharpImage=>{
+      req.admin.avatar = sharpImage; // set admin avater to sharp Image
+      req.admin.save().then(image=>{ // save admin avatar
+        res.json({Message:"Image Successfully Uploaded"});
+      }).catch(e=>{
+        return res.status(400).json({Message:`${e}`});
+      });
+  }).catch(e=>{
+    return res.status(400).json({Message:`${e}`});
+  })
+},(error, req, res, next) => {
+    return res.status(400).json({ error: `${error.message}` });
+});
 
 
 // route to upload an image
@@ -405,7 +405,6 @@ router.post('/notification',authenticate, (req, res)=>{
 router.patch('/admin/notification/:notificationid',authenticate, (req, res)=>{
     const notificationID = req.params.notificationid;
     let admin = req.admin;
-    let receiverEmail = req.body.email;
     req.body.onSenderModel = 'Admin'; // set the refPath
     req.body.onReceiverModel = 'User'; // set the refPath
     req.body.username = req.admin.username;
@@ -415,28 +414,39 @@ router.patch('/admin/notification/:notificationid',authenticate, (req, res)=>{
       return res.json({Message: "Invalid ObjectId"});
     }
 
-    User.findOne({email:receiverEmail}).then(user=>{ // find user with email given
-        if(!user){// handle wrong usesr emails
-            return res.status(404).json({Message: "error no user with that email in database"});
+    Notifcations.findById(notificationID).then(notification=>{// find the message to reply by id
+        const userID = notification.receiver; // get the user id who receives the notification
+
+        if(!ObjectId.isValid(userID)){// handle invalid ObjectId
+            return res.json({Message: "Invalid ObjectId"});
         }
+       
+        User.findOne({_id:userID}).then(user=>{ // find user with email given
 
-        Notifcations.findById(notificationID).then(notification=>{// find the message to reply by id
-          let receiver =  user._id;
-          let reply = req.body;
-          reply.receiver = [receiver];
+            if(!user){// handle wrong usesr emails
+                return res.status(404).json({Message: "error no user with that email in database"});
+            }
 
-          notification.reply = notification.reply.concat([reply]); // concat the reply object into the reply array
+            let receiverEmail = user.email;
+            let receiver =  user._id;
 
-          sendToOne(user.email, user.firstname, user.lastname, req.body.message); // send this notification by email also
+            let reply = req.body;
+            reply.receiver = [receiver];    
 
-          notification.save().then(doc=>{ // save the updated notification
-              return res.send(doc);
-          }).catch(e=>{// handle any error caught
-              return res.status(400).json({Message: `${e}`});
-          });
-        })
+            notification.reply = notification.reply.concat([reply]); // concat the reply object into the reply array
 
-        // res.send(doc);
+            sendToOne(user.email, user.firstname, user.lastname, req.body.message); // send this notification by email also
+
+            notification.save().then(doc=>{ // save the updated notification
+                return res.send(doc);
+            }).catch(e=>{// handle any error caught
+                return res.status(400).json({Message: `${e}`});
+            });
+
+        }).catch(e=>{
+            return res.status(400).json({Message: `${e}`});
+        });
+
     }).catch(e=>{
         return res.status(400).json({Message: `${e}`});
     });

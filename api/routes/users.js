@@ -36,22 +36,22 @@ const upload = multer({
 
 
 // route to upload an image
-// router.post('/upload/user/profile/image',authenticateUser,upload.single('avatar'),(req,res)=>{
-//   let buffer = sharp(req.file.buffer)
-//     .resize({width: 400, height: 400})
-//     .png()
-//     .toBuffer()
-//     .then(sharpImage=>{
-//       req.user.avatar = sharpImage; // set user avater to sharp Image
-//       req.user.save().then(image=>{ // save user avatar
-//       return res.json({Message:"Image Successfully Uploaded"});
-//       }).catch(e=>{
-//         return res.status(400).json({Message:`${e}`});
-//       });
-//   }).catch(e=>{
-//     return res.status(400).json({Message:`${e}`});
-//   })
-// });
+router.post('/upload/user/profile/image',authenticateUser,upload.single('avatar'),(req,res)=>{
+  let buffer = sharp(req.file.buffer)
+    .resize({width: 400, height: 400})
+    .png()
+    .toBuffer()
+    .then(sharpImage=>{
+      req.user.avatar = sharpImage; // set user avater to sharp Image
+      req.user.save().then(image=>{ // save user avatar
+      return res.json({Message:"Image Successfully Uploaded"});
+      }).catch(e=>{
+        return res.status(400).json({Message:`${e}`});
+      });
+  }).catch(e=>{
+    return res.status(400).json({Message:`${e}`});
+  })
+});
 
 
 // route to upload an image
@@ -452,7 +452,7 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
                   currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
                 }
                 if(count === batch.vesting.period){
-                  task.destroy();
+                  task.stop();
                 }
 
                 count +=1;
@@ -480,7 +480,7 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
                     currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
                   }
                   if(count === batch.vesting.period){
-                    task.destroy();
+                    task.stop();
                   }
 
                   count +=1;
@@ -503,18 +503,13 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
                     currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
                   }
                   if(count === batch.vesting.period){
-                    task.destroy();
+                    task.stop();
                   }
 
                   count +=1;
 
                 });
               }
-
-              // get cron job start and end time
-              var start = currentBatch.nextVestingDate; // when should the cron job start
-              var end = startTime.setFullYear(startTime.getFullYear() + batch.vesting.period); // how long should the cron start
-
           }
 
             if(user.status){ // run this if the user is a confirmed staff of the company
@@ -524,11 +519,11 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
                 // update total allocated shares to unconfirmed scheme members
                 company.totalSharesOfUnconfirmedSchemeMembers += req.body.allocatedShares;
             }
-            // user.save();
-            // batch.save();
-            // company.save().then(doc=>{
-            //   return res.json({Message: "User added to batch successfully"})
-            // })
+            user.save();
+            batch.save();
+            company.save().then(doc=>{
+              return res.json({Message: "User added to batch successfully"})
+            })
 
           }).catch(e=>{
               return res.status(400).json({Message:`${e}`});
