@@ -326,6 +326,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 
           // Auto generate random password for user
            req.body.password = genRandomPassword(10);
+           console.log(req.body.password)
         // create the user
         let user = new User(req.body);
 
@@ -621,6 +622,8 @@ router.post('/user/login', (req, res) => {
                 _id: user._id,
                 email: user.email,
                 company: user.company,
+                lastName:user.lastName,
+                firstName:user.firstName,
                 Company_Schemerules: user.Company_Schemerules,
                 tokens: user.tokens,
                 status: user.status

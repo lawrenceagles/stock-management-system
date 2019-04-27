@@ -121,7 +121,8 @@ router.post('/admin',authenticate,(req, res) => {
         if(doc){
             return Promise.reject();
         }
-    }).catch((e)=>{
+    })
+    .catch((e)=>{
         return res.status(400).json({Message:"Admin already exists"});
     })
 
@@ -188,6 +189,8 @@ router.post('/admin/login', (req, res) => {
             return res.header('x-auth', token).send({
                 id: admin._id,
                 username: admin.username,
+                firstname:admin.firstname,
+                lastname:admin.lastname,
                 role:admin.role,
                 token
             });
@@ -313,24 +316,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 
 // Audit Trail Route
 router.get('/audit', (req, res)=>{
-    const sort = {}
-
-    let options =  {
-        page: parseInt(req.query.page) || 0,
-        limit: parseInt(req.query.limit) || 10
-    }
-
-    if (req.query.sortBy) {
-        const parts = req.query.sortBy.split(':')
-        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
-    }
-
-    Log.find({})
-    .skip(options.page * options.limit)
-    .limit(options.limit)
-    .sort(sort)
-    .exec()
-    .then((doc)=>{
+    Log.find({}).then((doc)=>{
         return res.send(doc);
     });
 });
