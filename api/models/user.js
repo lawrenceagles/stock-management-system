@@ -314,7 +314,7 @@ userSchema.methods.userConfirmation = function(companyObj){
     let company = companyObj;
 
     // update total shares alloted by company to scheme members dynamically
-    let companyBatch = company.schemeBatch;
+    let companyBatch = company.batch;
     let userBatch = user.batch;
     let totalRetrivedShares;
 
