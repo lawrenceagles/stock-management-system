@@ -128,7 +128,6 @@ router.post('/admin',authenticate,(req, res) => {
 
     // Auto generate random password for admin
     body.password = genRandomPassword(10);
-    console.log(body.password);
     let admin = new Admin(body);
 
     let log = new Log({
@@ -346,7 +345,6 @@ router.get('/admin/received/notification',authenticate, (req,res)=>{
     })
     .execPopulate()
     .then(doc=>{
-        console.log(doc);
         return res.send(admin.receivedNotifications);
     })
 })
@@ -414,34 +412,33 @@ router.patch('/admin/notification/:notificationid',authenticate, (req, res)=>{
     }
 
     Notifcations.findById(notificationID).then(notification=>{// find the message to reply by id
-      let receiver =  user._id;
+      let receiver = notification.sender; // get the user id
       reply.receiver = [receiver];
-      let userID = notification.sender;
 
-      if(!ObjectId.isValid(userID)){// handle invalid ObjectId
+      if(!ObjectId.isValid(receiver)){// handle invalid ObjectId
         return res.json({Message: "Invalid ObjectId"});
       }
 
-      User.findById(userID).then(user=>{ // find user with email given
+      User.findById(receiver).then(user=>{ // find user with email given
           if(!user){// handle wrong usesr emails
               return res.status(404).json({Message: "error no user with that email in database"});
           }
 
           notification.reply = notification.reply.concat([reply]); // concat the reply object into the reply array
-          console.log(user.email);
 
           sendToOne(user.email, user.firstname, user.lastname, reply.message); // send this notification by email also
+
+          notification.save().then(doc=>{ // save the updated notification
+              return res.send(doc);
+          }).catch(e=>{// handle any error caught
+              return res.status(400).json({Message: `${e}`});
+          });
 
           // res.send(doc);
       }).catch(e=>{
           return res.status(400).json({Message: `${e}`});
       });
 
-      notification.save().then(doc=>{ // save the updated notification
-          return res.send(doc);
-      }).catch(e=>{// handle any error caught
-          return res.status(400).json({Message: `${e}`});
-      });
     }).catch(e=>{
         return res.status(400).json({Message: `${e}`});
     });

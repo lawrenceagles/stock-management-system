@@ -327,8 +327,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 
           // Auto generate random password for admin
            req.body.password = genRandomPassword(10);
-           console.log(req.body.password);
-
+           
         // create the user
         let user = new User(req.body);
 
@@ -760,14 +759,14 @@ router.patch('/user/notification/:notificationid',authenticateUser, (req, res)=>
             return res.status(404).json({Message:"error no admin found"});
         }
 
-        let receivers =  _.map(adminArray, 'id');
-        let receiversEmail = _.map(adminArray, 'email');
-        reply.receiver = receivers
-
         Notifcations.findById(notificationID).then(notification=>{
           if(!notification){
             return res.json({Message:"No notification found"});
           }
+
+          let receivers =  _.map(adminArray, 'id');
+          let receiversEmail = _.map(adminArray, 'email');
+          reply.receiver = receivers
 
           notification.reply = notification.reply.concat([reply]);
 
