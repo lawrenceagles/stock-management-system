@@ -749,10 +749,11 @@ router.patch('/user/notification/:notificationid',authenticateUser, (req, res)=>
     let user = req.user;
     let companyID = user.company;
     const notificationID = req.params.notificationid;
-    req.body.onSenderModel = 'User'; // set the refPath
-    req.body.onReceiverModel = 'Admin';
-    req.body.username = req.user.username;
-    req.body.sender = req.user._id;
+    let reply = req.body;
+    reply.onSenderModel = 'User'; // set the refPath
+    reply.onReceiverModel = 'Admin';
+    reply.username = req.user.username;
+    reply.sender = req.user._id;
 
     if(!ObjectId.isValid(notificationID)){// handle invalid ObjectId
       return res.json({Message: "Invalid ObjectId"});
@@ -760,13 +761,12 @@ router.patch('/user/notification/:notificationid',authenticateUser, (req, res)=>
 
     Admin.find({}).then(adminArray=>{
         if(!adminArray){
-            return res.status(404).send("error no admin found");
+            return res.status(404).json({Message:"error no admin found"});
         }
 
         Notifcations.findById(notificationID).then(notification=>{
           let receivers =  _.map(adminArray, 'id');
           let receiversEmail = _.map(adminArray, 'email');
-          let reply = req.body;
           reply.receiver = receivers
 
           notification.reply = notification.reply.concat([reply]);
