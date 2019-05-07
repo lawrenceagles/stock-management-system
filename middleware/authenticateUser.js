@@ -28,12 +28,12 @@ let authenticateUser = (req, res, next) => {
                 return next();
             })
             .catch((e) => {
-                res.status(401).json({Message:`${e}`});
+                res.status(401).json({Message:"You do not have the permission to perform this operation"});
             });
         }
     })
     .catch((e) => {
-        res.status(401).send(e);
+        res.status(401)json({Message:"You do not have the permission to perform this operation"});
     });
 }
 module.exports = {authenticateUser};

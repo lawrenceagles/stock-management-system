@@ -24,7 +24,6 @@ let authenticate = (req, res, next) => {
 
         next();
     }).catch((e) => {
-        console.log(e)
         res.status(401).json({Message:"You do not have the permission you perform this operation"});
     });
 }

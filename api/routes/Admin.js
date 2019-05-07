@@ -3,7 +3,6 @@ const router = express.Router();
 const _ = require('lodash');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
-const sharp = require('sharp');
 
 const {Admin} = require ('../models/admin');
 const {Company} = require('../models/company');
@@ -89,11 +88,7 @@ router.get('/admin',authenticate,(req, res) => {
         return res.json({Message:"No admin found"});
       }
       res.send(admins);
-    })
-    },
-
-    (e) => {
-      return res.status(404).json({Message:`{e}`});
+    }).catch(400).json({Message:`${e}`});
     }
 );
 
@@ -116,13 +111,17 @@ router.get('/admin/role/:role',authenticate,(req, res)=>{
 
 // POST Route onboard admin
 router.post('/admin',authenticate,(req, res) => {
+    const { firstname, lastname, username, email,phone,role} = req.body
+    if(firstname.trim()!==''&& lastname.trim() !=='' && username.trim()!=='' && email.trim()!=='' && phone.trim() !==''&& role.trim()!==''){
     // pick out fields to set and from req.body
     let body = _.pick(req.body, ['firstname', 'lastname', 'username', 'email', 'phone', 'role', 'password']);
+    console.log(body)
     Admin.findByEmail(body.email).then(doc=>{ // handle already registered admin
         if(doc){
             return Promise.reject();
         }
-    }).catch((e)=>{
+    })
+    .catch((e)=>{
         return res.status(400).json({Message:"Admin already exists"});
     })
 
@@ -143,6 +142,12 @@ router.post('/admin',authenticate,(req, res) => {
         sendWelcomePasswordEmail(body.email,body.firstname,body.lastname,body.password);
         return res.status(201).send(doc);
     });
+    }
+    else{
+        res.status(400).json({
+            Message:'All feilds are required'
+        })
+    }
 });
 
 // forgot Password Request Route
@@ -183,6 +188,8 @@ router.post('/admin/login', (req, res) => {
             return res.header('x-auth', token).send({
                 id: admin._id,
                 username: admin.username,
+                firstname:admin.firstname,
+                lastname:admin.lastname,
                 role:admin.role,
                 token
             });
@@ -308,24 +315,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 
 // Audit Trail Route
 router.get('/audit', (req, res)=>{
-    const sort = {}
-
-    let options =  {
-        page: parseInt(req.query.page) || 0,
-        limit: parseInt(req.query.limit) || 10
-    }
-
-    if (req.query.sortBy) {
-        const parts = req.query.sortBy.split(':')
-        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
-    }
-
-    Log.find({})
-    .skip(options.page * options.limit)
-    .limit(options.limit)
-    .sort(sort)
-    .exec()
-    .then((doc)=>{
+    Log.find({}).then((doc)=>{
         return res.send(doc);
     });
 });
@@ -424,7 +414,8 @@ router.patch('/admin/notification/:notificationid',authenticate, (req, res)=>{
               return res.status(404).json({Message: "error no user with that email in database"});
           }
 
-          notification.reply = notification.reply.concat([reply]); // concat the reply object into the reply array
+            let receiverEmail = user.email;
+            let receiver =  user._id;
 
           sendToOne(user.email, user.firstname, user.lastname, reply.message); // send this notification by email also
 
