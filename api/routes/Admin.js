@@ -406,38 +406,46 @@ router.post('/notification',authenticate, (req, res)=>{
 router.patch('/admin/notification/:notificationid',authenticate, (req, res)=>{
     const notificationID = req.params.notificationid;
     let admin = req.admin;
-    let receiverEmail = req.body.email;
-    req.body.onSenderModel = 'Admin'; // set the refPath
-    req.body.onReceiverModel = 'User'; // set the refPath
-    req.body.username = req.admin.username;
-    req.body.sender = admin._id;
+    let reply = req.body;
+    let receiverEmail = reply.email;
+    reply.onSenderModel = 'Admin'; // set the refPath
+    reply.onReceiverModel = 'User'; // set the refPath
+    reply.username = req.admin.username;
+    reply.sender = admin._id;
 
     if(!ObjectId.isValid(notificationID)){// handle invalid ObjectId
       return res.json({Message: "Invalid ObjectId"});
     }
 
-    User.findOne({email:receiverEmail}).then(user=>{ // find user with email given
-        if(!user){// handle wrong usesr emails
-            return res.status(404).json({Message: "error no user with that email in database"});
-        }
+    Notifcations.findById(notificationID).then(notification=>{// find the message to reply by id
+      let receiver =  user._id;
+      reply.receiver = [receiver];
+      let userID = notification.sender;
 
-        Notifcations.findById(notificationID).then(notification=>{// find the message to reply by id
-          let receiver =  user._id;
-          let reply = req.body;
-          reply.receiver = [receiver];
+      if(!ObjectId.isValid(userID)){// handle invalid ObjectId
+        return res.json({Message: "Invalid ObjectId"});
+      }
+
+      User.findById(userID).then(user=>{ // find user with email given
+          if(!user){// handle wrong usesr emails
+              return res.status(404).json({Message: "error no user with that email in database"});
+          }
 
           notification.reply = notification.reply.concat([reply]); // concat the reply object into the reply array
+          console.log(user.email);
 
-          sendToOne(user.email, user.firstname, user.lastname, req.body.message); // send this notification by email also
+          sendToOne(user.email, user.firstname, user.lastname, reply.message); // send this notification by email also
 
-          notification.save().then(doc=>{ // save the updated notification
-              return res.send(doc);
-          }).catch(e=>{// handle any error caught
-              return res.status(400).json({Message: `${e}`});
-          });
-        })
+          // res.send(doc);
+      }).catch(e=>{
+          return res.status(400).json({Message: `${e}`});
+      });
 
-        // res.send(doc);
+      notification.save().then(doc=>{ // save the updated notification
+          return res.send(doc);
+      }).catch(e=>{// handle any error caught
+          return res.status(400).json({Message: `${e}`});
+      });
     }).catch(e=>{
         return res.status(400).json({Message: `${e}`});
     });
@@ -485,38 +493,5 @@ router.post('/notification/:companyid',authenticate, (req, res)=>{
         return res.status(404).json({Message:`${e}`});
     });
 })
-
-// // POST ADMIN TO ALL USERS IN scheme
-// router.post('/notification/allvetiva/scheme/members',authenticate, (req, res)=>{
-//     req.body.onSenderModel = 'Admin'; // set the refPath
-//     req.body.onReceiverModel = 'User'; // set the refPath
-//     req.body.username = req.admin.username;
-//
-//     Company.find({}).then(allCompanies=>{// find the user company with id
-//         if(allCompanies.length < 0){// handle user not found
-//             return res.status(404).json({Message:"No company found, please onboard companies"});;
-//         }
-//
-//         let receiverID =  _.map(allCompanies, 'id');
-//         let receiverEmail =  _.map(allCompanies, 'email');
-//
-//         let sentMessage = new Notifcations({// create notification
-//             ...req.body,
-//             sender:req.admin._id,
-//             receiver: receiverID
-//         });
-//
-//         sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
-//
-//         sentMessage.save().then(doc=>{
-//             return res.status(200).send(doc);
-//         }).catch(e=>{
-//             return res.status(400).json({Message: `${e}`});
-//         });
-//     }).catch(e=>{ // catch any errors
-//         return res.status(404).JSON({Message:`${e}`});
-//     });
-// })
-
 
 module.exports = router;
