@@ -33,7 +33,7 @@ let authenticateUser = (req, res, next) => {
         }
     })
     .catch((e) => {
-        res.status(401)json({Message:"You do not have the permission to perform this operation"});
+        res.status(401).json({Message:"You do not have the permission to perform this operation"});
     });
 }
 module.exports = {authenticateUser};
