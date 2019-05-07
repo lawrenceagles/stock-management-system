@@ -2,7 +2,7 @@
 // https://github.com/sendgrid/sendgrid-nodejs
 const sgMail = require('@sendgrid/mail');
 
-sgMail.setApiKey("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");
+sgMail.setApiKey(process.env.SEND_GRID_API_KEY);
 
 const deleteAccountEmail = (email, firstname, lastname)=>{
 	const msg = {

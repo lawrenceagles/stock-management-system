@@ -6,12 +6,13 @@ const multer = require('multer');
 const userRoute = require('./api/routes/users');
 const companyRoute = require('./api/routes/company');
 const router = express.Router();
+require('dotenv').config();
 
 const {ObjectId} = require('mongodb');
 const {Company} = require('./api/models/company');
 
 const Host = 'localhost';
-const Port = process.env.PORT || 3004;
+const Port = process.env.PORT;
 
 const {mongoose} = require('./config/db/mongoose');
 
