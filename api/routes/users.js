@@ -519,11 +519,6 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
 
                 });
               }
-
-              // get cron job start and end time
-              // var start = currentBatch.nextVestingDate; // when should the cron job start
-              // var end = startTime.setFullYear(startTime.getFullYear() + batch.vesting.period); // how long should the cron start
-
           }
 
             if(user.status){ // run this if the user is a confirmed staff of the company
@@ -771,7 +766,7 @@ router.patch('/user/notification/:notificationid',authenticateUser, (req, res)=>
 
           notification.reply = notification.reply.concat([reply]);
 
-          sendToMultiple(receiversEmail,req.body.message); // send this notification by email also
+          sendToMultiple(receiversEmail,reply.message); // send this notification by email also
 
           notification.save().then(doc=>{
               return res.send(doc);
