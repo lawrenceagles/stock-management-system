@@ -346,6 +346,7 @@ router.get('/admin/received/notification',authenticate, (req,res)=>{
     })
     .execPopulate()
     .then(doc=>{
+        console.log(doc);
         return res.send(admin.receivedNotifications);
     })
 })
