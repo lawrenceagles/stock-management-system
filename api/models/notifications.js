@@ -12,7 +12,11 @@ const notificationSchema = new Schema({
 		trim:true,
 		default: "Vetiva"
 	},
-	username:{
+	firstname:{
+		type:String,
+		trim:true
+	},
+	lastname:{
 		type:String,
 		trim:true
 	},

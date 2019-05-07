@@ -326,7 +326,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
 
           // Auto generate random password for user
            req.body.password = genRandomPassword(10);
-           
+
         // create the user
         let user = new User(req.body);
 
@@ -699,7 +699,9 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
     let companyID = user.company;
     req.body.onSenderModel = 'User'; // set the refPath
     req.body.onReceiverModel = 'Admin';
-    req.body.username = req.user.username;
+    req.body.firstname = req.user.firstName;
+    req.body.lastname = req.user.lastName;
+    req.body.sender = user._id;
 
     Admin.find({}).then(adminArray=>{
         if(!adminArray){
@@ -707,14 +709,10 @@ router.post('/user/notification/',authenticateUser, (req, res)=>{
         }
 
         Company.findById(companyID).then(company=>{
-          receivers =  _.map(adminArray, 'id');
+          req.body.receiver =   _.map(adminArray, 'id');
           receiversEmail = _.map(adminArray, 'email');
-          req.body.company = company;
-          let sentMessage = new Notifcations({
-              ...req.body,
-              sender:user._id,
-              receiver:receivers
-          });
+          req.body.companyName = company.name;
+          let sentMessage = new Notifcations(req.body);
 
           sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
 
