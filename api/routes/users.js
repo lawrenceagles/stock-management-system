@@ -241,7 +241,7 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
     }
 
     // find and update the user by id if it is found, throw error 404 if not
-    User.updateOne({_id:id}, {$set:req.body}, { new: true, runValidators: true  }).then((user)=>{
+    User.findOneAndUpdate({_id:id}, {$set:req.body}, { new: true, runValidators: true  }).then((user)=>{
         // check if user was foun and updated
         if(!user){
             return res.status(404).json({Message: "No user found"});

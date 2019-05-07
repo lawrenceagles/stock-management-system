@@ -5,7 +5,7 @@ let authenticate = (req, res, next) => {
 
         Admin.findByToken(token).then((admin) => { // model method to find admin by token
         if(!admin) { // reject the promise if no admin is found
-            return Promise.reject("No Admin was found");
+            return res.json({Message:"No Admin found"});
             // you can redirect the user to the login page!
         }
         req.admin = admin;
@@ -13,18 +13,19 @@ let authenticate = (req, res, next) => {
 
         // Role management
         if(req.method !== 'GET' && req.admin.role === 'observer'){
-             return Promise.reject("You do not have the permission you perform this operation Admin only");
+             return Promise.reject("You do not have the permission you perform this operation");
             // you can redirect the user to the login page!
         }
 
         if(req.method === 'POST' && req.admin.role === 'manager') {
-            return Promise.reject("You do not have the permission you perform this operation Admin only");
+            return Promise.reject("You do not have the permission you perform this operation");
             // you can redirect the user to the login page!
         }
 
         next();
     }).catch((e) => {
-        res.status(401).json({Message:`${e}`});
+        console.log(e)
+        res.status(401).json({Message:"You do not have the permission you perform this operation"});
     });
 }
 module.exports = {authenticate};

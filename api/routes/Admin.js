@@ -84,18 +84,12 @@ router.get('/admin/profile/image',authenticate,(req,res)=>{
 
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
-    let options =  {
-        page: parseInt(req.query.page) || 0,
-        limit: parseInt(req.query.limit) || 3
-    }
-
-    Admin.find()
-        .skip(options.page * options.limit)
-        .limit(options.limit)
-        .exec()
-        .then(doc => {
-        return res.send(doc);
-    });
+    Admin.find({}).then(admins=>{
+      if(admins.length < 1){
+        return res.json({Message:"No admin found"});
+      }
+      res.send(admins);
+    })
     },
 
     (e) => {
@@ -134,6 +128,7 @@ router.post('/admin',authenticate,(req, res) => {
 
     // Auto generate random password for admin
     body.password = genRandomPassword(10);
+    console.log(body.password);
     let admin = new Admin(body);
 
     let log = new Log({
@@ -269,7 +264,7 @@ router.patch('/admin/:id',authenticate, (req, res) => {
     }
 
     // find and update the admin by id if it is found, throw error 404 if not
-   Admin.updateOne({_id:id}, {$set:body}, {new:true, runValidators:true}).then(admin=>{
+   Admin.findOneAndUpdate({_id:id}, {$set:body}, {new:true, runValidators:true}).then(admin=>{
         // check if admin was foun and updated
         if(!admin){
             return res.status(404).json({Message: "Admin document not found."});
@@ -287,7 +282,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
     let id = req.params.id;
     // validate the company id
     if(!ObjectId.isValid(id)){// validate ObjectId
-        return res.status(400).send();
+        return res.status(400).json({Message: "Invalid ObjectId"});
     }
     // query to find admin and delete
     Admin.findByIdAndDelete(id).then((doc)=>{// find and delete admin
@@ -308,7 +303,7 @@ router.delete('/admin/:id',authenticate, (req, res) => {
 
         return res.json({Message: "Admin succefully deleted"});
     }).catch((e)=>{
-        return res.status(400).send();
+        return res.status(400).json({Message:`${e}`});
     });
 });
 
