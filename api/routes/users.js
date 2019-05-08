@@ -112,7 +112,6 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
         res.status(400).json({Message:`Error: Please enter a valid Object ID`});
     }
 
-
      User.findById(id).then((user)=> {
         // if user is not found return error 404 otherwise send the admin.
         if(!user){
@@ -127,8 +126,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                 companyCanBuy: company.canBuyShares,
                 comapanyCanSell: company.canSellShares,
                 companyCanCollacterize: company.canCollateriseShares,
-                vestingSchedule: company.vestingSchedule,
-                vestingPeriod: company.vestingPeriod
+                companyCanRepurchase: company.canRepurchase
             });
         }).catch(e=>{
           res.status(400).json({Message:`${e}`});

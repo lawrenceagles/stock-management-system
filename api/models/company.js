@@ -68,14 +68,6 @@ const companySchema = new Schema({
     canRepurchase: {
         type: Boolean
     },
-    vestingSchedule:{
-      type: String,
-      required: [true, "Please enter the compnay vesting schedule"]
-    },
-    vestingPeriod:{
-      type: Number,
-      required: [true, "Please enter the company vesting Period"]
-    },
     schemeRule: {
         type: Buffer
     },

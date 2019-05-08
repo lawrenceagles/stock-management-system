@@ -200,6 +200,18 @@ const userSchema = new Schema({
         amount:{
             type: Number,
             default: 0
+        },
+        vesting:{
+            schedule:{
+                type: String
+            },
+            directDate:{
+              type: Date
+            },
+            period:{
+                type: Number,
+                required: [true, 'Please enter the vesting period for this batch']
+            }
         }
     }],
     avatar:{
