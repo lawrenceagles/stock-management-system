@@ -261,7 +261,7 @@ router.patch('/admin/:id',authenticate, (req, res) => {
     if(req.body.password){
         const salt = bcrypt.genSaltSync(12);
         const hash = bcrypt.hashSync(req.body.password, salt);
-        req.body.password = hash
+        req.body.password = hash;
     }
     let body = _.pick(req.body, ["firstname", "lastname", "username", "password", "email", "phone", "role"]);
     // validate the id

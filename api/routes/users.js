@@ -93,8 +93,8 @@ router.get('/user/profile/image',authenticateUser,(req,res)=>{
     }
 
     User.find()
-        .skip(pageOptions.page*pageOptions.limit)
-        .limit(pageOptions.limit)
+        // .skip(pageOptions.page*pageOptions.limit)
+        // .limit(pageOptions.limit)
         .sort(sort)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
@@ -127,7 +127,8 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                 companyCanBuy: company.canBuyShares,
                 comapanyCanSell: company.canSellShares,
                 companyCanCollacterize: company.canCollateriseShares,
-                vestingSchedule: company.vestingSchedule
+                vestingSchedule: company.vestingSchedule,
+                vestingPeriod: company.vestingPeriod
             });
         }).catch(e=>{
           res.status(400).json({Message:`${e}`});

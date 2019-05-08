@@ -59,7 +59,7 @@ const companySchema = new Schema({
     },
     canCollateriseShares: {
         type: Boolean,
-        required: true        
+        required: true
     },
     sharesForfieted:{
         type: Number,
@@ -68,13 +68,21 @@ const companySchema = new Schema({
     canRepurchase: {
         type: Boolean
     },
+    vestingSchedule:{
+      type: String,
+      required: [true, "Please enter the compnay vesting schedule"]
+    },
+    vestingPeriod:{
+      type: Number,
+      required: [true, "Please enter the company vesting Period"]
+    },
     schemeRule: {
         type: Buffer
     },
     batch:[{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Batch'
-    }]  
+    }]
 });
 
 
