@@ -83,12 +83,12 @@ router.get('/admin/profile/image',authenticate,(req,res)=>{
 
 // GET route get all admins
 router.get('/admin',authenticate,(req, res) => {
-    Admin.find({}).then(admins=>{
-      if(admins.length < 1){
-        return res.json({Message:"No admin found"});
-      }
-      res.send(admins);
-    }).catch(400).json({Message:`${e}`});
+    Admin.find({}).then(doc => {
+        res.send(doc);
+    });
+    },
+    (e) => {
+      res.status(404).json({Message: `${e}`});
     }
 );
 
