@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 
 const batchSchema = new Schema({
         name:{
-            type: String
+            type: String,
+            required: [true, 'The batch name is required']
         },
         allocatedShares: {
             type: Number,
