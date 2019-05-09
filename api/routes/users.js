@@ -414,9 +414,9 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
               return res.status(404).json({Message: "No batch found"});
             }
 
-           // if( batch.members.indexOf(user._id) >= 0 ){
-           //    return res.status(400).json({Message: "user already added to batch"});
-           // }
+           if( batch.members.indexOf(user._id) >= 0 ){
+              return res.status(400).json({Message: "user already added to batch"});
+           }
            let vestingPeriod = batch.vesting.period;
             req.body.name = batch.name;
 
