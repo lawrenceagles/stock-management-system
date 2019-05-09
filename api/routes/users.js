@@ -112,6 +112,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
         res.status(400).json({Message:`Error: Please enter a valid Object ID`});
     }
 
+
      User.findById(id).then((user)=> {
         // if user is not found return error 404 otherwise send the admin.
         if(!user){
@@ -126,7 +127,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                 companyCanBuy: company.canBuyShares,
                 comapanyCanSell: company.canSellShares,
                 companyCanCollacterize: company.canCollateriseShares,
-                companyCanRepurchase: company.canRepurchase
+                vestingSchedule: company.vestingSchedule
             });
         }).catch(e=>{
           res.status(400).json({Message:`${e}`});
@@ -163,7 +164,7 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
               company: `${user.Company_Name}`
           });
 
-          Company.findById(companyID).then(company=>{
+          Company.findOne({_id:companyID}).then(company=>{
 
             // Validate company id
             if(!Objectid.isValid(companyID)){
@@ -175,8 +176,10 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
             }
 
             // decrease company total scheme members by 1 and delete user id in each batch
+            console.log(company.totalSchemeMembers);
             company.totalSchemeMembers -= 1;
             company.save()
+            console.log(company.totalSchemeMembers);
             //  find all the batch in user company
             Batch.find({company:user.company}).then(batches=>{
               _.remove(batches, function(b){
@@ -212,11 +215,11 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
             company.save(); // save to store data
 
           }).catch(e=>{
-            return res.status(400).json({message:`${e}`})
+            return res.status(400).json({message:`${e}`});
           })
 
           log.save(); // save audit log
-          deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
+          // deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
           return res.json({Message: "User is deleted"});
        }).catch(e=>{
         return res.status(400).json({Message: `${e}`});
@@ -411,9 +414,9 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
               return res.status(404).json({Message: "No batch found"});
             }
 
-           if( batch.members.indexOf(user._id) >= 0 ){
-              return res.status(400).json({Message: "user already added to batch"});
-           }
+           // if( batch.members.indexOf(user._id) >= 0 ){
+           //    return res.status(400).json({Message: "user already added to batch"});
+           // }
            let vestingPeriod = batch.vesting.period;
             req.body.name = batch.name;
 
@@ -428,89 +431,93 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
             }
 
             user.batch = user.batch.concat([req.body]); // add batch data to user
-            let batchName = req.body.name;
-            let currentBatch =  _.find(user.batch, { name:batchName }); // get current batch index
-            batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
-            let userAllocatedShares = req.body.allocatedShares;
-            let vestingPercent = 100/batch.vesting.period;
-            let amountToVest = (userAllocatedShares * vestingPercent)/100;
+            user.save().then(updatedUser=>{
+              let batchName = req.body.name;
+              let currentBatch =  _.find(user.batch, { name:batchName }); // get current batch index
+              batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
+              let userAllocatedShares = req.body.allocatedShares;
+              let vestingPercent = 100/batch.vesting.period;
+              let amountToVest = (userAllocatedShares * vestingPercent)/100;
 
-            if(batch.vesting.directDate && !batch.vesting.schedule){// handle vesting on specific date
-              let vestingDate = batch.vesting.directDate;
-              let vestingMounth = batch.vesting.directDate.getMonth(); // get the vesting month
-              currentBatch.nextVestingDate = batch.vesting.directDate;
+                if(batch.vesting.directDate && !batch.vesting.schedule){// handle vesting on specific date
+                  let vestingDate = batch.vesting.directDate;
+                  let vestingMounth = batch.vesting.directDate.getMonth(); // get the vesting month
+                  currentBatch.nextVestingDate = batch.vesting.directDate;
 
-              // get cron job start and end time
-              let test = 1;
-              let count = 0;
-              // run the cron job every vesting day
-              var task = cron.schedule('* * 24 * *', () =>  {
-                let newCount = count + 1;
-                if(new Date.getMonth() == vestingMounth){
-                  currentBatch.amount += amountToVest; // user vests shares per calculation
-                  // increment next vesting date
-                  currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
+                  // get cron job start and end time
+                  let test = 1;
+                  let count = 0;
+                  // run the cron job every vesting day
+                  var task = cron.schedule('* * 24 * *', () =>  {
+                    let newCount = count + 1;
+                    if(new Date.getMonth() == vestingMounth){
+                      currentBatch.amount += amountToVest; // user vests shares per calculation
+                      // increment next vesting date
+                      currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
+                    }
+                    if(count === batch.vesting.period){
+                      task.stop();
+                    }
+
+                    count +=1;
+
+                  });
+
+                }else if(!batch.vesting.directDate && batch.vesting.schedule){// handle vesting schedule if in use
+                var schedule = batch.vesting.schedule; // get the company schedule period
+                var vestingDate = new Date();
+                var vestingScheduleDate;
+
+                if(schedule.toLowerCase() == "annually"){
+                  vestingScheduleDate = 1;
+                  currentBatch.nextVestingDate = vestingDate.setFullYear(vestingDate.getFullYear() + vestingScheduleDate);
+
+                  // get cron job start and end time
+                  let test = 1;
+                  let count = 0;
+                  // run the cron job every vesting day
+                  var task = cron.schedule('* * 24 * *', () =>  {
+                    let newCount = count + 1;
+                    if(new Date.getMonth() == vestingMounth){
+                      currentBatch.amount += amountToVest; // user vests shares per calculation
+                      // increment next vesting date
+                      currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
+                    }
+                    if(count === batch.vesting.period){
+                      task.stop();
+                    }
+
+                    count +=1;
+
+                  });
+
+                }else{
+                  vestingScheduleDate = 6;
+                  currentBatch.nextVestingDate = vestingDate.setMonth(vestingDate.getMonth() + vestingScheduleDate);
+
+                  // get cron job start and end time
+                  let test = 1;
+                  let count = 0;
+                  // run the cron job every vesting day
+                  var task = cron.schedule('* * 12 * *', () =>  {
+                    let newCount = count + 1;
+                    if(new Date.getMonth() == vestingMounth){
+                      currentBatch.amount += amountToVest; // user vests shares per calculation
+                      // increment next vesting date
+                      currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
+                    }
+                    if(count === batch.vesting.period){
+                      task.stop();
+                    }
+
+                    count +=1;
+
+                  });
                 }
-                if(count === batch.vesting.period){
-                  task.stop();
-                }
-
-                count +=1;
-
-              });
-
-            }else if(!batch.vesting.directDate && batch.vesting.schedule){// handle vesting schedule if in use
-              var schedule = batch.vesting.schedule; // get the company schedule period
-              var vestingDate = new Date();
-              var vestingScheduleDate;
-
-              if(schedule.toLowerCase() == "annually"){
-                vestingScheduleDate = 1;
-                currentBatch.nextVestingDate = vestingDate.setFullYear(vestingDate.getFullYear() + vestingScheduleDate);
-
-                // get cron job start and end time
-                let test = 1;
-                let count = 0;
-                // run the cron job every vesting day
-                var task = cron.schedule('* * 24 * *', () =>  {
-                  let newCount = count + 1;
-                  if(new Date.getMonth() == vestingMounth){
-                    currentBatch.amount += amountToVest; // user vests shares per calculation
-                    // increment next vesting date
-                    currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
-                  }
-                  if(count === batch.vesting.period){
-                    task.stop();
-                  }
-
-                  count +=1;
-
-                });
-
-              }else{
-                vestingScheduleDate = 6;
-                currentBatch.nextVestingDate = vestingDate.setMonth(vestingDate.getMonth() + vestingScheduleDate);
-
-                // get cron job start and end time
-                let test = 1;
-                let count = 0;
-                // run the cron job every vesting day
-                var task = cron.schedule('* * 12 * *', () =>  {
-                  let newCount = count + 1;
-                  if(new Date.getMonth() == vestingMounth){
-                    currentBatch.amount += amountToVest; // user vests shares per calculation
-                    // increment next vesting date
-                    currentBatch.nextVestingDate.setFullYear(currentBatch.nextVestingDate.getFullYear() + 1);
-                  }
-                  if(count === batch.vesting.period){
-                    task.stop();
-                  }
-
-                  count +=1;
-
-                });
-              }
-          }
+            }
+            }).catch(e=>{
+                return res.status(400).json({Message:`${e}`});
+            });
 
             if(user.status){ // run this if the user is a confirmed staff of the company
                 // updated total shares allocated to scheme members
@@ -519,7 +526,6 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
                 // update total allocated shares to unconfirmed scheme members
                 company.totalSharesOfUnconfirmedSchemeMembers += req.body.allocatedShares;
             }
-            user.save();
             batch.save();
             company.save().then(doc=>{
               return res.json({Message: "User added to batch successfully"})
