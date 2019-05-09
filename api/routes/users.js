@@ -157,66 +157,29 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
 
         let companyID = user.company;
 
+        // Validate company id
+        if(!Objectid.isValid(companyID)){
+          return res.json({Message:"Invalid company ID"});
+        }
+
+        Company.findById(companyID).then(company=>{
+          console.log(company);
+
+          if(!company){// handle company not found
+            return res.json({Message:"Company not found"});
+          }
+
+
+        }).catch(e=>{
+          return res.status(400).json({Message:`${e}`});
+        })
+
           let log = new Log({
               createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
               action: `deleted a user`,
               user: `${user.firstName} ${user.lastName}`,
               company: `${user.Company_Name}`
           });
-
-          Company.findOne({_id:companyID}).then(company=>{
-
-            // Validate company id
-            if(!Objectid.isValid(companyID)){
-              return res.json({Message:"Invalid company ID"});
-            }
-
-            if(!company){// handle company not found
-              return res.json({Message:"Company not found"});
-            }
-
-            // decrease company total scheme members by 1 and delete user id in each batch
-            console.log(company.totalSchemeMembers);
-            company.totalSchemeMembers -= 1;
-            company.save()
-            console.log(company.totalSchemeMembers);
-            //  find all the batch in user company
-            Batch.find({company:user.company}).then(batches=>{
-              _.remove(batches, function(b){
-                  return b == user._id;
-              })
-
-              batch.save();
-
-            }).catch(e=>{
-              return res.status(400).json({Message:`${e}`});
-            })
-
-            if(user.status){ // run this if the user is a confirmed staff of the company
-                batches.forEach(function(batch){
-                  let cBatch = batch.allocatedShares;
-                  let userBatches = user.batch;
-                  userBatches.forEach(function(uBatch){
-                    cBatch -= uBatch.allocatedShares; // dynamically generate total allocated to batch scheme
-                  })
-                })
-              }else{ // run this if the user is an unconfirmed staff of the company
-                // update total allocated shares to unconfirmed scheme members
-                let userBatches = user.batch;
-                  userBatches.forEach(function(uBatch){
-                    company.totalSharesOfUnconfirmedSchemeMembers -= uBatch.allocatedShares;
-                  })
-            }
-            // update total unallocated shares
-            company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
-            // updated forfieted shares
-            company.totalSharesForfieted = company.totalSharesAllocatedToSchemeMembers - vestedShares;
-            // company.totalSharesRepurchased = vestedShares;
-            company.save(); // save to store data
-
-          }).catch(e=>{
-            return res.status(400).json({message:`${e}`});
-          })
 
           log.save(); // save audit log
           // deleteAccountEmail(user.email, user.firstname, user.lastname); // send accound cancellation email to admin
