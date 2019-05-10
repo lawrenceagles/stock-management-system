@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const route = require('./api/routes/Admin');
 const multer = require('multer');
+const cron = require('node-cron');
 const userRoute = require('./api/routes/users');
 const companyRoute = require('./api/routes/company');
 const router = express.Router();
@@ -89,6 +90,12 @@ app.get('/upload/schemerule/:companyid', (req,res)=>{
 },(error, req, res, next) => {
     res.status(400).json({ error: `${error.message}` })
 })
+
+
+// Vesting Scheduler
+cron.schedule(' 1 * * * * *', () => {
+  console.log('running every minute 1, 2, 4 and 5');
+});
 
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }));
