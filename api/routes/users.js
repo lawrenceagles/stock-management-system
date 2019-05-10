@@ -342,7 +342,7 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           company.totalSchemeMembers += 1;
           company.save();
           // send welcome email containing password
-        sendUserWelcomePasswordEmail(user.email,user.firstName,user.lastName,user.password);
+        sendUserWelcomePasswordEmail(user.email,user.firstName,user.lastName,req.body.password);
           let body = _.pick(user, ['firstname', 'lastname', 'email','Company_Schemerules','company','status','tokens']);
           return res.status(201).send(body);
         }).catch(e=>{

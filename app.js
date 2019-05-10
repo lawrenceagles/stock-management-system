@@ -91,11 +91,37 @@ app.get('/upload/schemerule/:companyid', (req,res)=>{
     res.status(400).json({ error: `${error.message}` })
 })
 
-
+var count = 0;
 // Vesting Scheduler
-cron.schedule(' 1 * * * * *', () => {
-  console.log('running every minute 1, 2, 4 and 5');
-});
+// cron.schedule(' 1 * * * * *', () => {
+//   console.log('running every second');
+//
+//   // get all the companies in the scheme
+//   Company.find({}).then(companyArray=>{
+//     //  loop throught the companiess array
+//     companyArray.forEach((company)=>{
+//        // find all the users in each company
+//        company
+//        .populate({
+//            path: 'staffs'
+//        })
+//        .execPopulate()
+//        .then(companyDoc=>{
+//            if(!companyDoc){
+//                res.status(404).json({Message:`No scheme member for this ${companyDoc}`})
+//            }
+//            count++;
+//            console.log(companyDoc.staffs, `Company ${count}`);
+//
+//        });
+//     });
+//   }).catch((err) => {
+//     return res.status(400).json({Message:`${err}`});
+//   })
+//
+//   // check if they are vesting today
+//   //...
+// });
 
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }));
