@@ -156,8 +156,6 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
         }
 
         let companyID = user.company;
-        console.log(companyID);
-
         // Validate company id
         if(!ObjectId.isValid(companyID)){
           return res.json({Message:"Invalid company ID"});
@@ -167,9 +165,6 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
           if(!company){// handle company not found
             return res.json({Message:"Company not found"});
           }
-
-          console.log(company);
-
           //  find all the batch in user company
           Batch.find({company:user.company}).then(batches=>{
             _.remove(batches, function(b){
@@ -413,56 +408,64 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
             if(!batch){
               return res.status(404).json({Message: "No batch found"});
             }
-
-           if( batch.members.indexOf(user._id) >= 0 ){
+           if( batch.members.indexOf(user._id) >= 0 ){// check if user id is already in company batch member array.
               return res.status(400).json({Message: "user already added to batch"});
            }
-           let vestingPeriod = batch.vesting.period;
-            // req.body.name = batch.name;
+          if(!batch.vesting.directDate && !batch.vesting.schedule){// make sure a direct vesting date or vesting schedule is entered
+            return res.json({Message:"please enter a vesting date or a vesting schedule period"});
+          }
+          // make sure both direct vesting date and vesting schedule is entered is not entered
+          if(batch.vesting.directDate && batch.vesting.schedule){
+            return res.json({Message:"please enter either a vesting date or a vesting schedule period"});
+          }
 
-            // make sure a direct vesting date or vesting schedule is entered
-            if(!batch.vesting.directDate && !batch.vesting.schedule){
-              return res.json({Message:"please enter a vesting date or a vesting schedule period"});
+          // Begin batch dynamic calculations
+          batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
+          let userAllocatedShares = req.body.allocatedShares;
+          let batchName = batch.name;
+          req.body.name = batchName;
+          user.batch = user.batch.concat([req.body]); // add batch data to user
+          let currentBatch =  _.find(user.batch, { name:batchName }); // get current batch index
+          let vestingPeriod = batch.vesting.period; // get the vesting period for this batch
+          let vestingPercent = 100/batch.vesting.period;
+          let amountToVest = (userAllocatedShares * vestingPercent)/100;
+
+
+
+          if(batch.vesting.directDate && !batch.vesting.schedule){// handle vesting on specific date
+            let vestingDate = batch.vesting.directDate;
+            let vestingMounth = batch.vesting.directDate.getMonth(); // get the vesting month
+            currentBatch.nextVestingDate = batch.vesting.directDate; // dynamically set next vesting date
+          }else if(!batch.vesting.directDate && batch.vesting.schedule){// handle vesting schedule if in use
+            var schedule = batch.vesting.schedule; // get the company schedule period
+            var vestingDate = new Date();
+            var vestingScheduleDate;
+
+            if(schedule.toLowerCase() == "annually"){
+              vestingScheduleDate = 1;
+              currentBatch.nextVestingDate = vestingDate.setFullYear(vestingDate.getFullYear() + vestingScheduleDate);
             }
+          }else{
+            vestingScheduleDate = 6;
+            currentBatch.nextVestingDate = vestingDate.setMonth(vestingDate.getMonth() + vestingScheduleDate);
+          }
 
-            // make sure both direct vesting date and vesting schedule is entered is not entered
-            if(batch.vesting.directDate && batch.vesting.schedule){
-              return res.json({Message:"please enter either a vesting date or a vesting schedule period"});
-            }
+          if(user.status){ // run this if the user is a confirmed staff of the company
+              // updated total shares allocated to scheme members
+              batch.allocatedShares += req.body.allocatedShares; // dynamically generate total allocated to batch scheme
+            }else{ // run this if the user is an unconfirmed staff of the company
+              // update total allocated shares to unconfirmed scheme members
+              company.totalSharesOfUnconfirmedSchemeMembers += req.body.allocatedShares;
+          }
+          user.save();
+          batch.save();
+          company.save().then(doc=>{
+            return res.json({Message: "User added to batch successfully"})
+          })
 
-            // Begin batch dynamic calculations
-            // let batchName = req.body.name;
-            let batchName = batch.name;
-            
-            let currentBatch =  _.find(user.batch, { name:batchName }); // get current batch index
-            batch.members = batch.members.concat([user._id]); // onboard user to batch by passing id to batch members
-            user.batch = user.batch.concat([req.body]); // add batch data to user
-
-            let userAllocatedShares = req.body.allocatedShares;
-            let vestingPercent = 100/batch.vesting.period;
-            let amountToVest = (userAllocatedShares * vestingPercent)/100;
-
-            if(batch.vesting.directDate && !batch.vesting.schedule){// handle vesting on specific date
-              let vestingDate = batch.vesting.directDate;
-              let vestingMounth = batch.vesting.directDate.getMonth(); // get the vesting month
-              currentBatch.nextVestingDate = batch.vesting.directDate;
-            }
-
-            if(user.status){ // run this if the user is a confirmed staff of the company
-                // updated total shares allocated to scheme members
-                batch.allocatedShares += req.body.allocatedShares; // dynamically generate total allocated to batch scheme
-              }else{ // run this if the user is an unconfirmed staff of the company
-                // update total allocated shares to unconfirmed scheme members
-                company.totalSharesOfUnconfirmedSchemeMembers += req.body.allocatedShares;
-            }
-            batch.save();
-            company.save().then(doc=>{
-              return res.json({Message: "User added to batch successfully"})
-            })
-
-          }).catch(e=>{
-              return res.status(400).json({Message:`${e}`});
-          });
+        }).catch(e=>{
+            return res.status(400).json({Message:`${e}`});
+        });
       }).catch(e=>{
           return res.status(400).json({Message:`${e}`});
       });
