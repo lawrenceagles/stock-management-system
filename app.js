@@ -91,37 +91,65 @@ app.get('/upload/schemerule/:companyid', (req,res)=>{
     res.status(400).json({ error: `${error.message}` })
 })
 
-var count = 0;
 // Vesting Scheduler
-// cron.schedule(' 1 * * * * *', () => {
-//   console.log('running every second');
-//
-//   // get all the companies in the scheme
-//   Company.find({}).then(companyArray=>{
-//     //  loop throught the companiess array
-//     companyArray.forEach((company)=>{
-//        // find all the users in each company
-//        company
-//        .populate({
-//            path: 'staffs'
-//        })
-//        .execPopulate()
-//        .then(companyDoc=>{
-//            if(!companyDoc){
-//                res.status(404).json({Message:`No scheme member for this ${companyDoc}`})
-//            }
-//            count++;
-//            console.log(companyDoc.staffs, `Company ${count}`);
-//
-//        });
-//     });
-//   }).catch((err) => {
-//     return res.status(400).json({Message:`${err}`});
-//   })
-//
-//   // check if they are vesting today
-//   //...
-// });
+cron.schedule(' 1 * * * * *', () => {
+  console.log('running every second');
+
+  // get all the companies in the scheme
+  Company.find({}).then(companyArray=>{
+    //  loop throught the companiess array
+    companyArray.forEach((company)=>{
+       // find all the users in each company
+       company
+       .populate({
+           path: 'staffs'
+       })
+       .execPopulate()
+       .then(companyDoc=>{
+           if(!companyDoc){
+               res.status(404).json({Message:`No scheme member for this ${companyDoc}`})
+           }
+           // loop through the array of users of a company
+           companyDoc.staffs.forEach((user)=>{
+             let userBatch = user.batch;
+             // check if they are vesting today
+             forEach(userBatch=>{
+               let vestingPercent = 100/batch.vesting.period; // calculate % of shares to vest
+               let amountToVest = (batch.allocatedShares * vestingPercent)/100; // calculate amount of shares to vest
+               if(!batch.vestingCompleted){
+                 vesting.amount = amountToVest; // vest the calculated amount
+               }
+
+               if(batch.vesting.directDate && !batch.vesting.schedule && !batch.vestingCompleted){
+                 batch.nextVestingDate.setFullYear(batch.nextVestingDate.getFullYear() + 1); // set next vesting date
+               }else if(!batch.vesting.directDate && batch.vesting.schedule && !batch.vestingCompleted){
+                 if(schedule.toLowerCase() == "annually"){
+                   vestingScheduleDate = 1;
+                   batch.nextVestingDate = vestingDate.setFullYear(vestingDate.getFullYear() + vestingScheduleDate);
+                 }
+               }else{
+                 vestingScheduleDate = 6;
+                 currentBatch.nextVestingDate = vestingDate.setMonth(vestingDate.getMonth() + vestingScheduleDate);
+               }
+               count++; // increment count by 1
+               if(count === batch.vesting.period){
+                 batch.vestingCompleted = true;
+               }
+               
+             });
+
+             user.save(); // save user for data persistence
+             console.log(schemeMember.sharesSold, `comapany: ${companyDoc.name}`);
+
+           });
+
+       });
+    });
+  }).catch((err) => {
+    return res.status(400).json({Message:`${err}`});
+  })
+  //...
+});
 
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }));

@@ -212,6 +212,10 @@ const userSchema = new Schema({
                 type: Number,
                 required: [true, 'Please enter the vesting period for this batch']
             }
+        },
+        vestingCompleted:{
+          type:Boolean,
+          default:false
         }
     }],
     avatar:{
