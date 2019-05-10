@@ -193,8 +193,8 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
             // update total unallocated shares
             company.totalUnallocatedShares = (company.totalSharesAllocatedToScheme - company.totalSharesAllocatedToSchemeMembers) + company.totalSharesOfUnconfirmedSchemeMembers;
             // updated forfieted shares
-            company.totalSharesForfieted = company.totalSharesAllocatedToSchemeMembers - vestedShares;
-            // company.totalSharesRepurchased = vestedShares;
+            company.totalSharesForfieted = company.totalSharesAllocatedToSchemeMembers - user.vestedShares;
+            // company.totalSharesRepurchased = user.vestedShares;
 
             company.save().then(updatedCompany=>{
               let log = new Log({// create audit log

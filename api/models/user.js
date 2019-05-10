@@ -178,8 +178,12 @@ const userSchema = new Schema({
         },
         amountReceived:{
             type: Number,
-            default: 300
+            default: 0
         }
+    },
+    vestedShares:{
+      type: Number,
+      default: 0
     },
     batch:[{
         name:{

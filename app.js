@@ -111,13 +111,14 @@ cron.schedule(' 1 * * * * *', () => {
            }
            // loop through the array of users of a company
            companyDoc.staffs.forEach((user)=>{
-             let userBatch = user.batch;
+             let userBatchArray = user.batch;
              // check if they are vesting today
-             forEach(userBatch=>{
+             userBatchArray.forEach((batch)=>{
                let vestingPercent = 100/batch.vesting.period; // calculate % of shares to vest
                let amountToVest = (batch.allocatedShares * vestingPercent)/100; // calculate amount of shares to vest
                if(!batch.vestingCompleted){
                  vesting.amount = amountToVest; // vest the calculated amount
+                 user.vestedShares = amountToVest;
                }
 
                if(batch.vesting.directDate && !batch.vesting.schedule && !batch.vestingCompleted){
@@ -135,12 +136,10 @@ cron.schedule(' 1 * * * * *', () => {
                if(count === batch.vesting.period){
                  batch.vestingCompleted = true;
                }
-               
+               // user.save();
              });
 
              user.save(); // save user for data persistence
-             console.log(schemeMember.sharesSold, `comapany: ${companyDoc.name}`);
-
            });
 
        });
@@ -148,7 +147,6 @@ cron.schedule(' 1 * * * * *', () => {
   }).catch((err) => {
     return res.status(400).json({Message:`${err}`});
   })
-  //...
 });
 
 //support parsing of application/x-www-form-urlencoded post data
