@@ -453,9 +453,13 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
           if(user.status){ // run this if the user is a confirmed staff of the company
               // updated total shares allocated to scheme members
               batch.allocatedShares += req.body.allocatedShares; // dynamically generate total allocated to batch scheme
+              company.totalSharesAllocatedToSchemeMembers = req.body.allocatedShares;
+              company.totalSharesAllocatedToScheme = company.totalSharesAllocatedToSchemeMembers;
+
             }else{ // run this if the user is an unconfirmed staff of the company
               // update total allocated shares to unconfirmed scheme members
               company.totalSharesOfUnconfirmedSchemeMembers += req.body.allocatedShares;
+              company.totalSharesAllocatedToScheme = company.totalSharesAllocatedToSchemeMembers + company.totalSharesOfUnconfirmedSchemeMembers;
           }
           user.save();
           batch.save();
