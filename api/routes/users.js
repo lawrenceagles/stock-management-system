@@ -127,6 +127,7 @@ router.get("/user/:id",authenticateUser,(req,res,next)=>{
                 companyCanBuy: company.canBuyShares,
                 comapanyCanSell: company.canSellShares,
                 companyCanCollacterize: company.canCollateriseShares,
+                companyCanRepurchase: company.totalSharesRepurchased,
                 vestingSchedule: company.vestingSchedule
             });
         }).catch(e=>{
