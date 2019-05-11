@@ -11,23 +11,27 @@ const userSchema = new Schema({
         type: String,
         unique: true,
         maxlength:150,
-        required: [true, 'Employee Number is required']
+        required: [true, 'Employee Number is required'],
+        isDeleted: false
     },
     firstName: {
         type: String,
         maxlength:120,
         trim: true,
-        required: [true, 'User First Name is required']
+        required: [true, 'User First Name is required'],
+        isDeleted: false
     },
     lastName: {
         type: String,
         maxlength:120,
         trim: true,
-        required: [true, 'User Last Name is required']
+        required: [true, 'User Last Name is required'],
+        isDeleted: false
     },
     otherNames: {
         type: String,
-        maxlength:120
+        maxlength:120,
+        isDeleted: false;
     },
     email: {
         type: String,
@@ -38,50 +42,61 @@ const userSchema = new Schema({
         validate: {
             validator: validator.isEmail,
             message: '{VALUE }is not a valid Email!'
-        }
+        },,
+        isDeleted: false
     },
     gender:{
         type: String,
         required: true,
-        enum: ['male', 'female']
+        enum: ['male', 'female'],
+        isDeleted: false
     },
     phone: {
         type: Number,
         required: [true, 'User phone number is required'],
         minlength:11,
+        isDeleted: false
       },
     otherPhoneNumber:{
         type: Number,
         maxlength:100,
+        isDeleted: false
       },
     username: {
         type: String,
-        maxlength: 100
+        maxlength: 100,
+        isDeleted: false
       },
     password: {
         type: String,
         required: [true, 'User password is required'],
         minlength:5,
+        isDeleted: false
     },
     companySchemerules:{ //cannot be updated by users
         type:String,
         trim: true,
+        isDeleted: false
     },
     grade_level: {
         type: String,
-        required: [true, 'This field is required']
+        required: [true, 'This field is required'],
+        isDeleted: false
     },
     dateOfHire:{
         type: Date,
-        required: true
+        required: true,
+        isDeleted: false
     },
     group:{
         type: String,
-        required: [true, 'Please enter the staff group']
+        required: [true, 'Please enter the staff group'],
+        isDeleted: false
     },
     status:{
         type: Boolean,
-        required: [true, 'Please indicate the user status']
+        required: [true, 'Please indicate the user status'],
+        isDeleted: false
     },
     bankDetails:{
             bankName: {
@@ -89,22 +104,26 @@ const userSchema = new Schema({
                 trim: true,
                 required: [true, 'Bank name is required'],
                 maxlength:300,
+                isDeleted: false
             },
             bankBranch: {
                 type: String,
-                trim: true
+                trim: true,
+                isDeleted: false
             },
             accountName: {
                 type: String,
                 trim: true,
                 maxlength:300,
-                required: [true, 'Account name is required']
+                required: [true, 'Account name is required'],
+                isDeleted: false
             },
             accountNumber: {
                 type: Number,
                 trim: true,
                 maxlength:10,
-                required: [true, 'Account number is required']
+                required: [true, 'Account number is required'],
+                isDeleted: false
             },
             accountType: {
                 type: String
@@ -114,32 +133,38 @@ const userSchema = new Schema({
         NextOfKinlastName:{
             type: String,
             trim: true,
-            maxlength:120
+            maxlength:120,
+            isDeleted: false
         },
         NextOfKinfirstName: {
             type: String,
             trim: true,
-            maxlength:120
+            maxlength:120,
+            isDeleted: false
         },
         NextOfKinOtherName: {
             type: String,
             trim: true,
-            maxlength:120
+            maxlength:120,
+            isDeleted: false
         },
         NextOfKinEmail: {
             type: String,
             trim: true,
-            maxlength:200
+            maxlength:200,
+            isDeleted: false
         },
         NextOfKinPhone: {
             type: Number,
             trim: true,
             maxlength:120,
+            isDeleted: false
           },
         NextOfKinRelationship: {
               type: String,
               trim: true,
               maxlength:120,
+              isDeleted: false
         }
 
     },
