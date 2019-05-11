@@ -321,24 +321,20 @@ router.post("/:companyid/users",authenticate,(req, res, next) => {
           req.body.company = id;
           req.body.companySchemerules = company.schemeRules;
           req.body.currentShareValue = company.currentShareValue;
-
           // Auto generate random password for user
            req.body.password = genRandomPassword(10);
-
         // create the user
         let user = new User(req.body);
-
-        // log audit trail
-        let log = new Log({
-            createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
-            action: `created a new user`,
-            user: `${user.firstName} ${user.lastName}`,
-            company: `${user.Company_Name}`
-        });
-
-        log.save();
         user.save()
         .then(user=>{ // Return the user doc and update user-company data relationship
+          // log audit trail
+          let log = new Log({
+              createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
+              action: `created a new user`,
+              user: `${user.firstName} ${user.lastName}`,
+              company: `${user.Company_Name}`
+          });
+          log.save();
           // increase company total scheme members by 1
           company.totalSchemeMembers += 1;
           company.save();
@@ -465,6 +461,14 @@ router.patch("/company/batch/user/:id",authenticate, (req,res)=>{
           user.save();
           batch.save();
           company.save().then(doc=>{
+            // log audit trail
+            let log = new Log({
+                createdBy: `${req.admin.lastName} ${req.admin.firstName}`,
+                action: `added user to batch`,
+                user: `${user.firstName} ${user.lastName}`,
+                company: `${user.Company_Name}`
+            });
+            log.save();
             return res.json({Message: "User added to batch successfully"})
           })
 
