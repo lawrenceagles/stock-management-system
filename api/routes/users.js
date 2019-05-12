@@ -8,7 +8,7 @@ const cron = require('node-cron');
 const bcrypt = require('bcryptjs');
 const {ObjectId} = require('mongodb');
 
-const {sendToMultiple,sendUserWelcomePasswordEmail,sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
+const {sendToMultiple,sendToApproveUpdate,sendUserWelcomePasswordEmail,sendWelcomePasswordEmail,deleteAccountEmail, sendUpdatePasswordEmail, sendToOne} = require("../../config/emails/emailAuth");
 const {genRandomPassword} = require('../../config/genPassword.js');
 const {authenticateUser} = require('../../middleware/authenticateUser');
 const {authenticate} = require('../../middleware/authenticate');
@@ -222,33 +222,50 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
 
 //Update user information
 router.patch('/user/:id',authenticateUser, (req, res) => {
-    // get the user id
-    let id = req.params.id;
-    let body = {};
-    // validate the id
-    if(!ObjectId.isValid(id)){
-        return res.status(400).json({Message:"Invalid ObjectId"});
-    }
+  // get the user id
+  let id = req.params.id;
+  let body = {};
+  // validate the id
+  if(!ObjectId.isValid(id)){
+      return res.status(400).json({Message:"Invalid ObjectId"});
+  }
 
-    if(req.body.password){
-        const salt = bcrypt.genSaltSync(12);
-        const hash = bcrypt.hashSync(req.body.password, salt);
-        req.body.password = hash
-    }
+  if(req.body.password){
+      const salt = bcrypt.genSaltSync(12);
+      const hash = bcrypt.hashSync(req.body.password, salt);
+      req.body.password = hash
+  }
 
-    // find and update the user by id if it is found, throw error 404 if not
-    User.findOneAndUpdate({_id:id}, {$set:{password:req.body.password}}, { new: true, runValidators: true  }).then((user)=>{
-        // check if user was foun and updated
-        if(!user){
-            return res.status(404).json({Message: "No user found"});
-        }
+  if(user.canUpdate === false){// check if user can update account
+    Company.findById(companyID).then(company=>{ // find user company to send with email
+      sendToApproveUpdate(user.email, company.name, user.firstName, user.lastName);// send email to approve profile update
+      return res.json({Message: "A notification has been send to the admin to enable your account for modification"}); // notify user of sent notification email
+    }).catch(e=>{
+      return res.json({Message: `${e}`});
+    })
+  }
 
-        return res.json({Message:"user updated Successfully"});
+  // find and update the user by id if it is found, throw error 404 if not
+  User.findOneAndUpdate({_id:id}, {$set:req.body}, { new: true, runValidators: true  }).then((user)=>{
+      // check if user was foun and updated
+      if(!user){
+          return res.status(404).json({Message: "No user found"});
+      }
 
-    }).catch((e)=>{
-        return res.status(400).json({Message:`${e}`});
-    });
+      return res.json({Message:"user updated Successfully"});
 
+  }).catch((e)=>{
+      return res.status(400).json({Message:`${e}`});
+  });
+  
+});
+
+router.patch("/usercanupdate/:id", authenticate, (req, res)=>{
+  let id = req.params.id;
+  // confirm that object ID is valid
+  if(!ObjectId.isValid(id)){
+    return res.status(400).json({Message:`Error: The Company Object ID is not valid`});
+  }
 });
 
 // find all the company members by id.

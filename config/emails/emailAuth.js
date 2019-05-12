@@ -37,6 +37,17 @@ const sendToMultiple = (email, body)=>{
 	sgMail.send(msg);
 }
 
+const sendToApproveUpdate = (email, userCompany, firstname, lastname)=>{
+	const msg = {
+	  to: [email],
+	  from: `${userCompany}`,
+	  subject: `REQUEST TO EDIT PROFILE DATA`,
+	  text: `Hello Vetiva Admin. I am, ${lastname} ${firstname} from ${user.Company}. I am making a request to edit my personal data.`,
+	  html: `<p>Hello Vetiva Admin. I am, ${lastname} ${firstname} from ${user.Company}</p> <p>I am making a request to edit my personal data.</p>`,
+	};
+	sgMail.send(msg);
+}
+
 
 const sendUpdatePasswordEmail = (email, firstname, lastname, password)=>{
 	const msg = {
@@ -77,5 +88,6 @@ module.exports = {
 	deleteAccountEmail,
 	sendUpdatePasswordEmail,
 	sendToOne,
-	sendToMultiple
+	sendToMultiple,
+	sendToApproveUpdate
 }
