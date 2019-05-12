@@ -257,7 +257,7 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
   }).catch((e)=>{
       return res.status(400).json({Message:`${e}`});
   });
-  
+
 });
 
 router.patch("/usercanupdate/:id", authenticate, (req, res)=>{
@@ -266,6 +266,17 @@ router.patch("/usercanupdate/:id", authenticate, (req, res)=>{
   if(!ObjectId.isValid(id)){
     return res.status(400).json({Message:`Error: The Company Object ID is not valid`});
   }
+
+  User.findById(id).then(user=>{// find the user
+    user.canUpdate = true; // allow user update
+    user.save().then(userDoc=>{// save the user
+      return res.send({Message: "User profile update is enabled"});
+    }).catch(e=>{
+      return res.json({Message:`{e}`})
+    })
+  }).catch(e=>{
+    return res.json({Message:`{e}`})
+  })
 });
 
 // find all the company members by id.
