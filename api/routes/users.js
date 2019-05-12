@@ -93,8 +93,6 @@ router.get('/user/profile/image',authenticateUser,(req,res)=>{
     }
 
     User.find()
-        // .skip(pageOptions.page*pageOptions.limit)
-        // .limit(pageOptions.limit)
         .sort(sort)
         .exec( (err, doc)=>{
             if(err) { res.status(500).json(err); return; };
@@ -226,6 +224,7 @@ router.delete('/user/:id',authenticate, (req,res,next)=>{   //delete
 router.patch('/user/:id',authenticateUser, (req, res) => {
     // get the user id
     let id = req.params.id;
+    let body = {};
     // validate the id
     if(!ObjectId.isValid(id)){
         return res.status(400).json({Message:"Invalid ObjectId"});
@@ -238,7 +237,7 @@ router.patch('/user/:id',authenticateUser, (req, res) => {
     }
 
     // find and update the user by id if it is found, throw error 404 if not
-    User.findOneAndUpdate({_id:id}, {$set:req.body}, { new: true, runValidators: true  }).then((user)=>{
+    User.findOneAndUpdate({_id:id}, {$set:{password:req.body.password}}, { new: true, runValidators: true  }).then((user)=>{
         // check if user was foun and updated
         if(!user){
             return res.status(404).json({Message: "No user found"});
@@ -544,7 +543,7 @@ router.patch('/user/forgetpassword', (req,res)=>{
 
         // save user with new password
         user.save().then(doc=>{
-            return res.status(200).json({Message:"new password successfully regenerated"});
+            return res.status(200).json({Message:`new password successfully regenerated. You can now login with ${user.password}`});
         }).catch(e=>{
             return res.status(400).json({Message:`${e}`});
         })

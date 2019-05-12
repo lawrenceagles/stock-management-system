@@ -132,17 +132,15 @@ router.post('/admin',authenticate,(req, res) => {
     body.password = genRandomPassword(10);
     let admin = new Admin(body);
 
-    let log = new Log({
-        action: `Created a new admin`,
-        createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
-        user: `${admin.firstname} ${admin.lastname}`
-    });
+    admin.save().then(doc=>{// save admin
+        let log = new Log({ // create the audit log
+            action: `Created a new admin`,
+            createdBy: `${req.admin.lastname} ${req.admin.firstname}`,
+            user: `${admin.firstname} ${admin.lastname}`
+        });
 
-    log.save();
-
-    admin.save().then(doc=>{
-        // send welcome email containing password
-        sendWelcomePasswordEmail(body.email,body.firstname,body.lastname,body.password);
+        log.save(); // save the audit log
+        sendWelcomePasswordEmail(body.email,body.firstname,body.lastname,body.password); // send welcome email containing password
         return res.status(201).send(doc);
     });
     }
@@ -173,7 +171,7 @@ router.patch('/admin/forgetpassword', (req,res)=>{
 
         // save admin with new password
         admin.save().then(doc=>{
-            return res.status(201).json(`New password generated`);
+            return res.status(201).json(`New password generated. You can now login with: ${admin.password}`);
         }).catch(e=>{
             return res.status().json({Message:`${e}`})
         })
@@ -377,9 +375,9 @@ router.post('/notification',authenticate, (req, res)=>{
         let message = req.body;
         message.receiver = [user._id];
         let sentMessage = new Notifcations(message);
-        sendToOne(user.email, user.firstname, user.lastname, req.body.message); // send this notification by email also
 
         sentMessage.save().then(message=>{
+            sendToOne(user.email, user.firstname, user.lastname, req.body.message); // send this notification by email also
             return res.status(200).send(message);
         }).catch(e=>{// handle error caught
             return res.status(400).json(`${e} Error with the route`);
@@ -420,9 +418,8 @@ router.patch('/admin/notification/:notificationid',authenticate, (req, res)=>{
             let receiverEmail = user.email;
             let receiver =  user._id;
 
-          sendToOne(user.email, user.firstname, user.lastname, reply.message); // send this notification by email also
-
           notification.save().then(doc=>{ // save the updated notification
+              sendToOne(user.email, user.firstname, user.lastname, reply.message); // send this notification by email also
               return res.send(doc);
           }).catch(e=>{// handle any error caught
               return res.status(400).json({Message: `${e}`});
@@ -469,8 +466,8 @@ router.post('/notification/:companyid',authenticate, (req, res)=>{
                 sender:req.admin._id,
                 receiver: receiverID
             });
-            sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
             sentMessage.save().then(doc=>{
+                sendToMultiple(receiversEmail, req.body.message); // send this notification by email also
                 return res.status(200).send(doc);
             }).catch(e=>{
                 return res.status(400).json({Message: `${e}`});
